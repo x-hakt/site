@@ -1,0 +1,16 @@
+# Ignore system files
+.DS_Store
+Thumbs.db
+.bash_history
+.bashrc
+.lesshst
+.profile
+.viminfo
+
+# Ignore system folders
+*/.ssh
+*/.venv
+*/.cache
+*/__pycache__
+*/venv
+*/node_modules
