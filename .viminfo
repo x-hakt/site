@@ -15,7 +15,7 @@
 
 # Command Line History (newest to oldest):
 :wq
-|2,0,1707815053,,"wq"
+|2,0,1707825378,,"wq"
 :q
 |2,0,1707814845,,"q"
 
@@ -39,14 +39,14 @@
 |3,1,36,0,1,0,1707814986,"e"
 
 # File marks:
-'0  11  0  /etc/systemd/system/mkdocs.service
-|4,48,11,0,1707815053,"/etc/systemd/system/mkdocs.service"
-'1  3  3  /usr/local/bin/mkdocs_server.sh
-|4,49,3,3,1707814934,"/usr/local/bin/mkdocs_server.sh"
-'2  3  6  /usr/local/bin/mkdocs_server.sh
-|4,50,3,6,1707814915,"/usr/local/bin/mkdocs_server.sh"
-'3  2  23  /usr/local/bin/mkdocs_server.sh
-|4,51,2,23,1707814845,"/usr/local/bin/mkdocs_server.sh"
+'0  14  0  ~/.gitignore
+|4,48,14,0,1707825378,"~/.gitignore"
+'1  11  0  /etc/systemd/system/mkdocs.service
+|4,49,11,0,1707815053,"/etc/systemd/system/mkdocs.service"
+'2  3  3  /usr/local/bin/mkdocs_server.sh
+|4,50,3,3,1707814934,"/usr/local/bin/mkdocs_server.sh"
+'3  3  6  /usr/local/bin/mkdocs_server.sh
+|4,51,3,6,1707814915,"/usr/local/bin/mkdocs_server.sh"
 '4  2  23  /usr/local/bin/mkdocs_server.sh
 |4,52,2,23,1707814845,"/usr/local/bin/mkdocs_server.sh"
 '5  2  23  /usr/local/bin/mkdocs_server.sh
@@ -54,19 +54,33 @@
 '6  2  23  /usr/local/bin/mkdocs_server.sh
 |4,54,2,23,1707814845,"/usr/local/bin/mkdocs_server.sh"
 '7  2  23  /usr/local/bin/mkdocs_server.sh
-|4,55,2,23,1707813470,"/usr/local/bin/mkdocs_server.sh"
+|4,55,2,23,1707814845,"/usr/local/bin/mkdocs_server.sh"
 '8  2  23  /usr/local/bin/mkdocs_server.sh
 |4,56,2,23,1707813470,"/usr/local/bin/mkdocs_server.sh"
 '9  2  23  /usr/local/bin/mkdocs_server.sh
 |4,57,2,23,1707813470,"/usr/local/bin/mkdocs_server.sh"
 
 # Jumplist (newest first):
+-'  14  0  ~/.gitignore
+|4,39,14,0,1707825378,"~/.gitignore"
+-'  1  0  ~/.gitignore
+|4,39,1,0,1707825357,"~/.gitignore"
+-'  11  0  /etc/systemd/system/mkdocs.service
+|4,39,11,0,1707815053,"/etc/systemd/system/mkdocs.service"
 -'  11  0  /etc/systemd/system/mkdocs.service
 |4,39,11,0,1707815053,"/etc/systemd/system/mkdocs.service"
 -'  3  3  /usr/local/bin/mkdocs_server.sh
 |4,39,3,3,1707814934,"/usr/local/bin/mkdocs_server.sh"
 -'  3  3  /usr/local/bin/mkdocs_server.sh
 |4,39,3,3,1707814934,"/usr/local/bin/mkdocs_server.sh"
+-'  3  3  /usr/local/bin/mkdocs_server.sh
+|4,39,3,3,1707814934,"/usr/local/bin/mkdocs_server.sh"
+-'  3  3  /usr/local/bin/mkdocs_server.sh
+|4,39,3,3,1707814934,"/usr/local/bin/mkdocs_server.sh"
+-'  3  6  /usr/local/bin/mkdocs_server.sh
+|4,39,3,6,1707814915,"/usr/local/bin/mkdocs_server.sh"
+-'  3  6  /usr/local/bin/mkdocs_server.sh
+|4,39,3,6,1707814915,"/usr/local/bin/mkdocs_server.sh"
 -'  3  6  /usr/local/bin/mkdocs_server.sh
 |4,39,3,6,1707814915,"/usr/local/bin/mkdocs_server.sh"
 -'  3  6  /usr/local/bin/mkdocs_server.sh
@@ -80,6 +94,18 @@
 -'  2  23  /usr/local/bin/mkdocs_server.sh
 |4,39,2,23,1707814900,"/usr/local/bin/mkdocs_server.sh"
 -'  2  23  /usr/local/bin/mkdocs_server.sh
+|4,39,2,23,1707814900,"/usr/local/bin/mkdocs_server.sh"
+-'  2  23  /usr/local/bin/mkdocs_server.sh
+|4,39,2,23,1707814900,"/usr/local/bin/mkdocs_server.sh"
+-'  2  23  /usr/local/bin/mkdocs_server.sh
+|4,39,2,23,1707814900,"/usr/local/bin/mkdocs_server.sh"
+-'  2  23  /usr/local/bin/mkdocs_server.sh
+|4,39,2,23,1707814900,"/usr/local/bin/mkdocs_server.sh"
+-'  2  23  /usr/local/bin/mkdocs_server.sh
+|4,39,2,23,1707814845,"/usr/local/bin/mkdocs_server.sh"
+-'  2  23  /usr/local/bin/mkdocs_server.sh
+|4,39,2,23,1707814845,"/usr/local/bin/mkdocs_server.sh"
+-'  2  23  /usr/local/bin/mkdocs_server.sh
 |4,39,2,23,1707814845,"/usr/local/bin/mkdocs_server.sh"
 -'  2  23  /usr/local/bin/mkdocs_server.sh
 |4,39,2,23,1707814845,"/usr/local/bin/mkdocs_server.sh"
@@ -87,6 +113,42 @@
 |4,39,2,23,1707813470,"/usr/local/bin/mkdocs_server.sh"
 -'  2  23  /usr/local/bin/mkdocs_server.sh
 |4,39,2,23,1707813470,"/usr/local/bin/mkdocs_server.sh"
+-'  2  23  /usr/local/bin/mkdocs_server.sh
+|4,39,2,23,1707813470,"/usr/local/bin/mkdocs_server.sh"
+-'  2  23  /usr/local/bin/mkdocs_server.sh
+|4,39,2,23,1707813470,"/usr/local/bin/mkdocs_server.sh"
+-'  5  0  /etc/systemd/system/mkdocs.service
+|4,39,5,0,1707813245,"/etc/systemd/system/mkdocs.service"
+-'  5  0  /etc/systemd/system/mkdocs.service
+|4,39,5,0,1707813245,"/etc/systemd/system/mkdocs.service"
+-'  5  0  /etc/systemd/system/mkdocs.service
+|4,39,5,0,1707813245,"/etc/systemd/system/mkdocs.service"
+-'  5  0  /etc/systemd/system/mkdocs.service
+|4,39,5,0,1707813245,"/etc/systemd/system/mkdocs.service"
+-'  5  0  /etc/systemd/system/mkdocs.service
+|4,39,5,0,1707813245,"/etc/systemd/system/mkdocs.service"
+-'  5  0  /etc/systemd/system/mkdocs.service
+|4,39,5,0,1707813245,"/etc/systemd/system/mkdocs.service"
+-'  5  0  /etc/systemd/system/mkdocs.service
+|4,39,5,0,1707813245,"/etc/systemd/system/mkdocs.service"
+-'  5  0  /etc/systemd/system/mkdocs.service
+|4,39,5,0,1707813245,"/etc/systemd/system/mkdocs.service"
+-'  5  0  /etc/systemd/system/mkdocs.service
+|4,39,5,0,1707813245,"/etc/systemd/system/mkdocs.service"
+-'  5  0  /etc/systemd/system/mkdocs.service
+|4,39,5,0,1707813245,"/etc/systemd/system/mkdocs.service"
+-'  5  0  /etc/systemd/system/mkdocs.service
+|4,39,5,0,1707813245,"/etc/systemd/system/mkdocs.service"
+-'  5  0  /etc/systemd/system/mkdocs.service
+|4,39,5,0,1707813245,"/etc/systemd/system/mkdocs.service"
+-'  5  0  /etc/systemd/system/mkdocs.service
+|4,39,5,0,1707813245,"/etc/systemd/system/mkdocs.service"
+-'  5  0  /etc/systemd/system/mkdocs.service
+|4,39,5,0,1707813245,"/etc/systemd/system/mkdocs.service"
+-'  5  0  /etc/systemd/system/mkdocs.service
+|4,39,5,0,1707813245,"/etc/systemd/system/mkdocs.service"
+-'  5  0  /etc/systemd/system/mkdocs.service
+|4,39,5,0,1707813245,"/etc/systemd/system/mkdocs.service"
 -'  5  0  /etc/systemd/system/mkdocs.service
 |4,39,5,0,1707813245,"/etc/systemd/system/mkdocs.service"
 -'  5  0  /etc/systemd/system/mkdocs.service
@@ -153,6 +215,40 @@
 |4,39,6,25,1707813197,"/etc/systemd/system/mkdocs.service"
 -'  6  25  /etc/systemd/system/mkdocs.service
 |4,39,6,25,1707813197,"/etc/systemd/system/mkdocs.service"
+-'  12  25  /etc/systemd/system/mkdocs.service
+|4,39,12,25,1707813197,"/etc/systemd/system/mkdocs.service"
+-'  6  25  /etc/systemd/system/mkdocs.service
+|4,39,6,25,1707813197,"/etc/systemd/system/mkdocs.service"
+-'  6  25  /etc/systemd/system/mkdocs.service
+|4,39,6,25,1707813197,"/etc/systemd/system/mkdocs.service"
+-'  6  25  /etc/systemd/system/mkdocs.service
+|4,39,6,25,1707813197,"/etc/systemd/system/mkdocs.service"
+-'  6  25  /etc/systemd/system/mkdocs.service
+|4,39,6,25,1707813197,"/etc/systemd/system/mkdocs.service"
+-'  6  25  /etc/systemd/system/mkdocs.service
+|4,39,6,25,1707813197,"/etc/systemd/system/mkdocs.service"
+-'  6  25  /etc/systemd/system/mkdocs.service
+|4,39,6,25,1707813197,"/etc/systemd/system/mkdocs.service"
+-'  6  25  /etc/systemd/system/mkdocs.service
+|4,39,6,25,1707813197,"/etc/systemd/system/mkdocs.service"
+-'  6  25  /etc/systemd/system/mkdocs.service
+|4,39,6,25,1707813197,"/etc/systemd/system/mkdocs.service"
+-'  6  25  /etc/systemd/system/mkdocs.service
+|4,39,6,25,1707813197,"/etc/systemd/system/mkdocs.service"
+-'  6  25  /etc/systemd/system/mkdocs.service
+|4,39,6,25,1707813197,"/etc/systemd/system/mkdocs.service"
+-'  6  25  /etc/systemd/system/mkdocs.service
+|4,39,6,25,1707813197,"/etc/systemd/system/mkdocs.service"
+-'  6  25  /etc/systemd/system/mkdocs.service
+|4,39,6,25,1707813197,"/etc/systemd/system/mkdocs.service"
+-'  6  25  /etc/systemd/system/mkdocs.service
+|4,39,6,25,1707813197,"/etc/systemd/system/mkdocs.service"
+-'  6  25  /etc/systemd/system/mkdocs.service
+|4,39,6,25,1707813197,"/etc/systemd/system/mkdocs.service"
+-'  6  25  /etc/systemd/system/mkdocs.service
+|4,39,6,25,1707813197,"/etc/systemd/system/mkdocs.service"
+-'  6  25  /etc/systemd/system/mkdocs.service
+|4,39,6,25,1707813197,"/etc/systemd/system/mkdocs.service"
 -'  2  23  /usr/local/bin/mkdocs_server.sh
 |4,39,2,23,1707813181,"/usr/local/bin/mkdocs_server.sh"
 -'  2  23  /usr/local/bin/mkdocs_server.sh
@@ -161,108 +257,19 @@
 |4,39,2,23,1707813181,"/usr/local/bin/mkdocs_server.sh"
 -'  2  23  /usr/local/bin/mkdocs_server.sh
 |4,39,2,23,1707813181,"/usr/local/bin/mkdocs_server.sh"
--'  2  19  /usr/local/bin/mkdocs_server.sh
-|4,39,2,19,1707812972,"/usr/local/bin/mkdocs_server.sh"
--'  2  19  /usr/local/bin/mkdocs_server.sh
-|4,39,2,19,1707812972,"/usr/local/bin/mkdocs_server.sh"
--'  2  19  /usr/local/bin/mkdocs_server.sh
-|4,39,2,19,1707812972,"/usr/local/bin/mkdocs_server.sh"
--'  2  19  /usr/local/bin/mkdocs_server.sh
-|4,39,2,19,1707812972,"/usr/local/bin/mkdocs_server.sh"
--'  14  25  /etc/systemd/system/mkdocs.service
-|4,39,14,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
--'  8  25  /etc/systemd/system/mkdocs.service
-|4,39,8,25,1707812824,"/etc/systemd/system/mkdocs.service"
+-'  2  23  /usr/local/bin/mkdocs_server.sh
+|4,39,2,23,1707813181,"/usr/local/bin/mkdocs_server.sh"
+-'  2  23  /usr/local/bin/mkdocs_server.sh
+|4,39,2,23,1707813181,"/usr/local/bin/mkdocs_server.sh"
 
 # History of marks within files (newest to oldest):
+
+> ~/.gitignore
+	*	1707825378	0
+	"	14	0
+	^	14	0
+	.	15	0
+	+	15	0
 
 > /etc/systemd/system/mkdocs.service
 	*	1707815053	0
