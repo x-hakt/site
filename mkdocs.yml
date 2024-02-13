@@ -1,0 +1,58 @@
+site_name: Team X-HAKT
+site_description: Knowledge Dumping Group
+plugins:
+  - search
+  - blog:
+      post_date_format: long
+theme:
+  name: material
+  # favicon: images/favicon/favicon.ico
+  # logo: images/logo.png
+  features:
+    - navigation.tabs
+      #    - naviagation.tabs.sticky
+      #    - navigation.expand
+    - navigation.instant
+    - navigation.indexes
+    - navigation.path
+    - toc.integrate
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+    - header.autohide
+  nav:
+    - Home: index.md
+    - Blog: blog/index.md
+    - Cheat Sheets: cheat-sheets/index.md
+  language: en
+  palette:
+    scheme: slate
+    primary: green
+    accent: deep purple
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/x-hakt
+copyright: Established 2024.
+repo_url: https://github.com/x-hakt/
+repo_name: x-hakt/
+icon:
+  repo: fontawesome/brands/git-alt
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - admonition
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.arithmatex:
+      generic: true
+  - footnotes
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.mark
+  - attr_list
