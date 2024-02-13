@@ -11,6 +11,5 @@ Thumbs.db
 */.ssh
 */.venv
 */.cache
-*/__pycache__
 */venv
 */node_modules

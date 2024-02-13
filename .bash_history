@@ -140,3 +140,11 @@ ls
 source venv/bin/activate
 git add .
 exit
+vim /usr/local/bin/mkdocs_server.sh
+vim /etc/systemd/system/mkdocs.service
+systemctl stop mkdocs.service
+systemctl daemon-reload 
+systemctl stop mkdocs.service
+systemctl start mkdocs.service
+vim /usr/local/bin/mkdocs_server.sh
+ps aux
