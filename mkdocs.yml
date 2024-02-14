@@ -3,7 +3,9 @@ site_description: Knowledge Dumping Group
 plugins:
   - search
   - blog:
+      blog_dir: blog
       post_date_format: long
+      post_url_date_format: yyyy/MM
 theme:
   name: material
   # favicon: images/favicon/favicon.ico
