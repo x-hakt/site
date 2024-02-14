@@ -3,14 +3,16 @@ title: Resources
 
 nav:
   - Cheat Sheets:
-    - INE eJPT (2004): 'cheat-sheets/INE eJPT (2024)/INE-eJPT.md'
+    - cheat-sheets/index.md
+    - INE eJPT (2004): 'cheat-sheets/INE eJPT (2024)/index.md'
     - Linux Commands:
+      - linux-commands/index.md
       - Creating Services: 'linux-commands/creating-services.md'
       - Finding Files: 'linux-commands/finding-files.md'
   - OSINT:
-    - OSINT/index.md
-    - Overview: 'OSINT/overview.md'
-    - OSINT Tools: 'OSINT/OSINT-tools.md'
+    - osint/index.md
+    - Overview: 'osint/overview.md'
+    - OSINT Tools: 'osint/osint-tools.md'
     - Steganography:
       - What is Steganography: 'forensics/what-is-steganography.md'
 ---
