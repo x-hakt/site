@@ -5,8 +5,8 @@ categories:
 authors:
   - X
 links:
-  - [Daniel Miessler's SecList Collection](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
-  - [Weakpass](https://weakpass.com/download)
+  - linux-commands/finding-files.md
+  - wordlists/overview.md
 ---
 # Team X-HAKT Begins
 
