@@ -24,9 +24,9 @@ theme:
     - header.autohide
   nav:
    - Section:
-   - Home: index.md
-   - Blog: blog/index.md
-   - Resources: docs/resources/resources.md
+    - Home: index.md
+    - Blog: blog/index.md
+    - Resources: docs/resources/index.md
   language: en
   palette:
     scheme: slate
