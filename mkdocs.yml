@@ -10,10 +10,8 @@ theme:
   # logo: images/logo.png
   features:
     - navigation.tabs
-      #    - naviagation.tabs.sticky
-      #    - navigation.expand
     - navigation.instant
-    # - navigation.indexes
+    - navigation.indexes
     - navigation.path
     - toc.integrate
     - navigation.top
