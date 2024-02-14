@@ -12,9 +12,7 @@ nav:
   - OSINT:
     - osint/index.md
     - Overview: 'osint/overview.md'
-    - OSINT Tools: 'osint/osint-tools.md'
-    - Steganography:
-      - What is Steganography: 'forensics/what-is-steganography.md'
+    - Online Tools: 'osint/online-tools.md'
 ---
 
 Check out our collection of useful bookmarks. From basic google searches to training resources, CTF's, and more.
