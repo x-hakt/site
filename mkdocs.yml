@@ -21,10 +21,26 @@ theme:
     - content.code.annotation
     - content.code.copy
     - header.autohide
+#  nav:
+#   - Home: index.md
+#   - Blog: blog/index.md
+#   - Resources: docs/resources/index.md
+
   nav:
-   - Home: index.md
-   - Blog: blog/index.md
-   - Resources: docs/resources/index.md
+    - Cheat Sheets:
+    - cheat-sheets/index.md
+    - INE eJPT (2004): 'cheat-sheets/INE eJPT (2024)/index.md'
+    - Linux Commands:
+      - linux-commands/index.md
+      - Creating Services: 'linux-commands/creating-services.md'
+      - Finding Files: 'linux-commands/finding-files.md'
+    - OSINT:
+      - osint/index.md
+      - Overview: 'osint/overview.md'
+      - OSINT Tools: 'osint/osint-tools.md'
+      - Steganography:
+        - What is Steganography: 'forensics/what-is-steganography.md'
+
   language: en
   palette:
     scheme: slate
