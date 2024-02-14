@@ -2,8 +2,6 @@
 date: 2024-02-14
 categories:
   - Site News
-authors:
-  - X
 links:
   - linux-commands/finding-files.md
   - wordlists/overview.md
