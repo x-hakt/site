@@ -22,11 +22,11 @@ theme:
     - content.code.annotation
     - content.code.copy
     - header.autohide
- # nav:
- #   - Home: index.md
- #   - Blog: blog/index.md
- #   - Cheat Sheets: docs/cheat-sheets/cheat-sheets.md
- #   - Resources: docs/resources/resources.mc
+ nav:
+  - Section:
+   - Home: index.md
+   - Blog: blog/index.md
+   - Resources: docs/resources/resources.md
   language: en
   palette:
     scheme: slate
