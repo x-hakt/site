@@ -13,7 +13,6 @@ theme:
     - navigation.instant
     - navigation.indexes
     - navigation.path
-    - toc.integrate
     - navigation.top
     - navigation.footer
     - search.suggest
@@ -23,7 +22,6 @@ theme:
     - content.code.copy
     - header.autohide
   nav:
-   - Section:
    - Home: index.md
    - Blog: blog/index.md
    - Resources: docs/resources/index.md
