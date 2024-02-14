@@ -5,8 +5,8 @@ categories:
 authors:
   - X
 links:
-  - [Test Link](http://google.com)
-  - [Wordlists](/docs/resources/wordlists/overview.md)
+  - [Daniel Miessler's SecList Collection](https://github.com/danielmiessler/SecLists/tree/master/Passwords)
+  - [Weakpass](https://weakpass.com/download)
 ---
 # Team X-HAKT Begins
 
