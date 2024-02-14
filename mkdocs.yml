@@ -22,8 +22,8 @@ theme:
     - content.code.annotation
     - content.code.copy
     - header.autohide
- nav:
-  - Section:
+  nav:
+   - Section:
    - Home: index.md
    - Blog: blog/index.md
    - Resources: docs/resources/resources.md
