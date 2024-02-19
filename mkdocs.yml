@@ -58,17 +58,18 @@ markdown_extensions:
 # Page tree
 nav:
   - Front: index.md
-  - Cheat Sheets:
-    - Linux Commands: 
-      - resources/cheat-sheets/linux-commands/index.md
-      - Creating Services: resources/cheat-sheets/linux-commands/creating-services.md
-      - Finding Files: resources/cheat-sheets/linux-commands/finding-files.md
+  - Knowledge:
+    - Linux: 
+      - Creating Services: knowledge/linux/creating-services.md
+      - Finding Files: knowledge/linux/finding-files.md
   - Resources:
+    - Cheat Sheets:
+      - INE eJPT (2024): resources/cheat-sheets/ejpt/ejpt-exam.md
     - OSINT: 
       - resources/osint/index.md
       - Overview: resources/osint/overview.md
       - Online Tools: resources/osint/online-tools.md
     - Training: 
-      - resources/training/index.md
+      - resources/training/overview.md
     - Wordlists: 
       - resources/wordlists/overview.md
