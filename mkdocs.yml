@@ -63,5 +63,7 @@ nav:
       - resources/cheat-sheets/linux-commands/index.md
       - Creating Services: resources/cheat-sheets/linux-commands/creating-services.md
       - Finding Files: resources/cheat-sheets/linux-commands/finding-files.md
-  - OSINT:
-    - Overview: resources/osint/index.md
+  - Resources:
+    - OSINT: 
+      - resources/osint/index.md
+      - Overview: resources/osint/overview.md
