@@ -67,3 +67,8 @@ nav:
     - OSINT: 
       - resources/osint/index.md
       - Overview: resources/osint/overview.md
+      - Online Tools: resources/osint/online-tools.md
+    - Training: 
+      - resources/training/index.md
+    - Wordlists: 
+      - resources/wordlists/overview.md
