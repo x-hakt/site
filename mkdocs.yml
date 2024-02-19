@@ -51,3 +51,19 @@ markdown_extensions:
   - pymdownx.superfences
   - pymdownx.mark
   - attr_list
+  - abbr
+  - def_list
+  - md_in_html
+
+# Page tree
+nav:
+  - Front: index.md
+  - Cheat Sheets:
+    - Linux Commands: 
+      - resources/cheat-sheets/linux-commands/index.md
+      - Creating Services: resources/cheat-sheets/linux-commands/creating-services.md
+      - Finding Files: resources/cheat-sheets/linux-commands/finding-files.md
+  - OSINT:
+    - resources/osint/index.md
+    - Overview: - resources/osint/overview.md
+    - Online Tools: - resources/osint/online-tools.md
