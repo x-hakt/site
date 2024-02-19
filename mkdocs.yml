@@ -65,5 +65,4 @@ nav:
       - Finding Files: resources/cheat-sheets/linux-commands/finding-files.md
   - OSINT:
     - resources/osint/index.md
-    - Overview: - resources/osint/overview.md
-    - Online Tools: - resources/osint/online-tools.md
+      - Online Tools: - resources/osint/online-tools.md
