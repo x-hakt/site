@@ -57,7 +57,6 @@ markdown_extensions:
 
 # Page tree
 nav:
-  - Front: index.md
-  - Knowledge:
-  - Resources:
-    - Microsoft AZ-104: resources/index.md
+  - Front: 'index.md'
+  - Knowledge: 'resources/index.md'
+  - Resources: 'resources/index.md'
