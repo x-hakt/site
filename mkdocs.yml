@@ -19,17 +19,18 @@ theme:
     - navigation.instant.progress
     - navigation.path
     - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.top
     - navigation.footer
     - navigation.tracking
     - search.suggest
     - search.highlight
     - content.tabs.link
-    - content.tabs.sticky
     - content.code.annotation
     - content.code.copy
     - header.autohide
     - toc.follow
+    - toc.integrate
   language: en
   palette:
     scheme: slate
