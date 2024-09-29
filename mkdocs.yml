@@ -61,4 +61,3 @@ nav:
   - Front: 'index.md'
   - Knowledge: 'resources/index.md'
   - Resources: 'resources/index.md'
-    - Microsoft AZ-104: 'resources/AZ-104/Prerequisites-for-Azure-administrators.md'
