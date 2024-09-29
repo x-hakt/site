@@ -1,6 +1,6 @@
 # Front
 
-Welcome to x-hakt teams documentation site. Where we dump our various learnings, scripts, cheat sheets, etc.
+Welcome to team x-hakt's documentation site. Where we dump our various learnings, scripts, cheat sheets, etc.
 
 ## Testing
 
