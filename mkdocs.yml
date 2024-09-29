@@ -70,5 +70,5 @@ nav:
   - Blog: blog/
   - Study Notes:
     - 'study/index.md'
-    - AZ-104: 'study/microsoft.az.104.md'
+    - AZ-104: 'study/microsoft-az-104.md'
     - eJPTv2: 'study/ejptv2.md'
