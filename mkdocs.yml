@@ -13,18 +13,24 @@ theme:
   # favicon: images/favicon/favicon.ico
   # logo: images/logo.png
   features:
-    - navigation.tabs
-    - navigation.instant
+    - navigation.expand
     - navigation.indexes
+    - navigation.instant
+    - navigation.instant.progress
     - navigation.path
+    - navigation.tabs
     - navigation.top
     - navigation.footer
+    - navigation.tracking
     - search.suggest
     - search.highlight
     - content.tabs.link
+    - content.tabs.sticky
     - content.code.annotation
     - content.code.copy
     - header.autohide
+    - toc.follow
+    - toc.integrate
   language: en
   palette:
     scheme: slate
@@ -62,4 +68,7 @@ docs_dir: docs/
 nav:
   - Home: 'index.md'
   - Blog: blog/
-  - Study Notes: study/
+  - Study Notes:
+    - 'study/index.md'
+    - AZ-104: 'study/microsoft.az.104.md'
+    - eJPTv2: 'study/ejptv2.md'
