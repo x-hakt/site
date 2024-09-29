@@ -59,17 +59,5 @@ markdown_extensions:
 nav:
   - Front: index.md
   - Knowledge:
-    - Linux: 
-      - Creating Services: knowledge/linux/creating-services.md
-      - Finding Files: knowledge/linux/finding-files.md
   - Resources:
-    - Microsoft AZ-104: 
-      - Prerequisites for Azure administrators: resources/index.md
-    - OSINT: 
-      - resources/osint/index.md
-      - Overview: resources/osint/overview.md
-      - Online Tools: resources/osint/online-tools.md
-    - Training: 
-      - resources/training/overview.md
-    - Wordlists: 
-      - resources/wordlists/overview.md
+    - Microsoft AZ-104: resources/index.md
