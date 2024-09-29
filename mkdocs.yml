@@ -63,8 +63,8 @@ nav:
       - Creating Services: knowledge/linux/creating-services.md
       - Finding Files: knowledge/linux/finding-files.md
   - Resources:
-    - Cheat Sheets:
-      - INE eJPT (2024): resources/cheat-sheets/ejpt/ejpt-exam.md
+    - Microsoft AZ-104:
+      - Prerequisites for Azure administrators: AZ-104/pre-req/Prerequisites-for-Azure-administrators.md
     - OSINT: 
       - resources/osint/index.md
       - Overview: resources/osint/overview.md
