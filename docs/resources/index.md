@@ -1,6 +1,7 @@
 ---
+docs_dir: 'docs/resources'
+# Page tree
 nav:
-  - Microsoft AZ-104:
-    - Prerequisites for Azure administrators: 'Prerequisites-for-Azure-administrators.md'
+  - AZ-104: 'Prerequisites-for-Azure-administrators.md'
 ---
 Blah blah blah
