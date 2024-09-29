@@ -7,8 +7,7 @@ nav:
     - Linux Commands: 'linux-commands/index.md'
       - Creating Services: 'linux-commands/creating-services.md'
       - Finding Files: 'linux-commands/finding-files.md'
-  - OSINT:
-    - osint/index.md
+  - OSINT: 'osint/index.md'
     - Overview: 'osint/overview.md'
     - Online Tools: 'osint/online-tools.md'
 ---
