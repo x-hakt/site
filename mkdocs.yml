@@ -6,6 +6,9 @@ plugins:
       blog_dir: blog
       post_date_format: long
       post_url_date_format: yyyy/MM
+  - literate-nav:
+    nav_file: README.md
+    implicit_index: true
 theme:
   name: material
   # favicon: images/favicon/favicon.ico
@@ -60,4 +63,4 @@ docs_dir: docs/
 nav:
   - Home: 'index.md'
   - Knowledge: knowledge/
-  - Resources: resources
+  - Resources: resources/
