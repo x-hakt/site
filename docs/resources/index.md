@@ -3,7 +3,6 @@ title: Resources
 
 nav:
   - Microsoft AZ-104:
-    - AZ-104/index.md
     - Prerequisites-for-Azure-administrators: 'Prerequisites-for-Azure-administrators.md'
     - Linux Commands:
       - linux-commands/index.md
@@ -14,3 +13,5 @@ nav:
     - Overview: 'osint/overview.md'
     - Online Tools: 'osint/online-tools.md'
 ---
+
+Blah blah blah
