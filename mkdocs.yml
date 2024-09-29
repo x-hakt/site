@@ -55,8 +55,10 @@ markdown_extensions:
   - def_list
   - md_in_html
 
+docs_dir: docs/
 # Page tree
 nav:
   - Front: 'index.md'
   - Knowledge: 'resources/index.md'
   - Resources: 'resources/index.md'
+    - Microsoft AZ-104: 'resources/AZ-104/Prerequisites-for-Azure-administrators.md'
