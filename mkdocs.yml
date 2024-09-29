@@ -30,7 +30,6 @@ theme:
     - content.code.copy
     - header.autohide
     - toc.follow
-    - toc.integrate
   language: en
   palette:
     scheme: slate
