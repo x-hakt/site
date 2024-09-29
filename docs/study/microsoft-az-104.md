@@ -1,9 +1,3 @@
-# Microsoft AZ-104 Study Guide
-
-AZ-104 study guide.
-
----
-
 # Prerequisites for Azure administrators
 
 Intro text
@@ -19,12 +13,11 @@ Outro text
 
 # Manage identities and governance in Azure
 TBA
-
 # Implement and manage storage in Azure
 TBA
-
 # Deploy and manage Azure compute resources
-
+TBA
 # Configure and manage virtual networks for Azure administrators
-
+TBA
 # Monitor and backup Azure resources
+TBA
