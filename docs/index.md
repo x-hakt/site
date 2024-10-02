@@ -1,32 +1,10 @@
-# Front
+# Welcome, friend!
 
-Welcome to team x-hakt's documentation site. Where we dump our various learnings, scripts, cheat sheets, etc.
+I'm Chris, and this is my own little corner of the internet for my 'professional side'. Work type stuff and things that mostly connect to how I earn a living and related topics.
 
-## Testing
+Feel free to poke around and check the place out and drop me a line if you desire! I'm always up for expanding my professional network, unless you're selling something... then please don't waste either of our time (:
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+*'There are two types of people in this world. Those who can extrapolate data from incomplete data sets.'*
 
-Testing `code highlights`
-
-Testing a code block
-``` py title="Test code block title" linenums="1"
-import random
-print(random.randint(0,9))
-```
-
-## Admonitions
-
-!!! note "Note Heading"
-    This is a note
-
-??? info "Info Heading"
-    This is an info block
-
-??? bug "Bug Heading"
-    A bug
-
-??? example "Example Heading"
-    Examples all around!
+??? info "Personal Blog Ahead"
+    While this site is intended to be politically correct and professional, I don't plan on writing my blogs entries like a corporate email or LinkedIn post. Please use common sense when reading them; I'm a very humerous person that acts with candor in all situations. 
