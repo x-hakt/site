@@ -11,7 +11,7 @@ plugins:
 theme:
   name: material
   # favicon: images/favicon/favicon.ico
-  logo: fontawesome/solid/heart
+  logo: fontawesome/solid/scroll
   features:
     - navigation.expand
     - navigation.indexes
