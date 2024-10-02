@@ -18,5 +18,3 @@ As time has past since then I've tried to keep the same mentality. Only spend on
 This website help represent the culmination of that change as well. While there is no click and drag page builders, no CMS back end, and no bells and whistles.. this site may just be my favourite one I've ever made. It's simple, it's fast, and it's rock solid. It does everything it needs to and doesn't have the distractions. There is nothing to touch except the content, so that's all I need to look at. 
 
 I'm an IT guy, but not a website guy, so trust me when I say there was a whole lot of RTFM.. but the KISS principal proved king at the end of the day.
-
-- Chris
