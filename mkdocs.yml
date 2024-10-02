@@ -1,5 +1,6 @@
-site_name: Team X-HAKT
+site_name: Chris Burchell
 site_description: Knowledge Dumping Group
+site_author: Chris Burchell
 plugins:
   - search
   - blog:
@@ -10,7 +11,7 @@ plugins:
       post_dir: "{blog}/posts"
 theme:
   name: material
-  # favicon: images/favicon/favicon.ico
+  favicon: images/favicon/favicon.ico
   # logo: fontawesome/brands/git-alt
   features:
     - navigation.expand
