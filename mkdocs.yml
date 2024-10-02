@@ -11,7 +11,7 @@ plugins:
 theme:
   name: material
   # favicon: images/favicon/favicon.ico
-  logo: fontawesome/solid/scroll
+  logo: fontawesome/brands/git-alt
   features:
     - navigation.expand
     - navigation.indexes
