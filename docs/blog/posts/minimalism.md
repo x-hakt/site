@@ -7,6 +7,8 @@ categories:
 
 I've built many websites over the years, or rather the same handful of website over and over and over. I've got a decent amount of experience in it compared to most people that have never worked in website development or content, but like a lot of things in life quantity does not equal quality. 
 
+<!-- more -->
+
 Almost every time I build a site I start with Wordpress, and then a fancy building engine on top of it (usually Avada or TagDiv, both very nice if you put the time into them), cusomtize one of the pre-built themes for hours or days on end and then dodgy up a bit of content for a while and forget about it for months or years after that. Even shortcutting the code part and having fancy graphical bells and whistles, click & drag blocks and elements.. at the end of the day I found myself forever rebuilding and never satisfied.
 
 In 2023 my private life had a massive upheaval and I scaled down from having tonnes of space and many many posessions, to owning only what I needed and things that bought me joy (which in case was more like if I would realistically get around to using it or not). At the time I made light of it telling people I was "Mari Kondo'ing" everything, but inside I felt myself transofrming into a minimalist. After decades  of collecting and keeping odds and ends just in case I needed them (some might call it hoarding...) I just didn't care anymore. I looked at it all and couldn't care less if it was there or gone, so I sold it all.
