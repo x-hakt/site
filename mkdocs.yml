@@ -31,6 +31,8 @@ theme:
     - header.autohide
     - toc.follow
     - toc.integrate
+  font:
+    text: Roboto
   language: en
   palette:
     scheme: slate
