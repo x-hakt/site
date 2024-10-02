@@ -47,7 +47,7 @@ copyright: Established 2024.
 repo_url: https://github.com/x-hakt/
 repo_name: x-hakt/
 icon:
-  logo: material/ghost
+  logo: simple/ghostery
   repo: fontawesome/brands/git-alt
 markdown_extensions:
   - pymdownx.highlight:
