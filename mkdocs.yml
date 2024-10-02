@@ -73,3 +73,5 @@ nav:
     - 'study/index.md'
     - AZ-104: 'study/microsoft-az-104.md'
     - eJPTv2: 'study/ejptv2.md'
+  - Resume:
+    - 'resume/index.md'
