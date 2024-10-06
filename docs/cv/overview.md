@@ -11,7 +11,7 @@ businesses and support their rapid growth with solid
 technological foundations.
 
 ## Brief Work History
-<p style="color: purple;"><h3>Nexon Asia Pacific</h3></p>
+### Nexon Asia Pacific
 <b>Position: Technical Account Manager / Senior Engineer</b></br>
 <i>Time in Role: JUL ‘23 - Present</i></br>
 Overseeing technical operations and delivery for 3 local entprise clients. Managing planning, escalations, and reporting to key stakeholders, as well as technical leadership and excalation point for both internal and external dedicated teams.
@@ -61,7 +61,7 @@ While I have been in the indutry for 20+ years, I have often held roles that uti
 - ThreatLocker Cyber Hero
 
 ## Contact Details
-e: topher.burchell@gmail.com</br>
+e: [topher.burchell@gmail.com](mailto: topher.burchell@gmail.com)</br>
 p: +61 431 049 180</br>
 w: [LinkedIn](https://www.linkedin.com/in/cburchell/)</br>
 
