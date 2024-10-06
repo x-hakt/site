@@ -1,19 +1,21 @@
 # Detailed Work History
-
+## Career Duties and Achievements
 ### Nexon Asia Pacific
 <b>Position: Technical Account Manager / Senior Engineer</b></br>
 <i>Time in Role: JUL ‘23 - Present</i></br>
-Overseeing technical operations and delivery for 3 local entprise clients. Managing planning, escalations, and reporting to key stakeholders, as well as technical leadership and excalation point for both internal and external dedicated teams.</br>
-:material-chevron-right-box: Technical escalation point for assigned accounts
-:material-chevron-right-box: Drive service delivery through technical account management for large enterprise clients
-:material-chevron-right-box: Assist in technical pre-sales for assigned clients as senior engineer
-:material-chevron-right-box: Reporting and change management governance across assigned clients
+Overseeing technical operations and delivery for 3 local entprise clients. Managing planning, escalations, and reporting to key stakeholders, as well as technical leadership and excalation point for both internal and external dedicated teams.</br></br>
+:material-chevron-right-box: Technical escalation point for assigned accounts</br>
+:material-chevron-right-box: Drive service delivery through technical account management for large enterprise clients</br>
+:material-chevron-right-box: Assist in technical pre-sales for assigned clients as senior engineer</br>
+:material-chevron-right-box: Reporting and change management governance across assigned clients</br>
 
- Adept IT Solutions | Operations Manager - AUG ‘22 - Present
- Manage daily IT operations across technical teams, accounts, billing, and business direction. Develop and 
-track KPI’s, proof client billing, develop and implement tooling strategies, and lead tender and consultation 
-works to prospects and top tier clients.
- ❖ Lead implementation and migration of RMM and PSA tooling for busy MSP (2022)
+### Adept IT Solutions
+<b>Position: Operations Manager</b></br>
+<i>Time in Role: AUG ‘22 - JUL ‘23</i></br>
+Manage daily IT operations across technical teams, accounts, billing, and business direction. Develop and track KPI’s, proof client billing, develop and implement tooling strategies, and lead tender and consultation works to prospects and top tier clients.</br></br>
+:material-chevron-right-box: Lead implementation and migration of new PSA and RMM tooling (2022)</br>
+:material-chevron-right-box: Lead migration of documentation platforms (Keeper Security -> ITGlue) (2022)</br>
+
  Scenic Tours | Global Director of IT - APR ‘19 – JUN ‘22
  Global head of technology leading 30+ staff in global travel enterprise. Annual budgeting of OPEX and 
 CAPEX, creation of IT strategic plan encompassing each departments needs, C-Suite business case 
