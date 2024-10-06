@@ -11,7 +11,7 @@ businesses and support their rapid growth with solid
 technological foundations.
 
 ## Brief Work History
-### Nexon Asia Pacific
+<p style="color: purple;">### Nexon Asia Pacific</p>
 <b>Position: Technical Account Manager / Senior Engineer</b></br>
 <i>Time in Role: JUL ‘23 - Present</i></br>
 Overseeing technical operations and delivery for 3 local entprise clients. Managing planning, escalations, and reporting to key stakeholders, as well as technical leadership and excalation point for both internal and external dedicated teams.
@@ -36,7 +36,7 @@ While I have been in the indutry for 20+ years, I have often held roles that uti
 <strong>Management / Leadership</strong> - 11 Years</br>
 <strong>Project Management</strong> - 14 Years</br>
 <strong>Solution Design</strong> - 18 Years</br>
-<strong>Technical Hands-On</strong> - 22 Years</br>  |
+<strong>Technical Hands-On</strong> - 22 Years</br>
 
 ## Proven Skills
 - [x] Leadership
