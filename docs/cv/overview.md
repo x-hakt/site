@@ -12,31 +12,31 @@ technological foundations.
 
 ## Brief Work History
 ### Nexon Asia Pacific
-*** Position: Technical Account Manager / Senior Engineer ***</br>
+** Position: Technical Account Manager / Senior Engineer **</br>
 'Time in Role: JUL ‘23 - Present'</br>
 Overseeing technical operations and delivery for 3 local entprise clients. Managing planning, escalations, and reporting to key stakeholders, as well as technical leadership and excalation point for both internal and external dedicated teams.
 
 ### Scenic Tours
-*** Position: Global Director of IT*** </br>
+** Position: Global Director of IT** </br>
 'Time in Role: APR ‘19 – JUN ‘22'</br>
 Leadership of 6 departments and 30+ staff in global travel enterprise. Annual budgeting of OPEX and CAPEX, creation of IT strategic plan, C-Suite presentation, vendor management, and business case development.
 
 ### Elite ITMS
-*** Position: Director / Constultant ***</br>
+** Position: Director / Constultant **</br>
 Time in Role: SEP ‘17 – OCT ‘19</br>
 Independent consultant managing projects for Local Council and local enterprise finance client, along with strategic planning, process improvement, solution design and business analysis for a range of SMB clients.
 
 ### Dynamic Business Technologies
-*** Position: Service Manager ***</br>
+** Position: Service Manager **</br>
 Time in Role: SEP ‘13 – SEP ‘17</br>
 Manage daily operations for a busy managed service provider servicing over 200 clients. Train and mentor staff, develop and track KPI’s, client complaint handling, billing approval, and overview of pre-sales and project works.
 
 ## Position Experience
 While I have been in the indutry for 20+ years, I have often held roles that utilise multiple skillsets at once.</br>
-*** Management / Leadership *** - 11 Years</br>
-*** Project Management *** - 14 Years</br>
-*** Solution Design *** - 18 Years</br>
-*** Technical Hands-On *** - 22 Years</br>  |
+** Management / Leadership ** - 11 Years</br>
+** Project Management ** - 14 Years</br>
+** Solution Design ** - 18 Years</br>
+** Technical Hands-On ** - 22 Years</br>  |
 
 ## Proven Skills
 - [x] Leadership
