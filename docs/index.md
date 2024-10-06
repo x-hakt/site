@@ -6,5 +6,5 @@ Feel free to poke around and check the place out and drop me a line if you desir
 
 *'There are two types of people in this world. Those who can extrapolate data from incomplete data sets.'*
 
-??? info "Personal Blog Ahead"
+!!! info "Personal Blog Ahead"
     While this site is intended to be politically correct and professional, I don't plan on writing my blogs entries like a corporate email or LinkedIn post. Please use common sense when reading them; I'm a very humerous person that acts with candor in all situations. 
