@@ -11,19 +11,55 @@ businesses and support their rapid growth with solid
 technological foundations.
 
 ## Brief Work History
-### Nexon Asia Pacific | Client Engagement Lead (JUL ‘23 -Present)
-Oversee technical operations, service delivery, and 
-strategic planning for key enterprise accounts 
-including major University. Reporting and delivery to key stakeholders and leadership of dedicated teams.
+### Nexon Asia Pacific
+Position: Technical Account Manager / Senior Engineer
+Time in Role: JUL ‘23 - Present
+Overseeing technical operations and delivery for 3 local entprise clients. Managing planning, escalations, and reporting to key stakeholders, as well as technical leadership and excalation point for both internal and external dedicated teams.
 
-## Abilities
+### Scenic Tours
+Position: Global Director of IT
+Time in Role: APR ‘19 – JUN ‘22
+Leadership of 6 departments and 30+ staff in global travel enterprise. Annual budgeting of OPEX and CAPEX, creation of IT strategic plan, C-Suite presentation, vendor management, and business case development.
 
-## Intebagible Skills
+### Elite ITMS
+Position: Director / Constultant
+Time in Role: SEP ‘17 – OCT ‘19
+Independent consultant managing projects for Local Council and local enterprise finance client, along with strategic planning, process improvement, solution design and business analysis for a range of SMB clients.
 
-## Global Experience
+### Dynamic Business Technologies
+Position: Service Manager
+Time in Role: SEP ‘13 – SEP ‘17
+Manage daily operations for a busy managed service provider servicing over 200 clients. Train and mentor staff, develop and track KPI’s, client complaint handling, billing approval, and overview of pre-sales and project works.
+
+## Position Experience
+While I have been in the indutry for 20+ years, I have often held roles that utilise multiple skillsets at once.
+| Position    | Experience (Years) |
+| ----------- | ------------------ |
+| Management / Leadership | 11|
+| Project Management | 14 |
+| Solution Design | 18 |
+| Technical Hands-On | 22 |
+
+## Proven Skills
+| - [x] Leadership | - [x] Vendor Management |
+| - [x] Strategic Planning | - [x] Technical Analysis |
+| - [x] Training and Adoption | - [x] Reporting / Presenting |
+| - [x] Project Management | - [x] Commercial Acumen |
+| - [x] Critical Thinking | - [x] Cloud Technologies |
+| - [x] Solution Design | - [x] M365 Suite |
 
 ## Education
+- ITIL Foundations v3
+- PRINCE2 Practitioner
+- PROSCI Change Management Fundamentals
+- INE eJPTv2 Junior Penetration Tester
+- INE ICCA Cloud Associate
+- ThreatLocker Cyber Hero
 
 ## Contact Details
+e: topher.burchell@gmail.com
+p: +61 431 049 180
+w:
+[LinkedIn](https://www.linkedin.com/in/cburchell/)
 
-NB: References are available apon request.
+> References are available apon request.
