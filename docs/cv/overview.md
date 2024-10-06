@@ -32,13 +32,11 @@ Time in Role: SEP ‘13 – SEP ‘17</br>
 Manage daily operations for a busy managed service provider servicing over 200 clients. Train and mentor staff, develop and track KPI’s, client complaint handling, billing approval, and overview of pre-sales and project works.
 
 ## Position Experience
-While I have been in the indutry for 20+ years, I have often held roles that utilise multiple skillsets at once.
-| Position                | Experience (Years) |
-| ----------------------- | ------------------ |
-| Management / Leadership | 11                 |
-| Project Management      | 14                 |
-| Solution Design         | 18                 |
-| Technical Hands-On      | 22                 |
+While I have been in the indutry for 20+ years, I have often held roles that utilise multiple skillsets at once.</br>
+*** Management / Leadership *** - 11 Years</br>
+*** Project Management *** - 14 Years</br>
+*** Solution Design *** - 18 Years</br>
+*** Technical Hands-On *** - 22 Years</br>  |
 
 ## Proven Skills
 - [x] Leadership
