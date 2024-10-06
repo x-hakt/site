@@ -11,7 +11,7 @@ businesses and support their rapid growth with solid
 technological foundations.
 
 ## Brief Work History
-<p style="color: purple;">### Nexon Asia Pacific</p>
+<p style="color: purple;"><h3>Nexon Asia Pacific</h3></p>
 <b>Position: Technical Account Manager / Senior Engineer</b></br>
 <i>Time in Role: JUL ‘23 - Present</i></br>
 Overseeing technical operations and delivery for 3 local entprise clients. Managing planning, escalations, and reporting to key stakeholders, as well as technical leadership and excalation point for both internal and external dedicated teams.
