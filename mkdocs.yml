@@ -50,24 +50,31 @@ repo_name: x-hakt/
 icon:
   repo: fontawesome/brands/git-alt
 markdown_extensions:
-  - pymdownx.tasklist:
-      custom_checkbox: true
-  - pymdownx.highlight:
-      anchor_linenums: true
+  - abbr 
   - admonition
-  - pymdownx.inlinehilite
-  - pymdownx.snippets
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
   - pymdownx.arithmatex:
       generic: true
-  - footnotes
+  - pymdownx.critic
+  - pymdownx.caret
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.emoji:
+     emoji_index: !!python/name:material.extensions.emoji.twemoji
+     emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.keys
   - pymdownx.mark
-  - attr_list
-  - abbr
-  - def_list
-  - md_in_html
-
+  - pymdownx.tilde
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - tables
 docs_dir: docs/
 # Page tree
 nav:
