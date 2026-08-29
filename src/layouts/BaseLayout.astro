@@ -1,0 +1,109 @@
+---
+import '../styles/global.css';
+import { site } from '../site';
+import Masthead from '../components/Masthead.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** nav item to mark current */
+  current?: string;
+  /** absolute or root-relative OG image; defaults to the site card */
+  ogImage?: string;
+  /** widen the main column (index / wide content) */
+  wide?: boolean;
+}
+
+const {
+  title,
+  description = site.description,
+  current,
+  ogImage = '/og-default.png',
+  wide = false,
+} = Astro.props;
+
+const pageTitle = title ? `${title} · ${site.name}` : `${site.name} — ${site.tagline}`;
+const canonical = new URL(Astro.url.pathname, site.url).href;
+const ogImageAbs = new URL(ogImage, site.url).href;
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="canonical" href={canonical} />
+
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={site.author} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageAbs} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${site.name} — ${site.tagline}`}
+      href="/rss.xml"
+    />
+  </head>
+
+  <body>
+    <a href="#main" class="skip">skip to content</a>
+    <Masthead current={current} />
+
+    <main id="main" class:list={['wrap', wide ? 'wide' : 'reading']}>
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap wide">
+        <span>{site.name}.com</span>
+        <span class="dot">&middot;</span>
+        <span>{site.tagline}</span>
+        <span class="dot">&middot;</span>
+        <span>&copy; {year}</span>
+      </div>
+    </footer>
+
+    <style>
+      .skip {
+        position: absolute;
+        left: -9999px;
+        top: 0;
+        background: var(--color-surface);
+        color: var(--color-fg);
+        padding: 8px 14px;
+        font-family: var(--font-mono);
+        font-size: 12px;
+        z-index: 10;
+      }
+      .skip:focus { left: 8px; top: 8px; }
+
+      main {
+        padding-top: 56px;
+        padding-bottom: 96px;
+        min-height: 60vh;
+      }
+
+      .site-footer {
+        border-top: 1px solid var(--border);
+        background: var(--color-surface);
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--color-faint);
+        padding-block: 28px;
+      }
+      .site-footer .wrap { display: flex; gap: 10px; flex-wrap: wrap; }
+      .site-footer .dot { color: var(--color-accent-bg); }
+    </style>
+  </body>
+</html>

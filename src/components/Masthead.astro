@@ -1,0 +1,57 @@
+---
+import { site } from '../site';
+
+interface Props {
+  /** which nav item to mark current */
+  current?: string;
+}
+const { current } = Astro.props;
+---
+
+<header class="masthead">
+  <div class="bar wrap wide">
+    <a href="/" class="brand" aria-label={`${site.name} — home`}>
+      <span class="tick" aria-hidden="true">&#9656;</span> x&#8209;hakt
+    </a>
+    <nav class="nav">
+      {
+        site.nav.map((item) => (
+          <a
+            href={item.href}
+            class:list={['nav__link', { 'is-current': current === item.label }]}
+            aria-current={current === item.label ? 'page' : undefined}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+  </div>
+</header>
+
+<style>
+  .masthead {
+    border-bottom: 1px solid var(--border);
+    background: var(--color-surface);
+  }
+  .bar {
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .brand {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--color-fg);
+    letter-spacing: -0.01em;
+  }
+  .brand:hover { text-decoration: none; }
+  .brand .tick { color: var(--color-green); }
+  .nav { display: flex; gap: 18px; }
+  .nav__link { color: var(--color-dim); }
+  .nav__link:hover { color: var(--color-fg-soft); text-decoration: none; }
+  .nav__link.is-current { color: var(--color-fg); }
+</style>

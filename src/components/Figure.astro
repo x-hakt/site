@@ -1,0 +1,62 @@
+---
+/*
+  Figure — the framed home for a diagram or a cartographic illustration.
+  XH-5 will flesh out the diagram house style; this is the wrapper contract:
+  a bordered card on a faint dot grid, a mono caption, horizontal-scroll
+  containment on narrow screens, and a real text alternative.
+
+  Usage in .mdx:
+    <Figure caption="One key, one forced command, three hosts." wide>
+      <svg role="img" aria-label="...">...</svg>
+    </Figure>
+*/
+interface Props {
+  caption?: string;
+  /** break out past the reading column for a post hero */
+  wide?: boolean;
+  /** plain dark card with no dot grid (used for cartography) */
+  plain?: boolean;
+}
+const { caption, wide = false, plain = false } = Astro.props;
+---
+
+<figure class:list={['figure', { 'is-wide': wide }]}>
+  <div class:list={['figure__frame', { 'figure__frame--dots': !plain }]}>
+    <div class="figure__scroll">
+      <slot />
+    </div>
+  </div>
+  {caption && <figcaption class="figure__cap">{caption}</figcaption>}
+</figure>
+
+<style>
+  .figure { margin-block: 2rem; }
+  .figure.is-wide {
+    /* pull out to the wide column even inside a reading-width article */
+    width: min(var(--text-wide), 100vw - 40px);
+    margin-inline: calc(50% - min(var(--text-wide), 100vw - 40px) / 2);
+  }
+
+  .figure__frame {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    background: #0b0c0f;
+    padding: 18px;
+  }
+  .figure__frame--dots {
+    background-color: #0d0e11;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+
+  .figure__scroll { overflow-x: auto; }
+  .figure__scroll :global(svg) { display: block; width: 100%; height: auto; }
+
+  .figure__cap {
+    margin-top: 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--color-faint);
+  }
+</style>

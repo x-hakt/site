@@ -1,0 +1,89 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Figure from '../../components/Figure.astro';
+
+export async function getStaticPaths() {
+  const notes = await getCollection('notes', ({ data }) => import.meta.env.PROD ? !data.draft : true);
+  return notes.map((note) => ({
+    params: { slug: note.id },
+    props: { note },
+  }));
+}
+
+const { note } = Astro.props;
+const { Content } = await render(note);
+
+const dateFmt = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
+const topics = note.data.topics.join(' · ');
+---
+
+<BaseLayout
+  title={note.data.title}
+  description={note.data.summary}
+  current="notes"
+  ogImage={note.data.hero?.src ?? undefined}
+>
+  <article>
+    <header class="note-head">
+      <h1>{note.data.title}</h1>
+      <p class="note-head__summary">{note.data.summary}</p>
+      <p class="note-head__meta">
+        <time datetime={note.data.date.toISOString()}>{dateFmt.format(note.data.date)}</time>
+        {topics && <><span aria-hidden="true"> / </span>{topics}</>}
+        {
+          note.data.updated && (
+            <>
+              <span aria-hidden="true"> / </span>updated {dateFmt.format(note.data.updated)}
+            </>
+          )
+        }
+      </p>
+    </header>
+
+    {
+      note.data.hero && (
+        <Figure wide>
+          <img src={note.data.hero.src} alt={note.data.hero.alt} />
+        </Figure>
+      )
+    }
+
+    <div class="prose">
+      <Content components={{ Figure }} />
+    </div>
+
+    <footer class="note-foot">
+      <a href="/">&#8592; all notes</a>
+    </footer>
+  </article>
+</BaseLayout>
+
+<style>
+  .note-head { margin-bottom: 2rem; }
+  .note-head h1 {
+    font-size: clamp(1.5rem, 4vw, 1.8125rem);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin: 0 0 0.5rem;
+  }
+  .note-head__summary {
+    max-width: 60ch;
+    color: var(--color-fg-soft);
+    font-size: 1.06rem;
+    margin: 0 0 0.9rem;
+  }
+  .note-head__meta {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-faint);
+    margin: 0;
+  }
+  .note-foot {
+    margin-top: 3.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+</style>

@@ -1,0 +1,53 @@
+---
+title: Wiring the mesh
+summary: The shape of a small overlay network and why one forced command sits at the centre of it.
+date: 2026-08-29
+topics: [nebula, ssh, mesh]
+draft: false
+---
+
+import Figure from '../../components/Figure.astro';
+
+This is a placeholder note, here to prove the pipeline: MDX prose, an inline
+component, a diagram in the house style, and a code block that stays quiet while
+the diagram carries the idea.
+
+## The one diagram
+
+Every note earns its keep with a single figure. The diagram is dark, the strokes
+are thin, the labels are mono, and green marks the one path that matters.
+
+<Figure wide caption="One key, routed through a forced command, reaches three hosts and nothing else.">
+  <svg viewBox="0 0 320 170" role="img" aria-label="A key on the left connects through a forced-command box to three hosts on the right">
+    <rect x="14" y="66" width="96" height="40" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="62" y="90" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="10" fill="#eaebec">control&#8209;room</text>
+    <line x1="110" y1="86" x2="150" y2="86" stroke="#26cb96" stroke-width="1.5" />
+    <rect x="150" y="70" width="60" height="32" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
+    <text x="180" y="90" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#26cb96">command=</text>
+    <g stroke="#26cb96" stroke-opacity="0.9" stroke-width="1.4" fill="none">
+      <path d="M210 80 C 250 80, 262 44, 292 44" />
+      <path d="M210 86 C 255 86, 262 86, 292 86" />
+      <path d="M210 92 C 250 92, 262 128, 292 128" />
+    </g>
+    <g>
+      <circle cx="296" cy="44" r="3.5" fill="#26cb96" />
+      <circle cx="296" cy="86" r="3.5" fill="#26cb96" />
+      <circle cx="296" cy="128" r="3.5" fill="#26cb96" />
+    </g>
+  </svg>
+</Figure>
+
+## The prose around it
+
+The forced command is the whole trick. The key can only ever run the one program
+the server pins to it, so a leaked key is a leaked ability to run that one
+read-only report and nothing more. The `authorized_keys` line looks like this:
+
+```
+command="/usr/local/bin/report --json",no-port-forwarding,no-pty ssh-ed25519 AAAA...
+```
+
+Everything else in this note is filler until the real writing starts. What
+matters for the scaffold is that the paragraph above, the code block, and the
+diagram all rendered from one `.mdx` file, with the diagram sitting in a framed
+`<Figure>` that scrolls rather than overflowing on a phone.
