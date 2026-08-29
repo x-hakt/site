@@ -59,6 +59,18 @@ npm run check      # astro check (types)
 
 ## Deploy
 
-Not wired yet. Planned: a small container built from `dist/` served behind the
-shared Traefik, added to the `unified-services` compose stack alongside (then
-replacing) `hugo-x-hakt`. See Control Room tasks XH-4 / XH-8.
+`Dockerfile` is a two-stage build: Node builds the site, `nginx:alpine` serves
+`dist/client` as static files (`deploy/nginx.conf`). `dist/server` is built but
+unused until the `/admin` SSR route lands (XH-6).
+
+`deploy/docker-compose.x-hakt-site.yml` is the reviewed target service — Traefik
+labels mirroring `hugo-x-hakt` but bound to `new.x-hakt.com`. It is **not** yet in
+the live `unified-services` stack.
+
+```bash
+# staging, parallel with the old site
+docker compose -f deploy/docker-compose.x-hakt-site.yml up -d --build   # -> https://new.x-hakt.com
+```
+
+The deliberate cutover to the apex domain (and retiring `hugo-x-hakt`) is Control
+Room task **XH-8**; the steps are in the compose file header.
