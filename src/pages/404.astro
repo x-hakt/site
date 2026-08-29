@@ -3,12 +3,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 /*
   Style guide s.07 — the one place the map metaphor gets to be the whole page.
   Cartographic illustration, two dry lines, a way back. Everything calm and mono.
-  The hero emblem (XH-9) will sit faint behind this as a watermark later.
+  The hero emblem sits faint behind it as a watermark.
 */
 ---
 
 <BaseLayout title="404" description="No chart for that route.">
   <section class="lost">
+    <img src="/emblem.png" alt="" class="lost__watermark" aria-hidden="true" />
     <div class="lost__chart" role="img" aria-label="A torn nautical chart: a ship's wheel, rhumb lines, and island markers trailing off the edge">
       <svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -51,7 +52,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 </BaseLayout>
 
 <style>
-  .lost { text-align: center; padding-block: 40px; }
+  .lost { position: relative; text-align: center; padding-block: 40px; }
+  .lost__watermark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 460px;
+    max-width: 92%;
+    transform: translate(-50%, -50%);
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .lost > :not(.lost__watermark) { position: relative; z-index: 1; }
   .lost__chart {
     max-width: 420px;
     margin: 0 auto 32px;

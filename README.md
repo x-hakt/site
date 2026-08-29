@@ -50,12 +50,25 @@ npm run preview
 npm run check      # astro check (types)
 ```
 
+## Logo assets
+
+Source art is in `design/` (`emblem-src.png`, `mark-src.png`). Regenerate the
+public assets with:
+
+```bash
+npm run logo
+```
+
+`scripts/process-logo.mjs` hardens the alpha channel (the raw art has faint
+semi-transparent speckle), flattens the mark to the `#8b949e` token colour, and
+writes `public/{emblem,mark,og-default,favicon-16/32/48,apple-touch-icon}.png`.
+
 ## Known placeholders
 
-- `public/favicon.svg` — stand-in mark until XH-9.
-- `public/og-default.png` — not created yet; add before launch.
 - `src/site.ts` `handle` — pirate/hacker handle is fixed in XH-3.
 - Diagram house style — `Figure.astro` is the wrapper contract only; XH-5.
+- The 16px favicon is the full wheel-and-skull mark scaled down; a purpose-drawn
+  16px glyph would read cleaner.
 
 ## Deploy
 
