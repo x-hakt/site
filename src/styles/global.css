@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+/* latin subset only — keeps the font payload small */
+@import "@fontsource/ibm-plex-sans/latin-400.css";
+@import "@fontsource/ibm-plex-sans/latin-500.css";
+@import "@fontsource/ibm-plex-sans/latin-600.css";
+@import "@fontsource/ibm-plex-mono/latin-400.css";
+@import "@fontsource/ibm-plex-mono/latin-400-italic.css";
+@import "@fontsource/ibm-plex-mono/latin-500.css";
+@import "@fontsource/ibm-plex-mono/latin-600.css";
+
+/*
+  x-hakt.com design tokens.
+  Ported from the XH-7 style guide, which imports Control Room's dark palette
+  token-for-token from control-room/src/app/globals.css and adds one accent.
+  There is one look and it is dark (style guide, section 08).
+*/
+@theme {
+  --color-bg:        #07080a;   /* page ground */
+  --color-surface:   #0e0f12;   /* cards, header, footer */
+  --color-raised:    #17181b;   /* code wells, insets */
+  --color-accent-bg: #202225;   /* hover, selected */
+
+  --color-fg:        #eaebec;   /* headings */
+  --color-fg-soft:   #c9cacd;   /* body text */
+  --color-dim:       #87898d;   /* meta, captions */
+  --color-faint:     #5c5e62;   /* furthest back */
+
+  --color-green:     #26cb96;   /* the one identity accent (CR chart-1) */
+  --color-link:      #38bdf8;   /* sky, as Control Room */
+  --color-amber:     #dfa11a;   /* rare, "note" */
+  --color-red:       #e5484d;   /* errors only */
+
+  /* the mark's slate/obsidian ink (XH-7 rev 2026-08-29) */
+  --color-seal:      #3f474e;
+  --color-seal-rim:  #6b7681;
+  --color-seal-flat: #8b949e;
+
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  --radius-card: 6px;
+
+  --text-reading: 46rem;   /* ~704px single reading column */
+  --text-wide:    62.5rem; /* ~900px index / wide content */
+}
+
+:root {
+  color-scheme: dark;
+  --border:   rgba(255, 255, 255, 0.08);
+  --border-2: rgba(255, 255, 255, 0.14);
+}
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; scrollbar-gutter: stable; }
+
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-fg-soft);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--color-link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  :focus-visible { outline: 2px solid var(--color-green); outline-offset: 2px; }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.86em;
+    color: var(--color-green);
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--color-fg);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  ::selection { background: rgba(38, 203, 150, 0.25); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+}
+
+/*
+  Long-form prose. Applied to the rendered body of a note.
+  Accent colour never enters running text except inline <code> (style guide s.02).
+*/
+@layer components {
+  /* horizontal containers. .wide for index/chrome, .reading for a note body */
+  .wrap  { width: 100%; margin-inline: auto; padding-inline: 32px; }
+  .wide  { max-width: var(--text-wide); }
+  .reading { max-width: var(--text-reading); }
+  @media (max-width: 640px) {
+    .wrap { padding-inline: 20px; }
+  }
+
+  .prose {
+    font-size: 1.03rem;
+    line-height: 1.75;
+    color: var(--color-fg-soft);
+  }
+  .prose > * + * { margin-top: 1.1em; }
+  .prose h2 {
+    font-size: 1rem;
+    margin-top: 2.4em;
+    margin-bottom: 0.2em;
+  }
+  .prose h3 {
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-dim);
+    margin-top: 2em;
+  }
+  .prose a { text-decoration: underline; text-underline-offset: 2px; }
+  .prose ul, .prose ol { padding-left: 1.3em; }
+  .prose li + li { margin-top: 0.35em; }
+  .prose blockquote {
+    border-left: 2px solid var(--color-accent-bg);
+    padding-left: 1em;
+    color: var(--color-dim);
+  }
+  .prose pre {
+    background: var(--color-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 0.9rem 1rem;
+    overflow-x: auto;
+    font-size: 0.86rem;
+    line-height: 1.6;
+  }
+  .prose pre code { color: inherit; font-size: inherit; }
+  .prose :not(pre) > code {
+    background: var(--color-raised);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.08em 0.34em;
+  }
+}
