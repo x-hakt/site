@@ -1,22 +1,16 @@
-# Deploy target for the new x-hakt.com (Control Room task XH-4 / cutover XH-8).
+# Live deployment for the new x-hakt.com (Control Room tasks XH-4 / XH-8).
 #
-# This is NOT yet merged into the live unified-services stack. It is the reviewed
-# target state, kept in the site repo so the deployment is version-controlled with
-# the code it ships.
+# Run as its own compose project so it never has to `up` the shared phase4 stack:
 #
-# Staging bring-up (safe, parallel with the old site):
-#   docker compose -f deploy/docker-compose.x-hakt-site.yml up -d --build
-#   # -> https://new.x-hakt.com
+#   cd ~/unified-services
+#   cp x-hakt-site/deploy/docker-compose.x-hakt-site.yml docker-compose.x-hakt-site.yml
+#   # (edit build.context to ./x-hakt-site)
+#   docker compose -f docker-compose.x-hakt-site.yml up -d --build
 #
-# Cutover (XH-8, deliberate):
-#   1. copy the `x-hakt-site` service into unified-services/docker-compose.phase4.yml
-#   2. switch the router rules from `new.x-hakt.com` to
-#      Host(`x-hakt.com`) || Host(`www.x-hakt.com`) || Host(`apex.x-hakt.com`)
-#      with priority=100 and the https-redirect middleware, mirroring hugo-x-hakt
-#   3. `docker compose ... up -d x-hakt-site` then stop + remove `hugo-x-hakt`
-#   4. update Control Room's deploy-verification hash for docker-compose.phase4.yml
-#      in the same commit
-#   5. archive the old X_HAKT app
+# The router priority (200) is above hugo-x-hakt's (100), so bringing this up
+# takes x-hakt.com over immediately; `docker stop x-hakt-site` hands it straight
+# back. Once verified, hugo-x-hakt is stopped and commented out of
+# docker-compose.phase4.yml.
 
 services:
   x-hakt-site:
@@ -31,13 +25,15 @@ services:
       - traefik.enable=true
       - traefik.docker.network=unified-services_x-hakt-network
       # HTTP -> HTTPS
-      - traefik.http.routers.x-hakt-site-insecure.rule=Host(`new.x-hakt.com`)
+      - traefik.http.routers.x-hakt-site-insecure.rule=Host(`x-hakt.com`) || Host(`www.x-hakt.com`) || Host(`apex.x-hakt.com`)
       - traefik.http.routers.x-hakt-site-insecure.entrypoints=web
       - traefik.http.routers.x-hakt-site-insecure.middlewares=https-redirect@docker
+      - traefik.http.routers.x-hakt-site-insecure.priority=200
       # HTTPS
-      - traefik.http.routers.x-hakt-site.rule=Host(`new.x-hakt.com`)
+      - traefik.http.routers.x-hakt-site.rule=Host(`x-hakt.com`) || Host(`www.x-hakt.com`) || Host(`apex.x-hakt.com`)
       - traefik.http.routers.x-hakt-site.entrypoints=websecure
       - traefik.http.routers.x-hakt-site.tls.certresolver=xhakt
+      - traefik.http.routers.x-hakt-site.priority=200
       - traefik.http.services.x-hakt-site.loadbalancer.server.port=80
 
 networks:
