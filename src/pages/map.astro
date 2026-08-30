@@ -1,0 +1,315 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { seaMeta, seaSort, seaSlug } from '../seas';
+
+/*
+  The map (XH-12): every note, filed by its sea and waters, with the spyglass
+  (client-side search) sitting above it. The grouped map is fully static; the
+  spyglass is progressive enhancement over /search.json.
+*/
+const notes = (await getCollection('notes', ({ data }) => import.meta.env.PROD ? !data.draft : true)).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+
+const dateFmt = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
+const cargoSlug = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+// group: sea -> water -> notes  (a note with no waters lands under "")
+const bySea = new Map<string, Map<string, typeof notes>>();
+for (const note of notes) {
+  const sea = note.data.sea;
+  if (!bySea.has(sea)) bySea.set(sea, new Map());
+  const waters = note.data.waters.length ? note.data.waters : [''];
+  for (const water of waters) {
+    const m = bySea.get(sea)!;
+    if (!m.has(water)) m.set(water, []);
+    m.get(water)!.push(note);
+  }
+}
+const seaNames = [...bySea.keys()].sort(seaSort);
+
+// cargo tally
+const cargoCount = new Map<string, number>();
+for (const note of notes) for (const c of note.data.cargo) cargoCount.set(c, (cargoCount.get(c) ?? 0) + 1);
+const cargo = [...cargoCount.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+---
+
+<BaseLayout title="the map" description="Every note, filed by the waters it charts." current="map" wide>
+  <section class="map-head">
+    <h1>the map</h1>
+    <p>Every note, filed by the waters it charts. Take a spyglass to it, or read down the coast.</p>
+    <label class="spyglass">
+      <span class="spyglass__icon" aria-hidden="true">&#9906;</span>
+      <input
+        type="search"
+        id="spyglass"
+        placeholder="spyglass: search titles, text, cargo…"
+        autocomplete="off"
+        aria-label="Search notes"
+      />
+    </label>
+    <p class="spyglass__status" id="spyglass-status" aria-live="polite" hidden></p>
+  </section>
+
+  <ol class="results" id="results" hidden></ol>
+
+  <div id="chart">
+    {seaNames.length === 0 && <p class="empty">No charts drawn yet. The ink is still wet.</p>}
+    {
+      seaNames.map((sea) => {
+        const waters = [...bySea.get(sea)!.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+        return (
+          <section class="sea" id={`sea-${seaSlug(sea)}`}>
+            <header class="sea__head">
+              <h2>{sea}</h2>
+              {seaMeta(sea).blurb && <p class="sea__blurb">{seaMeta(sea).blurb}</p>}
+            </header>
+            {waters.map(([water, ns]) => (
+              <div class="water">
+                {water && <h3 class="water__name">{water}</h3>}
+                <ul class="water__notes" role="list">
+                  {ns.map((note) => (
+                    <li class="chart-note">
+                      <a href={`/notes/${note.id}`}>
+                        <span class="chart-note__date">{dateFmt.format(note.data.date)}</span>
+                        <span class="chart-note__title">{note.data.title}</span>
+                        <span class="chart-note__summary">{note.data.summary}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </section>
+        );
+      })
+    }
+  </div>
+
+  {
+    cargo.length > 0 && (
+      <section class="cargo-hold">
+        <h2>the hold</h2>
+        <p class="cargo-hold__note">Loose cargo. Every tag that has ridden along in a note.</p>
+        <ul class="cargo-hold__list" role="list">
+          {cargo.map(([tag, n]) => (
+            <li>
+              <a href={`/cargo/${cargoSlug(tag)}`}>
+                {tag}
+                <span class="cargo-hold__n">{n}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+</BaseLayout>
+
+<script>
+  type Row = {
+    title: string;
+    summary: string;
+    url: string;
+    date: string;
+    sea: string;
+    waters: string[];
+    cargo: string[];
+    text: string;
+  };
+
+  const input = document.getElementById('spyglass') as HTMLInputElement;
+  const results = document.getElementById('results') as HTMLOListElement;
+  const chart = document.getElementById('chart') as HTMLElement;
+  const hold = document.querySelector('.cargo-hold') as HTMLElement | null;
+  const status = document.getElementById('spyglass-status') as HTMLElement | null;
+  if (!input || !results || !chart) throw new Error('spyglass: missing nodes');
+
+  let rows: Row[] = [];
+  let loaded = false;
+
+  async function load() {
+    if (loaded) return;
+    const res = await fetch('/search.json');
+    rows = await res.json();
+    loaded = true;
+  }
+
+  function score(row: Row, terms: string[]): number {
+    const hay = (row.title + ' ' + row.summary + ' ' + row.sea + ' ' + row.waters.join(' ') + ' ' + row.cargo.join(' ')).toLowerCase();
+    const body = row.text.toLowerCase();
+    let s = 0;
+    for (const t of terms) {
+      if (row.title.toLowerCase().includes(t)) s += 8;
+      else if (hay.includes(t)) s += 4;
+      else if (body.includes(t)) s += 1;
+      else return -1; // every term must match somewhere
+    }
+    return s;
+  }
+
+  function esc(s: string) {
+    return s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+  }
+
+  function render(q: string) {
+    const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
+    if (terms.length === 0) {
+      results.hidden = true;
+      results.innerHTML = '';
+      chart.hidden = false;
+      if (hold) hold.hidden = false;
+      if (status) status.hidden = true;
+      return;
+    }
+    const hits = rows
+      .map((r) => ({ r, s: score(r, terms) }))
+      .filter((x) => x.s >= 0)
+      .sort((a, b) => b.s - a.s || b.r.date.localeCompare(a.r.date));
+
+    chart.hidden = true;
+    if (hold) hold.hidden = true;
+    results.hidden = false;
+    if (status) {
+      status.hidden = false;
+      status.textContent = `${hits.length} ${hits.length === 1 ? 'note' : 'notes'} in sight`;
+    }
+    results.innerHTML =
+      hits
+        .map(
+          ({ r }) => `
+      <li class="chart-note">
+        <a href="${r.url}">
+          <span class="chart-note__date">${r.date}</span>
+          <span class="chart-note__title">${esc(r.title)}</span>
+          <span class="chart-note__summary">${esc(r.summary)}</span>
+          <span class="chart-note__where">${esc(r.sea)}${r.cargo.length ? ' · ' + r.cargo.map(esc).join(' · ') : ''}</span>
+        </a>
+      </li>`,
+        )
+        .join('') || `<li class="chart-note chart-note--none">Nothing on the horizon for “${esc(q)}”.</li>`;
+  }
+
+  input.addEventListener('focus', load, { once: true });
+  let t: number | undefined;
+  input.addEventListener('input', () => {
+    window.clearTimeout(t);
+    t = window.setTimeout(async () => {
+      await load();
+      render(input.value.trim());
+    }, 120);
+  });
+
+  // deep link: /map?q=term
+  const q0 = new URLSearchParams(location.search).get('q');
+  if (q0) {
+    input.value = q0;
+    load().then(() => render(q0));
+  }
+</script>
+
+<style>
+  .map-head { border-bottom: 1px solid var(--border); padding-bottom: 24px; margin-bottom: 8px; }
+  .map-head h1 { font-size: clamp(1.6rem, 4.4vw, 2rem); letter-spacing: -0.02em; margin: 0 0 0.5rem; }
+  .map-head > p { color: var(--color-fg-soft); max-width: 60ch; margin: 0 0 1.25rem; }
+
+  .spyglass {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius-card);
+    background: var(--color-surface);
+    padding: 0 12px;
+    max-width: 32rem;
+  }
+  .spyglass:focus-within { border-color: var(--color-green); }
+  .spyglass__icon { color: var(--color-dim); font-size: 15px; }
+  .spyglass input {
+    flex: 1;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    color: var(--color-fg);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 11px 0;
+  }
+  .spyglass input::placeholder { color: var(--color-faint); }
+  .spyglass__status {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-faint);
+    margin: 10px 0 0;
+  }
+
+  .results { list-style: none; margin: 8px 0 0; padding: 0; }
+
+  .sea { padding-block: 28px; border-bottom: 1px solid var(--border); }
+  .sea__head h2 {
+    font-size: 1.15rem;
+    letter-spacing: -0.01em;
+    margin: 0 0 0.3rem;
+  }
+  .sea__blurb { color: var(--color-dim); font-size: 14px; margin: 0 0 1rem; max-width: 64ch; }
+
+  .water { margin-top: 14px; }
+  .water__name {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-faint);
+    margin: 0 0 6px;
+  }
+  .water__notes, .results { list-style: none; margin: 0; padding: 0; }
+
+  .chart-note { border-top: 1px solid var(--border); }
+  .chart-note:first-child { border-top: 0; }
+  .chart-note a {
+    display: grid;
+    grid-template-columns: 108px 1fr;
+    gap: 4px 22px;
+    padding: 13px 0;
+    color: inherit;
+  }
+  .chart-note a:hover { text-decoration: none; }
+  .chart-note a:hover .chart-note__title { color: var(--color-green); }
+  .chart-note__date {
+    grid-row: 1 / span 3;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-faint);
+    padding-top: 2px;
+  }
+  .chart-note__title { font-family: var(--font-mono); font-weight: 600; font-size: 14px; color: var(--color-fg); }
+  .chart-note__summary { color: var(--color-dim); font-size: 14px; max-width: 64ch; }
+  .chart-note__where { font-family: var(--font-mono); font-size: 11px; color: var(--color-faint); }
+  .chart-note--none { padding: 14px 0; font-family: var(--font-mono); font-size: 13px; color: var(--color-faint); }
+
+  .cargo-hold { padding-top: 30px; }
+  .cargo-hold h2 { font-size: 1rem; margin: 0 0 0.3rem; }
+  .cargo-hold__note { color: var(--color-dim); font-size: 14px; margin: 0 0 1rem; }
+  .cargo-hold__list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .cargo-hold__list a {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 11px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-fg-soft);
+  }
+  .cargo-hold__list a:hover { border-color: var(--color-green); color: var(--color-green); text-decoration: none; }
+  .cargo-hold__n { color: var(--color-faint); font-size: 10px; }
+
+  .empty { color: var(--color-faint); font-family: var(--font-mono); font-size: 13px; padding: 20px 0; }
+
+  @media (max-width: 640px) {
+    .chart-note a { grid-template-columns: 1fr; gap: 3px; }
+    .chart-note__date { grid-row: auto; }
+  }
+</style>

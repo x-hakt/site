@@ -2,6 +2,8 @@
 import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Figure from '../../components/Figure.astro';
+import { site } from '../../site';
+import { seaSlug } from '../../seas';
 
 export async function getStaticPaths() {
   const notes = await getCollection('notes', ({ data }) => import.meta.env.PROD ? !data.draft : true);
@@ -15,7 +17,7 @@ const { note } = Astro.props;
 const { Content } = await render(note);
 
 const dateFmt = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
-const topics = note.data.topics.join(' · ');
+const cargoSlug = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 ---
 
 <BaseLayout
@@ -30,7 +32,9 @@ const topics = note.data.topics.join(' · ');
       <p class="note-head__summary">{note.data.summary}</p>
       <p class="note-head__meta">
         <time datetime={note.data.date.toISOString()}>{dateFmt.format(note.data.date)}</time>
-        {topics && <><span aria-hidden="true"> / </span>{topics}</>}
+        <span aria-hidden="true"> / </span>
+        <a href={`/map#sea-${seaSlug(note.data.sea)}`}>{note.data.sea}</a>
+        {note.data.waters.length > 0 && <><span aria-hidden="true"> / </span>{note.data.waters.join(' · ')}</>}
         {
           note.data.updated && (
             <>
@@ -39,6 +43,15 @@ const topics = note.data.topics.join(' · ');
           )
         }
       </p>
+      {
+        note.data.cargo.length > 0 && (
+          <p class="note-head__cargo">
+            {note.data.cargo.map((tag) => (
+              <a href={`/cargo/${cargoSlug(tag)}`}>{tag}</a>
+            ))}
+          </p>
+        )
+      }
     </header>
 
     {
@@ -52,6 +65,8 @@ const topics = note.data.topics.join(' · ');
     <div class="prose">
       <Content components={{ Figure }} />
     </div>
+
+    <p class="signoff" aria-label={`signed, ${site.byline}`}>{site.signoff}</p>
 
     <footer class="note-foot">
       <a href="/">&#8592; all notes</a>
@@ -79,8 +94,33 @@ const topics = note.data.topics.join(' · ');
     color: var(--color-faint);
     margin: 0;
   }
+  .note-head__meta a { color: var(--color-dim); }
+  .note-head__meta a:hover { color: var(--color-fg-soft); }
+  .note-head__cargo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin: 0.7rem 0 0;
+  }
+  .note-head__cargo a {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-fg-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px 9px;
+  }
+  .note-head__cargo a:hover { border-color: var(--color-green); color: var(--color-green); text-decoration: none; }
+  .signoff {
+    margin-top: 2.75rem;
+    text-align: right;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--color-dim);
+    letter-spacing: 0.04em;
+  }
   .note-foot {
-    margin-top: 3.5rem;
+    margin-top: 1.25rem;
     padding-top: 1.5rem;
     border-top: 1px solid var(--border);
     font-family: var(--font-mono);

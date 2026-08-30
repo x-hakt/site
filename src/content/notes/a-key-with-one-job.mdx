@@ -1,0 +1,118 @@
+---
+title: A key with one job
+summary: Control Room needs to see what is running on three other hosts. Here is how that key was scoped so a leak of it is worth almost nothing.
+date: 2026-08-29
+sea: The Mesh
+waters: [ssh, discovery]
+cargo: [authorized_keys, forced-command, permitopen, least-privilege, openssh]
+draft: false
+---
+
+import Figure from '../../components/Figure.astro';
+
+[Control Room](https://control.x-hakt.com) is a dashboard that watches this
+mesh. Part of what it shows is which containers are up on the other hosts, which
+means it has to reach across the network and ask them. The first version of that
+did the obvious thing: mount my own SSH key into the container read only and let
+it log in. It worked on the first try, which should have been the warning.
+
+That key can become root on every box it touches. The job it was doing is "run
+`docker ps` and read four files." A container breakout would have handed an
+attacker the whole mesh in exchange for a feature that lists container names.
+The capability and the need were not in the same postcode.
+
+## The one diagram
+
+<Figure wide caption="One key. sshd ignores whatever the client asks for and runs the pinned script instead. The script's own allowlist is the second gate.">
+  <svg viewBox="0 0 340 176" role="img" aria-label="A key on the left connects through a forced-command box to three hosts on the right: lighthouse, gp-forms, podusa. The gp-forms line passes through a jump host.">
+    <rect x="10" y="70" width="92" height="36" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="56" y="92" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="10" fill="#eaebec">control&#8209;room</text>
+
+    <line x1="102" y1="88" x2="140" y2="88" stroke="#26cb96" stroke-width="1.5" />
+
+    <rect x="140" y="70" width="74" height="36" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
+    <text x="177" y="86" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#26cb96">command=</text>
+    <text x="177" y="97" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#26cb96">restrict</text>
+
+    <g stroke="#26cb96" stroke-opacity="0.9" stroke-width="1.4" fill="none">
+      <path d="M214 82 C 244 82, 250 40, 276 40" />
+      <path d="M214 88 C 250 88, 250 88, 276 88" />
+      <path d="M214 94 C 244 94, 250 136, 276 136" />
+    </g>
+
+    <rect x="243" y="30" width="26" height="16" rx="3" fill="#101216" stroke="rgba(255,255,255,0.14)" />
+    <text x="256" y="41" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">jump</text>
+
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#c9cacd">
+      <circle cx="280" cy="40" r="3.5" fill="#26cb96" /><text x="290" y="43">lighthouse</text>
+      <circle cx="280" cy="88" r="3.5" fill="#26cb96" /><text x="290" y="91">gp&#8209;forms</text>
+      <circle cx="280" cy="136" r="3.5" fill="#26cb96" /><text x="290" y="139">podusa</text>
+    </g>
+  </svg>
+</Figure>
+
+## What is doing the work
+
+Three `authorized_keys` options, added as one new line on each target host and
+nothing removed:
+
+```
+restrict,command="/usr/local/bin/control-room-ro.sh",permitopen="10.10.10.x:22" ssh-ed25519 AAAA... discovery
+```
+
+`restrict` is the important word. It is an allowlist, not a blocklist: it turns
+off pty allocation, X11 forwarding, agent forwarding, and `~/.ssh/rc`, and it
+stays off as OpenSSH adds new things to turn off. The forced `command=` means
+sshd runs that one script no matter what the client sends. Control Room's SSH
+call literally passes the string `control-room-ro` as its command, and the
+server pays it no attention. The pinned script runs instead.
+
+`permitopen` is the single exception. One of the three hosts is only reachable
+by jumping through another box, and a `ProxyJump` needs a channel open. So
+port-forwarding is back on, scoped to exactly one destination host and port.
+Everywhere else it stays off.
+
+## The second gate
+
+The forced command is not a trusting script. `SSH_ORIGINAL_COMMAND` (what the
+client asked for) is matched against exact literal cases and never passed to a
+shell:
+
+```sh
+case "$SSH_ORIGINAL_COMMAND" in
+  doc:/opt/gp-forms:SPEC.md) DOC=/opt/gp-forms/SPEC.md ;;
+  # ...one line per allowed file...
+  doc:*) echo "===REJECTED==="; exit 1 ;;
+esac
+```
+
+The rest of it is a fixed sequence: `uname`, `nproc`, `free`, `df`, the load
+average, `docker ps -a`, `docker stats`. File reads are capped with `head -c`
+and refuse symlinks, so it cannot be talked into being a general file reader or
+into returning something unbounded.
+
+## Verified, not assumed
+
+A restriction you have not tried to break is not a restriction. After switching
+the forced command over I checked the boundary directly:
+
+- Asked it to run `id`. It ran the pinned script instead and ignored me.
+- Asked for an interactive shell (`ssh -tt`). Rejected: `PTY allocation request failed`.
+- Opened a tunnel to a host that was not the one permitted destination. Rejected,
+  `administratively prohibited`. Relayed an SSH banner through the one tunnel that
+  is allowed and got bytes; every other destination got zero.
+
+## What is verified vs assumed
+
+Verified: the three checks above, on the live hosts, after the change. Also that
+Control Room still gets its snapshot (2.4 to 2.9 seconds per host, cached five
+minutes).
+
+Assumed, and worth revisiting: that the pinned script has no argument-injection
+path I missed, and that `head -c 65536` is a sane cap rather than one I will
+regret when a `STATUS.md` gets long. Neither has bitten yet.
+
+The shape here is reusable. Any time something inside a container needs to reach
+a host outside it: a credential that exists for nothing else, cut down to the
+one capability the feature needs, and a test that proves the wall is where you
+think it is.
