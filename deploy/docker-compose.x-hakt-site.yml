@@ -52,7 +52,7 @@ services:
       - traefik.http.routers.x-hakt-site.entrypoints=websecure
       - traefik.http.routers.x-hakt-site.tls.certresolver=xhakt
       - traefik.http.routers.x-hakt-site.priority=200
-      - traefik.http.routers.x-hakt-site.middlewares=x-hakt-site-compress
+      - traefik.http.routers.x-hakt-site.middlewares=x-hakt-site-compress@docker
       - traefik.http.services.x-hakt-site.loadbalancer.server.port=4321
 
 networks:
