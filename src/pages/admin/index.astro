@@ -9,8 +9,9 @@ if (!adminEnabled()) return new Response('Not found', { status: 404 });
 const authed = sessionValid(Astro.cookies.get(COOKIE)?.value);
 const err = Astro.url.searchParams.get('e');
 const errText =
-  err === 'bad' ? 'Wrong password.' :
-  err === 'locked' ? 'Too many attempts. Wait five minutes.' :
+  err === 'denied' ? 'That Google account is not allowed here.' :
+  err === 'state' ? 'Sign-in expired or was tampered with. Try again.' :
+  err === 'exchange' ? 'Google sign-in failed. Try again.' :
   err === 'session' ? 'Session expired. Sign in again.' : null;
 
 const notes = authed ? await listNotes() : [];
@@ -22,14 +23,10 @@ const result = authed ? await lastResult() : null;
     <h1>the chart room</h1>
 
     {!authed && (
-      <form method="post" action="/admin/login" class="login">
+      <div class="login">
         {errText && <p class="err">{errText}</p>}
-        <label>
-          <span>password</span>
-          <input type="password" name="password" autocomplete="current-password" autofocus required />
-        </label>
-        <button type="submit">sign in</button>
-      </form>
+        <a class="signin" href="/admin/login">sign in with Google</a>
+      </div>
     )}
 
     {authed && (
@@ -83,7 +80,19 @@ const result = authed ? await lastResult() : null;
   .admin { max-width: 40rem; }
   .admin h1 { font-size: 1.4rem; margin: 0 0 1.5rem; }
 
-  .login, .new, .out { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .login { margin-bottom: 1.5rem; }
+  .signin {
+    display: inline-block;
+    background: var(--color-raised);
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius-card);
+    color: var(--color-fg-soft);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 11px 20px;
+  }
+  .signin:hover { border-color: var(--color-green); color: var(--color-green); text-decoration: none; }
+  .new, .out { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 1.5rem; flex-wrap: wrap; }
   label { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 12rem; }
   label span { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--color-faint); }
   input {

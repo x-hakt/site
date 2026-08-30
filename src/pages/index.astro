@@ -11,10 +11,7 @@ const dateFmt = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
 
 <BaseLayout current="notes" wide>
   <section class="intro">
-    <div class="intro__text">
-      <h1>{site.tagline}</h1>
-      <p>{site.description}</p>
-    </div>
+    <h1>{site.tagline}</h1>
     <img
       src="/emblem.png"
       width="200"
@@ -56,7 +53,6 @@ const dateFmt = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
     border-bottom: 1px solid var(--border);
     margin-bottom: 8px;
   }
-  .intro__text { flex: 1; min-width: 0; }
   .intro__crest {
     width: 168px;
     height: auto;
@@ -68,11 +64,12 @@ const dateFmt = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
     .intro__crest { width: 120px; align-self: center; }
   }
   .intro h1 {
+    flex: 1;
+    min-width: 0;
     font-size: clamp(1.6rem, 4.4vw, 2rem);
     letter-spacing: -0.02em;
-    margin: 0 0 0.75rem;
+    margin: 0;
   }
-  .intro p { max-width: 60ch; color: var(--color-fg-soft); margin: 0; }
 
   .notes { list-style: none; margin: 0; padding: 0; }
   .note { border-bottom: 1px solid var(--border); }
