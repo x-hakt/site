@@ -43,7 +43,6 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=unified-services_x-hakt-network
-      - traefik.http.middlewares.x-hakt-site-compress.compress=true
       - traefik.http.routers.x-hakt-site-insecure.rule=Host(`x-hakt.com`) || Host(`www.x-hakt.com`) || Host(`apex.x-hakt.com`)
       - traefik.http.routers.x-hakt-site-insecure.entrypoints=web
       - traefik.http.routers.x-hakt-site-insecure.middlewares=https-redirect@docker
@@ -52,7 +51,6 @@ services:
       - traefik.http.routers.x-hakt-site.entrypoints=websecure
       - traefik.http.routers.x-hakt-site.tls.certresolver=xhakt
       - traefik.http.routers.x-hakt-site.priority=200
-      - traefik.http.routers.x-hakt-site.middlewares=x-hakt-site-compress@docker
       - traefik.http.services.x-hakt-site.loadbalancer.server.port=4321
 
 networks:
