@@ -76,6 +76,27 @@ const year = new Date().getFullYear();
       </div>
     </footer>
 
+    {/* XH-11 — the chart room. Whisper level; auth is CR-1's job, once wired. */}
+    <a
+      href="https://control.x-hakt.com"
+      class="chest"
+      aria-label="the chart room"
+      title="the chart room"
+      rel="noopener"
+    >
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+        <path
+          d="M3 10.5V19a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-8.5M3 10.5 4.4 6a2 2 0 0 1 1.9-1.4h11.4A2 2 0 0 1 19.6 6L21 10.5M3 10.5h18M12 10.5v-3"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <rect x="10.4" y="12.2" width="3.2" height="3.6" rx="0.6" fill="currentColor" />
+      </svg>
+    </a>
+
     <style>
       .skip {
         position: absolute;
@@ -106,6 +127,26 @@ const year = new Date().getFullYear();
       }
       .site-footer .wrap { display: flex; gap: 10px; flex-wrap: wrap; }
       .site-footer .dot { color: var(--color-accent-bg); }
+
+      .chest {
+        position: fixed;
+        right: 14px;
+        bottom: 12px;
+        display: grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        color: var(--color-faint);
+        opacity: 0.35;
+        transition: opacity 0.15s, color 0.15s;
+        z-index: 5;
+      }
+      .chest:hover, .chest:focus-visible {
+        opacity: 1;
+        color: var(--color-seal-flat);
+        text-decoration: none;
+      }
+      @media (max-width: 640px) { .chest { right: 8px; bottom: 8px; } }
     </style>
   </body>
 </html>
