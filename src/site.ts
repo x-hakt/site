@@ -11,8 +11,8 @@ export const site = {
   author: 'x',
   byline: 'x',
   signoff: '-x',
+  // the wordmark already goes home, so no "notes" item here
   nav: [
-    { label: 'notes', href: '/' },
     { label: 'map', href: '/map' },
     { label: 'about', href: '/about' },
     { label: 'feed', href: '/rss.xml' },
