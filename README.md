@@ -45,8 +45,11 @@ src/
     404.astro             the cartographic treatment (style guide s.07)
     notes/[...slug].astro
     cargo/[tag].astro      notes carrying one cargo tag
+    admin/                 the SSR editor (XH-6): index, login, callback, save, logout
     rss.xml.ts
     search.json.ts         the spyglass index, built once
+server.mjs                the supervisor: runs the Astro node server + the rebuild loop
+src/lib/admin.ts          admin auth (Google OAuth + session cookie) and note file I/O
 VOICE.md                  the persona + writing rules (XH-3)
 public/                    generated logo assets (npm run logo) — see below
 ```
@@ -76,12 +79,14 @@ writes `public/{emblem,mark,og-default,favicon-16/32/48,apple-touch-icon}.png`.
 
 ## The /admin editor (XH-6)
 
-`/admin` is a live SSR route. It is **404 until both `ADMIN_PASSWORD_HASH` and
-`ADMIN_SESSION_SECRET` are set** in the environment.
+`/admin` is a live SSR route. It is **404 until `GOOGLE_CLIENT_ID`,
+`GOOGLE_CLIENT_SECRET` and `ADMIN_SESSION_SECRET` are all set**.
 
-- password-gated (scrypt hash, `scripts/admin-hash.mjs` makes the value), a
-  stateless HMAC session cookie (`SameSite=Lax`), a per-IP in-memory rate limit,
-  and an Origin/Referer-vs-Host check on the POST endpoints.
+- **Google sign-in.** `/admin/login` bounces to Google with a state cookie;
+  `/admin/callback` exchanges the code server-side, checks `email_verified` and
+  `email === ADMIN_ALLOWED_EMAIL`, then issues a stateless HMAC session cookie
+  (`SameSite=Lax`, 7 days). One Google OAuth client, shared with Control Room
+  (`GOOGLE_OAUTH_*` in `~/unified-services/.env`).
 - list / create / edit notes as raw MDX in a textarea.
 - **save** writes the `.mdx`, then `server.mjs` (the supervisor that owns the
   process) runs `astro build`. Build OK: it commits the notes dir and pushes,
@@ -89,10 +94,17 @@ writes `public/{emblem,mark,og-default,favicon-16/32/48,apple-touch-icon}.png`.
   file) and respawns. A note that does not build never reaches the live site. A
   503 holding page covers the ~10s rebuild gap.
 
-To turn it on: `node scripts/admin-hash.mjs '<password>'`, put the line in
-`~/unified-services/.env` as `XHAKT_ADMIN_PASSWORD_HASH=...`, set
-`XHAKT_ADMIN_SESSION_SECRET` to a random 32+ char string, and
-`docker compose -f docker-compose.x-hakt-site.yml up -d`.
+To turn it on:
+
+1. Create one Google OAuth 2.0 **Web application** client (Cloud Console →
+   Credentials). Authorized redirect URIs:
+   - `https://x-hakt.com/admin/callback`
+   - `https://control.x-hakt.com/api/auth/callback/google`
+2. Put the client id/secret in `~/unified-services/.env` as
+   `GOOGLE_OAUTH_CLIENT_ID` / `GOOGLE_OAUTH_CLIENT_SECRET`.
+   `XHAKT_ADMIN_SESSION_SECRET` and `CONTROL_ROOM_AUTH_SECRET` are already set.
+3. `docker compose -f docker-compose.x-hakt-site.yml up -d` (and the same for
+   `docker-compose.control-room.yml`).
 
 The container pushes with a dedicated deploy key
 (`~/unified-services/x-hakt-site-deploy-key`, public half on the GitHub repo's

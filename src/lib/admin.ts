@@ -1,44 +1,33 @@
 /*
-  XH-6 — the /admin editor's server-only helpers: auth, a stateless signed
-  session cookie, a crude in-memory rate limiter, and the note file I/O.
+  XH-6 — the /admin editor's server-only helpers: Google OAuth sign-in, a
+  stateless signed session cookie, and the note file I/O.
 
   Only ever imported from `prerender = false` routes under src/pages/admin/.
   Nothing here runs at build time.
 */
-import { createHmac, timingSafeEqual, scryptSync, randomBytes } from 'node:crypto';
+import { createHmac, timingSafeEqual, randomBytes } from 'node:crypto';
 import { readFile, writeFile, readdir, access } from 'node:fs/promises';
 import { constants as FS } from 'node:fs';
 import path from 'node:path';
 
-const PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH ?? '';
+const CLIENT_ID = process.env.GOOGLE_CLIENT_ID ?? '';
+const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET ?? '';
 const SESSION_SECRET = process.env.ADMIN_SESSION_SECRET ?? '';
+const ALLOWED_EMAIL = (process.env.ADMIN_ALLOWED_EMAIL ?? 'topher.burchell@gmail.com').toLowerCase();
+const SITE_URL = (process.env.SITE_URL ?? 'https://x-hakt.com').replace(/\/$/, '');
 const CONTENT_DIR = process.env.CONTENT_DIR
   ? path.resolve(process.env.CONTENT_DIR)
   : path.resolve(process.cwd(), 'src/content/notes');
 
-/** the editor is live only when both secrets are configured */
+/** the editor is live only when Google OAuth and the session secret are set */
 export function adminEnabled(): boolean {
-  return PASSWORD_HASH.length > 0 && SESSION_SECRET.length > 0;
+  return CLIENT_ID.length > 0 && CLIENT_SECRET.length > 0 && SESSION_SECRET.length > 0;
 }
 
 export const COOKIE = 'xh_admin';
+export const STATE_COOKIE = 'xh_admin_state';
 const SESSION_TTL_S = 7 * 24 * 60 * 60;
-
-// ---- password ------------------------------------------------------------
-
-/** format: scrypt$<saltHex>$<hashHex> (generate with scripts/admin-hash.mjs) */
-export function verifyPassword(plain: string): boolean {
-  const [scheme, saltHex, hashHex] = PASSWORD_HASH.split('$');
-  if (scheme !== 'scrypt' || !saltHex || !hashHex) return false;
-  const expected = Buffer.from(hashHex, 'hex');
-  let got: Buffer;
-  try {
-    got = scryptSync(plain, Buffer.from(saltHex, 'hex'), expected.length);
-  } catch {
-    return false;
-  }
-  return got.length === expected.length && timingSafeEqual(got, expected);
-}
+const REDIRECT_URI = `${SITE_URL}/admin/callback`;
 
 // ---- session cookie (stateless, HMAC-signed) -----------------------------
 
@@ -46,9 +35,9 @@ function sign(msg: string): string {
   return createHmac('sha256', SESSION_SECRET).update(msg).digest('base64url');
 }
 
-export function issueSession(): string {
+export function issueSession(email: string): string {
   const exp = Math.floor(Date.now() / 1000) + SESSION_TTL_S;
-  const payload = `v1.${exp}`;
+  const payload = `v1.${exp}.${Buffer.from(email).toString('base64url')}`;
   return `${payload}.${sign(payload)}`;
 }
 
@@ -72,30 +61,77 @@ export const cookieOpts = {
   maxAge: SESSION_TTL_S,
 };
 
-// ---- rate limit (per-IP, in-memory; resets on restart) -------------------
+export const stateCookieOpts = { ...cookieOpts, maxAge: 600 };
 
-const WINDOW_MS = 5 * 60 * 1000;
-const MAX_TRIES = 8;
-const attempts = new Map<string, number[]>();
+// ---- Google OAuth (authorization code flow) -----------------------------
 
-export function rateLimited(ip: string): boolean {
-  const now = Date.now();
-  const hits = (attempts.get(ip) ?? []).filter((t) => now - t < WINDOW_MS);
-  attempts.set(ip, hits);
-  return hits.length >= MAX_TRIES;
+/** the URL to bounce the browser to, plus the state to stash in a cookie */
+export function oauthStart(): { url: string; state: string } {
+  const state = randomBytes(16).toString('hex');
+  const url = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+  url.searchParams.set('client_id', CLIENT_ID);
+  url.searchParams.set('redirect_uri', REDIRECT_URI);
+  url.searchParams.set('response_type', 'code');
+  url.searchParams.set('scope', 'openid email');
+  url.searchParams.set('state', state);
+  url.searchParams.set('prompt', 'select_account');
+  return { url: url.toString(), state };
 }
 
-export function recordAttempt(ip: string): void {
-  const hits = attempts.get(ip) ?? [];
-  hits.push(Date.now());
-  attempts.set(ip, hits);
+function decodeJwtPayload(jwt: string): Record<string, unknown> {
+  const part = jwt.split('.')[1] ?? '';
+  return JSON.parse(Buffer.from(part, 'base64url').toString('utf8'));
 }
 
-export function clearAttempts(ip: string): void {
-  attempts.delete(ip);
+/**
+ * Exchange the code at Google's token endpoint (server-to-server, over TLS,
+ * authenticated with the client secret) and return the signed-in email if it
+ * is verified and on the allowlist, else null.
+ */
+export async function oauthFinish(code: string): Promise<string | null> {
+  let idToken: string;
+  try {
+    const res = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        code,
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET,
+        redirect_uri: REDIRECT_URI,
+        grant_type: 'authorization_code',
+      }),
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as { id_token?: string };
+    if (!json.id_token) return null;
+    idToken = json.id_token;
+  } catch {
+    return null;
+  }
+
+  let claims: Record<string, unknown>;
+  try {
+    claims = decodeJwtPayload(idToken);
+  } catch {
+    return null;
+  }
+
+  const iss = String(claims.iss ?? '');
+  const aud = String(claims.aud ?? '');
+  const exp = Number(claims.exp ?? 0);
+  const email = String(claims.email ?? '').toLowerCase();
+  const emailVerified = claims.email_verified === true || claims.email_verified === 'true';
+
+  if (iss !== 'https://accounts.google.com' && iss !== 'accounts.google.com') return null;
+  if (aud !== CLIENT_ID) return null;
+  if (!(exp > Math.floor(Date.now() / 1000))) return null;
+  if (!emailVerified || email !== ALLOWED_EMAIL) return null;
+
+  return email;
 }
 
-// ---- same-origin guard (CSRF) ------------------------------------------
+// ---- same-origin guard (CSRF, for the save POST) ----------------------
 //
 // The session cookie is SameSite=Lax so it is not sent on a cross-site POST;
 // this is the belt to that suspenders. Accept a request only if its Origin (or
@@ -262,8 +298,4 @@ export async function lastResult(): Promise<RebuildResult | null> {
   } catch {
     return null;
   }
-}
-
-export function newSalt(): string {
-  return randomBytes(16).toString('hex');
 }
