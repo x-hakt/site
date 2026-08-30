@@ -296,6 +296,29 @@ serialises writers with a per-project lock and refuses a checkpoint from an
 agent that is not the current owner. That is what stops two sessions quietly
 writing over each other.
 
+<Figure caption="Everyone appends to HANDOFF.md. The next watch reads only HANDOFF.yml: the last checkpoint in full, plus a short trail so a thin one cannot erase the trajectory.">
+  <svg viewBox="0 0 340 176" role="img" aria-label="Claude, Codex and a human all append to HANDOFF.md. A resume step reads the bounded HANDOFF.yml snapshot, which feeds the next session.">
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#c9cacd">
+      <rect x="10" y="16" width="64" height="22" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="42" y="30" text-anchor="middle">Claude</text>
+      <rect x="10" y="50" width="64" height="22" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="42" y="64" text-anchor="middle">Codex</text>
+      <rect x="10" y="84" width="64" height="22" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="42" y="98" text-anchor="middle">a human</text>
+    </g>
+    <g stroke="rgba(255,255,255,0.28)" stroke-width="1.2" fill="none">
+      <path d="M74 27 H 132" /><path d="M74 61 H 132" /><path d="M74 95 H 132" />
+    </g>
+    <rect x="132" y="18" width="80" height="88" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" />
+    <text x="172" y="46" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#26cb96">HANDOFF.md</text>
+    <text x="172" y="60" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#87898d">append-only</text>
+    <text x="172" y="71" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#87898d">newest first</text>
+    <path d="M172 106 V 130 H 238" stroke="#26cb96" stroke-width="1.4" fill="none" />
+    <rect x="238" y="118" width="74" height="26" rx="6" fill="#101216" stroke="#26cb96" stroke-opacity="0.55" />
+    <text x="275" y="131" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">HANDOFF.yml</text>
+    <text x="275" y="140" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">resume snapshot</text>
+    <path d="M275 144 V 166" stroke="#26cb96" stroke-width="1.4" fill="none" />
+    <text x="275" y="176" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#eaebec">next watch</text>
+  </svg>
+</Figure>
+
 What makes it work is the discipline, more than the mechanism. A checkpoint has
 to separate verified from attempted, include the actual test output, name the
 blockers still open, and give exactly one next action. "Ran the suite, 14 pass,
