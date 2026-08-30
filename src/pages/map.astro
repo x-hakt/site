@@ -1,50 +1,47 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { seaMeta, seaSort, seaSlug } from '../seas';
+import { trackMeta, trackSort, trackSlug } from '../tracks';
 
 /*
-  The map (XH-12): every note, filed by its sea and waters, with the spyglass
+  The map (XH-12, revised): every note, grouped by track, with the spyglass
   (client-side search) sitting above it. The grouped map is fully static; the
-  spyglass is progressive enhancement over /search.json.
+  spyglass is progressive enhancement over /search.json. A note with more than
+  one track is listed under each.
 */
 const notes = (await getCollection('notes', ({ data }) => import.meta.env.PROD ? !data.draft : true)).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
 );
 
 const dateFmt = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
-const cargoSlug = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+const techSlug = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
-// group: sea -> water -> notes  (a note with no waters lands under "")
-const bySea = new Map<string, Map<string, typeof notes>>();
+// group: track -> notes
+const byTrack = new Map<string, typeof notes>();
 for (const note of notes) {
-  const sea = note.data.sea;
-  if (!bySea.has(sea)) bySea.set(sea, new Map());
-  const waters = note.data.waters.length ? note.data.waters : [''];
-  for (const water of waters) {
-    const m = bySea.get(sea)!;
-    if (!m.has(water)) m.set(water, []);
-    m.get(water)!.push(note);
+  for (const track of note.data.tracks) {
+    if (!byTrack.has(track)) byTrack.set(track, []);
+    byTrack.get(track)!.push(note);
   }
 }
-const seaNames = [...bySea.keys()].sort(seaSort);
+const trackNames = [...byTrack.keys()].sort(trackSort);
 
-// cargo tally
-const cargoCount = new Map<string, number>();
-for (const note of notes) for (const c of note.data.cargo) cargoCount.set(c, (cargoCount.get(c) ?? 0) + 1);
-const cargo = [...cargoCount.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+// tech tally
+const techCount = new Map<string, number>();
+for (const note of notes) for (const t of note.data.tech) techCount.set(t, (techCount.get(t) ?? 0) + 1);
+const tech = [...techCount.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 ---
 
-<BaseLayout title="the map" description="Every note, filed by the waters it charts." current="map" wide>
+<BaseLayout title="the map" description="Every note, grouped by the kind of work it is." current="map" wide>
   <section class="map-head">
     <h1>the map</h1>
-    <p>Every note, filed by the waters it charts. Take a spyglass to it, or read down the coast.</p>
+    <p>Every note, grouped by the kind of work it is. Take a spyglass to it, or read down the list.</p>
     <label class="spyglass">
       <span class="spyglass__icon" aria-hidden="true">&#9906;</span>
       <input
         type="search"
         id="spyglass"
-        placeholder="spyglass: search titles, text, cargo…"
+        placeholder="spyglass: search titles, text, tech…"
         autocomplete="off"
         aria-label="Search notes"
       />
@@ -55,49 +52,41 @@ const cargo = [...cargoCount.entries()].sort((a, b) => b[1] - a[1] || a[0].local
   <ol class="results" id="results" hidden></ol>
 
   <div id="chart">
-    {seaNames.length === 0 && <p class="empty">No charts drawn yet. The ink is still wet.</p>}
+    {trackNames.length === 0 && <p class="empty">No charts drawn yet. The ink is still wet.</p>}
     {
-      seaNames.map((sea) => {
-        const waters = [...bySea.get(sea)!.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-        return (
-          <section class="sea" id={`sea-${seaSlug(sea)}`}>
-            <header class="sea__head">
-              <h2>{sea}</h2>
-              {seaMeta(sea).blurb && <p class="sea__blurb">{seaMeta(sea).blurb}</p>}
-            </header>
-            {waters.map(([water, ns]) => (
-              <div class="water">
-                {water && <h3 class="water__name">{water}</h3>}
-                <ul class="water__notes" role="list">
-                  {ns.map((note) => (
-                    <li class="chart-note">
-                      <a href={`/notes/${note.id}`}>
-                        <span class="chart-note__date">{dateFmt.format(note.data.date)}</span>
-                        <span class="chart-note__title">{note.data.title}</span>
-                        <span class="chart-note__summary">{note.data.summary}</span>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+      trackNames.map((track) => (
+        <section class="track" id={`track-${trackSlug(track)}`}>
+          <header class="track__head">
+            <h2>{track}</h2>
+            {trackMeta(track).blurb && <p class="track__blurb">{trackMeta(track).blurb}</p>}
+          </header>
+          <ul class="track__notes" role="list">
+            {byTrack.get(track)!.map((note) => (
+              <li class="chart-note">
+                <a href={`/notes/${note.id}`}>
+                  <span class="chart-note__date">{dateFmt.format(note.data.date)}</span>
+                  <span class="chart-note__title">{note.data.title}</span>
+                  <span class="chart-note__summary">{note.data.summary}</span>
+                </a>
+              </li>
             ))}
-          </section>
-        );
-      })
+          </ul>
+        </section>
+      ))
     }
   </div>
 
   {
-    cargo.length > 0 && (
-      <section class="cargo-hold">
-        <h2>the hold</h2>
-        <p class="cargo-hold__note">Loose cargo. Every tag that has ridden along in a note.</p>
-        <ul class="cargo-hold__list" role="list">
-          {cargo.map(([tag, n]) => (
+    tech.length > 0 && (
+      <section class="toolbox" id="the-toolbox">
+        <h2>the toolbox</h2>
+        <p class="toolbox__note">Every technology that has turned up in a note. Follow one to see where.</p>
+        <ul class="toolbox__list" role="list">
+          {tech.map(([tag, n]) => (
             <li>
-              <a href={`/cargo/${cargoSlug(tag)}`}>
+              <a href={`/tech/${techSlug(tag)}`}>
                 {tag}
-                <span class="cargo-hold__n">{n}</span>
+                <span class="toolbox__n">{n}</span>
               </a>
             </li>
           ))}
@@ -113,16 +102,15 @@ const cargo = [...cargoCount.entries()].sort((a, b) => b[1] - a[1] || a[0].local
     summary: string;
     url: string;
     date: string;
-    sea: string;
-    waters: string[];
-    cargo: string[];
+    tracks: string[];
+    tech: string[];
     text: string;
   };
 
   const input = document.getElementById('spyglass') as HTMLInputElement;
   const results = document.getElementById('results') as HTMLOListElement;
   const chart = document.getElementById('chart') as HTMLElement;
-  const hold = document.querySelector('.cargo-hold') as HTMLElement | null;
+  const box = document.querySelector('.toolbox') as HTMLElement | null;
   const status = document.getElementById('spyglass-status') as HTMLElement | null;
   if (!input || !results || !chart) throw new Error('spyglass: missing nodes');
 
@@ -137,7 +125,7 @@ const cargo = [...cargoCount.entries()].sort((a, b) => b[1] - a[1] || a[0].local
   }
 
   function score(row: Row, terms: string[]): number {
-    const hay = (row.title + ' ' + row.summary + ' ' + row.sea + ' ' + row.waters.join(' ') + ' ' + row.cargo.join(' ')).toLowerCase();
+    const hay = (row.title + ' ' + row.summary + ' ' + row.tracks.join(' ') + ' ' + row.tech.join(' ')).toLowerCase();
     const body = row.text.toLowerCase();
     let s = 0;
     for (const t of terms) {
@@ -159,7 +147,7 @@ const cargo = [...cargoCount.entries()].sort((a, b) => b[1] - a[1] || a[0].local
       results.hidden = true;
       results.innerHTML = '';
       chart.hidden = false;
-      if (hold) hold.hidden = false;
+      if (box) box.hidden = false;
       if (status) status.hidden = true;
       return;
     }
@@ -169,7 +157,7 @@ const cargo = [...cargoCount.entries()].sort((a, b) => b[1] - a[1] || a[0].local
       .sort((a, b) => b.s - a.s || b.r.date.localeCompare(a.r.date));
 
     chart.hidden = true;
-    if (hold) hold.hidden = true;
+    if (box) box.hidden = true;
     results.hidden = false;
     if (status) {
       status.hidden = false;
@@ -184,7 +172,7 @@ const cargo = [...cargoCount.entries()].sort((a, b) => b[1] - a[1] || a[0].local
           <span class="chart-note__date">${r.date}</span>
           <span class="chart-note__title">${esc(r.title)}</span>
           <span class="chart-note__summary">${esc(r.summary)}</span>
-          <span class="chart-note__where">${esc(r.sea)}${r.cargo.length ? ' · ' + r.cargo.map(esc).join(' · ') : ''}</span>
+          <span class="chart-note__where">${[...r.tracks, ...r.tech].map(esc).join(' · ')}</span>
         </a>
       </li>`,
         )
@@ -246,24 +234,16 @@ const cargo = [...cargoCount.entries()].sort((a, b) => b[1] - a[1] || a[0].local
 
   .results { list-style: none; margin: 8px 0 0; padding: 0; }
 
-  .sea { padding-block: 28px; border-bottom: 1px solid var(--border); }
-  .sea__head h2 {
-    font-size: 1.15rem;
+  .track { padding-block: 28px; border-bottom: 1px solid var(--border); }
+  .track__head h2 {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
     letter-spacing: -0.01em;
     margin: 0 0 0.3rem;
   }
-  .sea__blurb { color: var(--color-dim); font-size: 14px; margin: 0 0 1rem; max-width: 64ch; }
+  .track__blurb { color: var(--color-dim); font-size: 14px; margin: 0 0 1rem; max-width: 64ch; }
 
-  .water { margin-top: 14px; }
-  .water__name {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--color-faint);
-    margin: 0 0 6px;
-  }
-  .water__notes, .results { list-style: none; margin: 0; padding: 0; }
+  .track__notes, .results { list-style: none; margin: 0; padding: 0; }
 
   .chart-note { border-top: 1px solid var(--border); }
   .chart-note:first-child { border-top: 0; }
@@ -288,11 +268,11 @@ const cargo = [...cargoCount.entries()].sort((a, b) => b[1] - a[1] || a[0].local
   .chart-note__where { font-family: var(--font-mono); font-size: 11px; color: var(--color-faint); }
   .chart-note--none { padding: 14px 0; font-family: var(--font-mono); font-size: 13px; color: var(--color-faint); }
 
-  .cargo-hold { padding-top: 30px; }
-  .cargo-hold h2 { font-size: 1rem; margin: 0 0 0.3rem; }
-  .cargo-hold__note { color: var(--color-dim); font-size: 14px; margin: 0 0 1rem; }
-  .cargo-hold__list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
-  .cargo-hold__list a {
+  .toolbox { padding-top: 30px; }
+  .toolbox h2 { font-size: 1rem; margin: 0 0 0.3rem; }
+  .toolbox__note { color: var(--color-dim); font-size: 14px; margin: 0 0 1rem; }
+  .toolbox__list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .toolbox__list a {
     display: inline-flex;
     align-items: baseline;
     gap: 6px;
@@ -303,8 +283,8 @@ const cargo = [...cargoCount.entries()].sort((a, b) => b[1] - a[1] || a[0].local
     font-size: 12px;
     color: var(--color-fg-soft);
   }
-  .cargo-hold__list a:hover { border-color: var(--color-green); color: var(--color-green); text-decoration: none; }
-  .cargo-hold__n { color: var(--color-faint); font-size: 10px; }
+  .toolbox__list a:hover { border-color: var(--color-green); color: var(--color-green); text-decoration: none; }
+  .toolbox__n { color: var(--color-faint); font-size: 10px; }
 
   .empty { color: var(--color-faint); font-family: var(--font-mono); font-size: 13px; padding: 20px 0; }
 

@@ -3,7 +3,7 @@ import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Figure from '../../components/Figure.astro';
 import { site } from '../../site';
-import { seaSlug } from '../../seas';
+import { trackSlug } from '../../tracks';
 
 export async function getStaticPaths() {
   const notes = await getCollection('notes', ({ data }) => import.meta.env.PROD ? !data.draft : true);
@@ -17,7 +17,7 @@ const { note } = Astro.props;
 const { Content } = await render(note);
 
 const dateFmt = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
-const cargoSlug = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+const techSlug = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 ---
 
 <BaseLayout
@@ -32,9 +32,12 @@ const cargoSlug = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').rep
       <p class="note-head__summary">{note.data.summary}</p>
       <p class="note-head__meta">
         <time datetime={note.data.date.toISOString()}>{dateFmt.format(note.data.date)}</time>
-        <span aria-hidden="true"> / </span>
-        <a href={`/map#sea-${seaSlug(note.data.sea)}`}>{note.data.sea}</a>
-        {note.data.waters.length > 0 && <><span aria-hidden="true"> / </span>{note.data.waters.join(' · ')}</>}
+        {note.data.tracks.map((track) => (
+          <>
+            <span aria-hidden="true"> / </span>
+            <a href={`/map#track-${trackSlug(track)}`}>{track}</a>
+          </>
+        ))}
         {
           note.data.updated && (
             <>
@@ -44,10 +47,10 @@ const cargoSlug = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').rep
         }
       </p>
       {
-        note.data.cargo.length > 0 && (
+        note.data.tech.length > 0 && (
           <p class="note-head__cargo">
-            {note.data.cargo.map((tag) => (
-              <a href={`/cargo/${cargoSlug(tag)}`}>{tag}</a>
+            {note.data.tech.map((tag) => (
+              <a href={`/tech/${techSlug(tag)}`}>{tag}</a>
             ))}
           </p>
         )
