@@ -1,40 +1,59 @@
-# Live deployment for the new x-hakt.com (Control Room tasks XH-4 / XH-8).
+# Live deployment for x-hakt.com (Control Room XH-4 / XH-8 cutover 2026-08-29,
+# XH-6 node-server + /admin editor 2026-08-30).
+# Source of truth: x-hakt-site/deploy/docker-compose.x-hakt-site.yml in the site repo.
+# Its own compose project so it never touches the shared phase4 stack.
 #
-# Run as its own compose project so it never has to `up` the shared phase4 stack:
-#
-#   cd ~/unified-services
-#   cp x-hakt-site/deploy/docker-compose.x-hakt-site.yml docker-compose.x-hakt-site.yml
-#   # (edit build.context to ./x-hakt-site)
 #   docker compose -f docker-compose.x-hakt-site.yml up -d --build
 #
-# The router priority (200) is above hugo-x-hakt's (100), so bringing this up
-# takes x-hakt.com over immediately; `docker stop x-hakt-site` hands it straight
-# back. Once verified, hugo-x-hakt is stopped and commented out of
-# docker-compose.phase4.yml.
+# The site now runs as the Astro node server (server.mjs supervisor), not nginx.
+# The repo is bind-mounted at /app so the working tree is the source of truth for
+# edits + git + the built output; node_modules stays the image's (anon volume).
+#
+# Router priority 200 sits above the retired hugo-x-hakt's 100. Rollback: check
+# out an earlier commit of the site repo and `up -d --build`, or `git revert`.
 
 services:
   x-hakt-site:
     build:
-      context: ..
+      context: ./x-hakt-site
       dockerfile: Dockerfile
     container_name: x-hakt-site
     restart: unless-stopped
+    working_dir: /app
+    # run as thrax so the bind-mounted repo (git, dist/, note writes) is writable
+    user: "1000:1000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=4321
+      - NODE_ENV=production
+      - CONTENT_DIR=/app/src/content/notes
+      - ADMIN_STATE_DIR=/app/.admin-state
+      # /admin is 404 until BOTH of these are set (see x-hakt-site/README.md):
+      - ADMIN_PASSWORD_HASH=${XHAKT_ADMIN_PASSWORD_HASH:-}
+      - ADMIN_SESSION_SECRET=${XHAKT_ADMIN_SESSION_SECRET:-}
+      - GIT_AUTHOR_NAME=x
+      - GIT_AUTHOR_EMAIL=x@x-hakt.com
+      - GIT_SSH_COMMAND=ssh -i /run/secrets/x-hakt-deploy-key -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/tmp/known_hosts
     networks:
       - x_hakt_network
+    volumes:
+      - ./x-hakt-site:/app
+      - /app/node_modules
+      - ./x-hakt-site-deploy-key:/run/secrets/x-hakt-deploy-key:ro
     labels:
       - traefik.enable=true
       - traefik.docker.network=unified-services_x-hakt-network
-      # HTTP -> HTTPS
+      - traefik.http.middlewares.x-hakt-site-compress.compress=true
       - traefik.http.routers.x-hakt-site-insecure.rule=Host(`x-hakt.com`) || Host(`www.x-hakt.com`) || Host(`apex.x-hakt.com`)
       - traefik.http.routers.x-hakt-site-insecure.entrypoints=web
       - traefik.http.routers.x-hakt-site-insecure.middlewares=https-redirect@docker
       - traefik.http.routers.x-hakt-site-insecure.priority=200
-      # HTTPS
       - traefik.http.routers.x-hakt-site.rule=Host(`x-hakt.com`) || Host(`www.x-hakt.com`) || Host(`apex.x-hakt.com`)
       - traefik.http.routers.x-hakt-site.entrypoints=websecure
       - traefik.http.routers.x-hakt-site.tls.certresolver=xhakt
       - traefik.http.routers.x-hakt-site.priority=200
-      - traefik.http.services.x-hakt-site.loadbalancer.server.port=80
+      - traefik.http.routers.x-hakt-site.middlewares=x-hakt-site-compress
+      - traefik.http.services.x-hakt-site.loadbalancer.server.port=4321
 
 networks:
   x_hakt_network:

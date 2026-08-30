@@ -74,25 +74,47 @@ npm run logo
 semi-transparent speckle), flattens the mark to the `#8b949e` token colour, and
 writes `public/{emblem,mark,og-default,favicon-16/32/48,apple-touch-icon}.png`.
 
+## The /admin editor (XH-6)
+
+`/admin` is a live SSR route. It is **404 until both `ADMIN_PASSWORD_HASH` and
+`ADMIN_SESSION_SECRET` are set** in the environment.
+
+- password-gated (scrypt hash, `scripts/admin-hash.mjs` makes the value), a
+  stateless HMAC session cookie (`SameSite=Lax`), a per-IP in-memory rate limit,
+  and an Origin/Referer-vs-Host check on the POST endpoints.
+- list / create / edit notes as raw MDX in a textarea.
+- **save** writes the `.mdx`, then `server.mjs` (the supervisor that owns the
+  process) runs `astro build`. Build OK: it commits the notes dir and pushes,
+  then respawns. Build fails: it restores the previous content (or deletes a new
+  file) and respawns. A note that does not build never reaches the live site. A
+  503 holding page covers the ~10s rebuild gap.
+
+To turn it on: `node scripts/admin-hash.mjs '<password>'`, put the line in
+`~/unified-services/.env` as `XHAKT_ADMIN_PASSWORD_HASH=...`, set
+`XHAKT_ADMIN_SESSION_SECRET` to a random 32+ char string, and
+`docker compose -f docker-compose.x-hakt-site.yml up -d`.
+
+The container pushes with a dedicated deploy key
+(`~/unified-services/x-hakt-site-deploy-key`, public half on the GitHub repo's
+Deploy keys with write access). Without it, saves still build and show live;
+they just are not pushed to git until the key is in place.
+
 ## Still open
 
 - **Diagram house style** (XH-5): `Figure.astro` is the wrapper contract only.
   The 404, and the diagram in `a-key-with-one-job`, already show the intended
-  register (dark card, thin strokes, mono labels, green for the path that
-  matters); XH-5 writes it down.
-- **`/admin` editor** (XH-6): mechanism not chosen. The `@astrojs/node` adapter
-  is wired so a single route can opt into SSR with `export const prerender = false`.
+  register; XH-5 writes it down.
 - **16px favicon**: the full wheel-and-skull mark scaled down. A purpose-drawn
   glyph, and an SVG trace of the mark, would read cleaner.
 - Per-`sea` pages (`/seas/<slug>`). For now `/map#sea-<slug>` anchors cover it.
+- `/admin` v1 has no MDX preview and no media library (inline SVG only, by design).
 
 ## Deploy
 
-`Dockerfile` is a two-stage build: Node builds the site, `nginx:alpine` serves
-`dist/client` as static files (`deploy/nginx.conf`). `dist/server` is built but
-unused until the `/admin` SSR route lands (XH-6).
-
-Live as its own compose project so it never touches the shared phase4 stack:
+Runs as the Astro node server via the `server.mjs` supervisor (`Dockerfile` is
+node + git + ssh; the repo is bind-mounted at `/app` in production, node_modules
+is the image's via an anonymous volume). Its own compose project, never touches
+the shared phase4 stack:
 
 ```bash
 cd ~/unified-services
@@ -100,5 +122,6 @@ docker compose -f docker-compose.x-hakt-site.yml up -d --build   # -> https://x-
 ```
 
 Traefik router priority 200 sits above the retired `hugo-x-hakt`'s 100.
-Rollback is in that compose file's header. `deploy/docker-compose.x-hakt-site.yml`
-in this repo is the source-of-truth copy.
+`deploy/docker-compose.x-hakt-site.yml` in this repo is the source-of-truth copy.
+After a dependency change, refresh the node_modules volume:
+`docker compose -f docker-compose.x-hakt-site.yml down && docker volume rm unified-services_... && up -d --build`.
