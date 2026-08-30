@@ -58,6 +58,20 @@ services:
       - traefik.http.routers.x-hakt-site.tls.certresolver=xhakt
       - traefik.http.routers.x-hakt-site.priority=200
       - traefik.http.services.x-hakt-site.loadbalancer.server.port=4321
+      # admin.x-hakt.com -> x-hakt.com/admin (a memorable entry point, like control.x-hakt.com)
+      - traefik.http.middlewares.x-hakt-admin-redirect.redirectregex.regex=^https?://admin\.x-hakt\.com/.*
+      - traefik.http.middlewares.x-hakt-admin-redirect.redirectregex.replacement=https://x-hakt.com/admin
+      - traefik.http.routers.x-hakt-admin.rule=Host(`admin.x-hakt.com`)
+      - traefik.http.routers.x-hakt-admin.entrypoints=websecure
+      - traefik.http.routers.x-hakt-admin.tls.certresolver=xhakt
+      - traefik.http.routers.x-hakt-admin.priority=210
+      - traefik.http.routers.x-hakt-admin.service=x-hakt-site
+      - traefik.http.routers.x-hakt-admin.middlewares=x-hakt-admin-redirect
+      - traefik.http.routers.x-hakt-admin-insecure.rule=Host(`admin.x-hakt.com`)
+      - traefik.http.routers.x-hakt-admin-insecure.entrypoints=web
+      - traefik.http.routers.x-hakt-admin-insecure.priority=210
+      - traefik.http.routers.x-hakt-admin-insecure.service=x-hakt-site
+      - traefik.http.routers.x-hakt-admin-insecure.middlewares=x-hakt-admin-redirect
 
 networks:
   x_hakt_network:

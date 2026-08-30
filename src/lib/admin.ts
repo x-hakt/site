@@ -294,7 +294,10 @@ export async function requestRebuild(req: RebuildRequest): Promise<void> {
 
 export async function lastResult(): Promise<RebuildResult | null> {
   try {
-    return JSON.parse(await readFile(path.join(STATE_DIR, 'rebuild.result'), 'utf8'));
+    const r: RebuildResult = JSON.parse(await readFile(path.join(STATE_DIR, 'rebuild.result'), 'utf8'));
+    // only surface a recent result — an old one is just noise on the next visit
+    if (Date.now() - Date.parse(r.at) > 6 * 60 * 60 * 1000) return null;
+    return r;
   } catch {
     return null;
   }
