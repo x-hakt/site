@@ -1,0 +1,76 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const notes = await getCollection('notes', ({ data }) => import.meta.env.PROD ? !data.draft : true);
+  const cargoSlug = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  const byTag = new Map<string, { label: string; notes: typeof notes }>();
+  for (const note of notes) {
+    for (const tag of note.data.cargo) {
+      const slug = cargoSlug(tag);
+      if (!byTag.has(slug)) byTag.set(slug, { label: tag, notes: [] });
+      byTag.get(slug)!.notes.push(note);
+    }
+  }
+  return [...byTag.entries()].map(([slug, { label, notes }]) => ({
+    params: { tag: slug },
+    props: {
+      label,
+      notes: notes.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()),
+    },
+  }));
+}
+
+const { label, notes } = Astro.props;
+const dateFmt = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
+---
+
+<BaseLayout title={`cargo: ${label}`} description={`Notes carrying "${label}".`} current="map" wide>
+  <section class="tag-head">
+    <p class="tag-head__kicker"><a href="/map#the-hold">the hold</a> / cargo</p>
+    <h1>{label}</h1>
+    <p>{notes.length} {notes.length === 1 ? 'note carries' : 'notes carry'} this.</p>
+  </section>
+
+  <ul class="notes" role="list">
+    {
+      notes.map((note) => (
+        <li class="note">
+          <a href={`/notes/${note.id}`}>
+            <span class="note__date">{dateFmt.format(note.data.date)}</span>
+            <span class="note__body">
+              <span class="note__title">{note.data.title}</span>
+              <span class="note__summary">{note.data.summary}</span>
+              <span class="note__sea">{note.data.sea}</span>
+            </span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+  <p class="back"><a href="/map">&#8592; the map</a></p>
+</BaseLayout>
+
+<style>
+  .tag-head { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 8px; }
+  .tag-head__kicker { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--color-faint); margin: 0 0 0.5rem; }
+  .tag-head h1 { font-family: var(--font-mono); font-size: 1.4rem; margin: 0 0 0.3rem; }
+  .tag-head > p { color: var(--color-dim); font-size: 14px; margin: 0; }
+
+  .notes { list-style: none; margin: 0; padding: 0; }
+  .note { border-bottom: 1px solid var(--border); }
+  .note a { display: grid; grid-template-columns: 108px 1fr; gap: 22px; padding: 18px 0; color: inherit; }
+  .note a:hover { text-decoration: none; }
+  .note a:hover .note__title { color: var(--color-green); }
+  .note__date { font-family: var(--font-mono); font-size: 11px; color: var(--color-faint); padding-top: 3px; }
+  .note__body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .note__title { font-family: var(--font-mono); font-weight: 600; font-size: 14px; color: var(--color-fg); }
+  .note__summary { color: var(--color-dim); font-size: 14px; max-width: 62ch; }
+  .note__sea { font-family: var(--font-mono); font-size: 11px; color: var(--color-faint); }
+  .back { font-family: var(--font-mono); font-size: 12px; margin-top: 2rem; }
+
+  @media (max-width: 640px) {
+    .note a { grid-template-columns: 1fr; gap: 5px; }
+  }
+</style>

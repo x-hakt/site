@@ -35,9 +35,9 @@ const dateFmt = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
             <span class="note__body">
               <span class="note__title">{note.data.title}</span>
               <span class="note__summary">{note.data.summary}</span>
-              {note.data.topics.length > 0 && (
-                <span class="note__topics">{note.data.topics.join(' · ')}</span>
-              )}
+              <span class="note__topics">
+                {[note.data.sea, ...note.data.cargo].join(' · ')}
+              </span>
             </span>
           </a>
         </li>

@@ -17,7 +17,7 @@ export async function GET(context: APIContext) {
       description: note.data.summary,
       pubDate: note.data.date,
       link: `/notes/${note.id}/`,
-      categories: note.data.topics,
+      categories: [note.data.sea, ...note.data.waters, ...note.data.cargo],
     })),
   });
 }

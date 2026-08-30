@@ -2,8 +2,16 @@ import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
 /*
-  "notes from the workbench" — the only collection for now (style guide s.01:
-  it's Notes, not "the blog"). One .mdx file per note under src/content/notes/.
+  "a landlocked captain's log" — one collection of notes under src/content/notes/.
+
+  Taxonomy (XH-12), sea words but the plain meaning stays obvious:
+    sea     one named region this note belongs to      "Sea of Development"
+    waters  sub-areas within/around that sea           ["deploys", "traefik"]
+    cargo   loose keyword tags                         ["ssh", "systemd"]
+
+  `sea` is a free string on purpose (add one by typing it in a note's
+  frontmatter). Known seas get a blurb and an order in src/seas.ts; unknown
+  ones still render, just plainly.
 */
 const notes = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/notes' }),
@@ -13,8 +21,9 @@ const notes = defineCollection({
     summary: z.string(),
     date: z.coerce.date(),
     updated: z.coerce.date().optional(),
-    // the systems this note documents, e.g. ["nebula", "ssh", "traefik"]
-    topics: z.array(z.string()).default([]),
+    sea: z.string(),
+    waters: z.array(z.string()).default([]),
+    cargo: z.array(z.string()).default([]),
     // hero diagram: path under /public or an imported asset, plus its alt text
     hero: z
       .object({
