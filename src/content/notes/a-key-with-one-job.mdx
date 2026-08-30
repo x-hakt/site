@@ -1,6 +1,6 @@
 ---
 title: A key with one job
-summary: A dashboard needs to peek at three other machines. Handing it my real SSH key would trade one small feature for the whole network. Here is the key I made instead.
+summary: The dashboard needed to look in on three other machines. The easy way was to hand it my own SSH key, which opens every box I own. So I cut a key that can do one harmless thing and nothing else, then spent an afternoon trying to break it.
 date: 2026-08-29
 updated: 2026-08-30
 sea: The Mesh
@@ -11,31 +11,57 @@ draft: false
 
 import Figure from '../../components/Figure.astro';
 
-## The problem
+## The fleet was fine. The keyring was the problem.
 
-[Control Room](https://control.x-hakt.com) is a dashboard that watches this
-mesh. One of the things it shows is which containers are up on the other hosts.
-To know that, it has to log in to each of them over SSH and ask.
+I keep a small number of machines running. Caspar does most of the work, tied
+up here in the harbour where I can see it. Three more sit further out: a
+lighthouse box on a public address, and two production hosts I can only reach
+by rowing through a jump box first. Between them they run the things that are
+actually live and earning their keep.
 
-The obvious way to make that work is to give it my own SSH key, mounted into
-the container read only. I tried that first. It worked immediately, which
-should have been the warning.
+For a long time, "what is running out on those three" was a job I did by hand.
+Open a terminal, connect to the lighthouse, list the containers, read the
+list, close it. Connect to the jump, hop through to the first production host,
+list again. Then the second one. Every time I wanted a straight answer about
+the state of the fleet I rowed the whole circuit myself. It is not hard. It is
+just something you stop bothering to do, and then you are running blind on the
+hosts that matter most.
 
-Think of it like a house-sitter. Someone is going to come in once a day and
-water the one plant on the porch. Do you hand them the whole keyring, the one
-that also opens the front door, the study, the safe? If they lose it, or
-someone lifts it from their bag, that is not "the plant got overwatered." That
-is your house.
+So I built [Control Room](https://control.x-hakt.com), a dashboard that keeps
+an eye on the whole mesh, and I wanted it to row that circuit for me. One page
+that shows every container on every host, refreshing quietly while I drink my
+coffee, instead of me connecting to three machines in turn.
 
-My SSH key is the whole keyring. It can become root on every box it touches.
-The job it is doing is "run `docker ps` and read four files." A container
-breakout would have handed an attacker the entire mesh in exchange for a
-feature that lists container names.
+For the dashboard to ask a host what it is running, it has to log in over SSH.
+The obvious way to make that work is to give it my own key. I did, for about an
+hour. It worked on the first try, which should have been the warning.
 
-<Figure wide caption="Same feature, two keys. The one on the left is what I nearly shipped.">
-  <svg viewBox="0 0 340 190" role="img" aria-label="Left: a compromised full SSH key gives root on lighthouse, gp-forms, podusa and caspar. Right: a compromised scoped key can only run one read-only report.">
+Here is what my key actually is. It opens every box I own, and on each one it
+can become root. It is the master key to the entire harbour. The job I was
+about to hand it is "run one `docker ps` and read a few text files." And that
+master key would then be sitting on disk inside a container, mounted in and
+readable, behind a web application. Web applications have bugs. One of those
+bugs, one day, plus my key right there for the taking, and I have not lost a
+container list. I have lost the mesh.
+
+That was the moment to stop and think about what the dashboard genuinely
+needed. Not "log in as the captain." It needed to ask three small, harmless
+questions and get three answers back. That is a far smaller thing to give
+away. So I cut a key that can do exactly that and refuses everything else, on
+any host it touches.
+
+## So I cut a key with one job
+
+It is a brand new SSH keypair that exists for this feature and nothing else. On
+each of the far hosts it goes into `authorized_keys` as a single extra line,
+with my own key left untouched beside it. That one line does three things, and
+the rest of this note is those three things, and how I checked that each of
+them holds when someone leans on it.
+
+<Figure wide caption="Same feature, two keys. The one on the left is what I nearly shipped: if it leaks, it is root on everything. The one on the right can only ever ask for one report.">
+  <svg viewBox="0 0 344 190" role="img" aria-label="Left: a leaked full SSH key gives root on lighthouse, gp-forms, podusa and caspar. Right: a leaked scoped key can only run one read-only report.">
     <text x="85" y="16" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#87898d">my key, if it leaks</text>
-    <text x="255" y="16" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#87898d">the scoped key, if it leaks</text>
+    <text x="256" y="16" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#87898d">the scoped key, if it leaks</text>
 
     <rect x="10" y="80" width="40" height="22" rx="5" fill="#101216" stroke="#e5484d" stroke-opacity="0.7" />
     <text x="30" y="94" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#e5484d">key</text>
@@ -52,40 +78,46 @@ feature that lists container names.
       <text x="142" y="145">root @ caspar</text>
     </g>
 
-    <rect x="188" y="80" width="40" height="22" rx="5" fill="#101216" stroke="#26cb96" stroke-opacity="0.6" />
-    <text x="208" y="94" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">key</text>
-    <path d="M228 91 H 276" stroke="#26cb96" stroke-width="1.5" fill="none" />
-    <rect x="276" y="80" width="56" height="22" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
-    <text x="304" y="94" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#26cb96">one report</text>
+    <rect x="190" y="80" width="40" height="22" rx="5" fill="#101216" stroke="#26cb96" stroke-opacity="0.6" />
+    <text x="210" y="94" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">key</text>
+    <path d="M230 91 H 270" stroke="#26cb96" stroke-width="1.5" fill="none" />
+    <rect x="270" y="80" width="60" height="22" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
+    <text x="300" y="94" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#26cb96">one report</text>
   </svg>
 </Figure>
 
-The fix has three parts: the key can only run one script, that script can only
-reach out through one narrow tunnel, and the script itself only answers a fixed
-list of questions. Then I checked all three by trying to break them.
+The three things: the key can only run one script, that script can only tunnel
+to one place, and the script itself only answers a fixed list of questions.
 
-## Building block 1: the key can only run one script
+## The key can only run one script
 
-The key lives in the target host's `authorized_keys` file, as one new line,
-with nothing removed:
+**Why it is here.** This is the whole point. A normal SSH key is a general
+permission: log in, then do anything the account can do. I do not want the
+dashboard to be able to do anything. I want it to be able to run one specific,
+harmless program and then be shown the door.
+
+**How it works.** The key goes into the host's `authorized_keys` as one line,
+with options in front of it that constrain what presenting that key is allowed
+to do:
 
 ```
 restrict,command="/usr/local/bin/control-room-ro.sh" ssh-ed25519 AAAA... discovery
 ```
 
 Think of a bank teller behind glass. You write what you want on a slip and push
-it through the slot. Whatever you wrote, they run one specific procedure. You
-cannot climb through the slot, you cannot walk around the counter, and you
-never see the vault.
+it through the slot. Whatever you wrote, they carry out one fixed procedure.
+You cannot climb through the slot, you cannot walk around the counter, and you
+never see the vault. Mechanically:
 
-`restrict` is the glass. It is an allowlist, not a blocklist: it turns off pty
-allocation, port forwarding, agent forwarding, X11, and `~/.ssh/rc`, and it
-keeps turning off anything new that OpenSSH adds later. The forced `command=`
-is the one procedure. No matter what command the client sends, sshd runs that
-script instead. Control Room's SSH call literally passes the string
-`control-room-ro`, and the server pays it no attention.
+`restrict` is the glass. It is an allowlist, not a blocklist: it switches off
+pty allocation, port forwarding, agent forwarding, X11, and `~/.ssh/rc` in one
+word, and it keeps switching off anything new that OpenSSH adds in future
+versions. The forced `command=` is the one procedure. Whatever command the
+client actually sends, sshd ignores it and runs that script instead. Control
+Room's SSH call passes the string `control-room-ro`, and the server pays it no
+attention at all.
 
-<Figure caption="Whatever the client sends, sshd runs the pinned script. The request is not so much rejected as ignored.">
+<Figure caption="Whatever the client sends, sshd runs the pinned script. The request is not so much refused as unread.">
   <svg viewBox="0 0 320 150" role="img" aria-label="The SSH client sends an arbitrary command; sshd discards it and runs the pinned control-room-ro.sh script, which returns a fixed read-only report.">
     <rect x="10" y="24" width="96" height="26" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
     <text x="58" y="41" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#eaebec">SSH client</text>
@@ -107,24 +139,26 @@ script instead. Control Room's SSH call literally passes the string
   </svg>
 </Figure>
 
-## Building block 2: one tunnel, one destination
+## The script can only tunnel to one place
 
-One of the three hosts is not reachable directly. I get to it by jumping
-through another box, which SSH does with a `ProxyJump`. A `ProxyJump` needs to
-open a forwarded channel, and `restrict` just turned forwarding off.
+**Why it is here.** One of the three hosts is not reachable straight from
+Caspar. I get to it by jumping through another box on the way, which SSH does
+with a `ProxyJump`. A `ProxyJump` needs to open a forwarded channel through the
+jump host, and `restrict` in the last step just switched forwarding off. So I
+need to hand back exactly one piece of what `restrict` took away, and not a
+scrap more.
 
-Back to the teller: the glass has one small pass-through drawer, and it only
-reaches one desk in the back office. Not the whole back office. One desk.
-
-That is `permitopen`. It re-enables forwarding to exactly one host and port and
-nothing else:
+**How it works.** Back to the teller: the glass has one small pass-through
+drawer, and that drawer only reaches one desk in the back office. Not the
+office. One desk. That is `permitopen`. It re-enables forwarding to a single
+host and port, and refuses every other target:
 
 ```
-restrict,command="...",permitopen="10.10.10.x:22" ssh-ed25519 AAAA... discovery
+restrict,command="...",permitopen="192.168.6.180:22" ssh-ed25519 AAAA... discovery
 ```
 
-<Figure caption="Forwarding is on for one hop only. Every other destination gets 'administratively prohibited'.">
-  <svg viewBox="0 0 320 160" role="img" aria-label="Control Room forwards through a jump host to gp-forms, the one permitted destination. Attempts to forward anywhere else are refused.">
+<Figure caption="Forwarding is on for one hop only. Every other destination comes back 'administratively prohibited'.">
+  <svg viewBox="0 0 336 160" role="img" aria-label="Control Room forwards through a jump host to gp-forms, the one permitted destination. Attempts to forward anywhere else are refused.">
     <rect x="10" y="20" width="80" height="26" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
     <text x="50" y="37" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#eaebec">control-room</text>
 
@@ -139,42 +173,46 @@ restrict,command="...",permitopen="10.10.10.x:22" ssh-ed25519 AAAA... discovery
     <text x="277" y="37" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">gp-forms</text>
 
     <g stroke="#5c5e62" stroke-width="1.1" stroke-dasharray="2 4" fill="none">
-      <path d="M50 46 V 96 H 120" />
-      <path d="M50 46 V 128 H 120" />
+      <path d="M50 46 V 100 H 116" />
+      <path d="M50 46 V 132 H 116" />
     </g>
     <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#5c5e62">
-      <text x="126" y="99">any other host:port</text>
-      <text x="126" y="131">a local port on the jump</text>
-      <text x="240" y="118" fill="#87898d">✕ administratively</text>
-      <text x="240" y="129" fill="#87898d">   prohibited</text>
+      <text x="122" y="103">any other host:port</text>
+      <text x="122" y="135">a local port on the jump</text>
     </g>
+    <text x="238" y="120" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#87898d">refused</text>
   </svg>
 </Figure>
 
-## Building block 3: the script only answers a fixed list
+## The script only answers a fixed list
 
-The forced command is not a trusting script. `SSH_ORIGINAL_COMMAND`, the string
-the client asked for, is matched against exact literal patterns and never
-handed to a shell:
+**Why it is here.** The forced command closes off the shell, but now the whole
+security of the arrangement rests on that one script. If the script can be
+argued into reading an arbitrary file, or running an arbitrary command, then
+`restrict` bought me nothing. So the script has to be as narrow as the key.
+
+**How it works.** The script never trusts its input. `SSH_ORIGINAL_COMMAND`,
+the string the client asked for, is compared against exact literal patterns and
+is never handed to a shell:
 
 ```sh
 case "$SSH_ORIGINAL_COMMAND" in
-  doc:/opt/gp-forms:SPEC.md) DOC=/opt/gp-forms/SPEC.md ;;
+  doc:/opt/gp-forms:SPEC.md)   DOC=/opt/gp-forms/SPEC.md ;;
+  doc:/opt/gp-forms:AGENTS.md) DOC=/opt/gp-forms/AGENTS.md ;;
   # ...one line per file it is allowed to read...
   doc:*) echo "===REJECTED==="; exit 1 ;;
 esac
 ```
 
 Even the teller's one procedure has a checklist taped to the counter. Ask for
-something that is not on it and the slip comes straight back.
+something that is not on it and the slip comes straight back. Everything else
+the script does is a fixed sequence with no inputs at all: `uname`, `nproc`,
+`free`, `df`, the load average, `docker ps -a`, `docker stats`. The handful of
+file reads it does allow are capped with `head -c 65536` and refuse symlinks
+and anything that is not a regular file, so the script cannot be talked into
+being a general file reader or into returning something unbounded.
 
-Everything else the script does is a fixed sequence with no inputs: `uname`,
-`nproc`, `free`, `df`, the load average, `docker ps -a`, `docker stats`. The
-file reads are capped with `head -c` and refuse symlinks, so the script cannot
-be talked into being a general-purpose file reader or into returning something
-unbounded.
-
-<Figure caption="No pattern matches, no answer. The allowlist is a fixed switch in the script, not something the caller can extend.">
+<Figure caption="No pattern matches, no answer. The allowlist is a fixed switch inside the script, not something the caller can add to.">
   <svg viewBox="0 0 320 130" role="img" aria-label="SSH_ORIGINAL_COMMAND is checked against a fixed set of patterns; a match runs a read-only action, anything else returns REJECTED.">
     <rect x="8" y="52" width="104" height="26" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
     <text x="60" y="69" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#eaebec">SSH_ORIGINAL_CMD</text>
@@ -193,30 +231,35 @@ unbounded.
   </svg>
 </Figure>
 
-## I checked the wall by pushing on it
+## I pulled on the handle
 
-You do not trust a lock because the locksmith says so. You pull the handle.
-After switching the forced command over I tried the three things an attacker
-with this key would try:
+You do not trust a lock because the locksmith says so. You pull on it. After
+switching the forced command over, I tried the three things anyone who had
+lifted this key would try:
 
-- Asked it to run `id`. It ran the pinned script instead and ignored me.
-- Asked for an interactive shell (`ssh -tt`). Rejected: `PTY allocation request failed`.
-- Opened a tunnel to a host that was not the permitted destination. Rejected,
-  `administratively prohibited`. Then relayed an SSH banner through the one
-  tunnel that is allowed and got bytes back, so the exception works and only
-  the exception works.
+- Asked it to run `id`. It ran the pinned script instead and did not so much as
+  acknowledge the request.
+- Asked for an interactive shell with `ssh -tt`. Refused: `PTY allocation
+  request failed`.
+- Opened a tunnel to a host that was not the one permitted destination.
+  Refused, `administratively prohibited`. Then relayed an SSH banner through
+  the one tunnel that is allowed and got bytes back, so the exception works and
+  only the exception works.
 
 ## Verified vs assumed
 
-Verified: the three tests above, on the live hosts, after the change. Also that
-Control Room still gets its snapshot, in 2.4 to 2.9 seconds per host, cached
-five minutes.
+**Verified.** The three tests above, run against the live hosts, after the
+change. Also that Control Room still gets its snapshot from each host in 2.4 to
+2.9 seconds, cached for five minutes, and that a failed poll is only remembered
+for thirty seconds rather than pinning an empty result for the full five.
 
-Assumed, and worth another look: that the pinned script has no
-argument-handling path I missed, and that `head -c 65536` is a sane cap rather
-than one I will regret when a `STATUS.md` grows. Neither has bitten yet.
+**Assumed, and worth another look.** That the pinned script has no
+argument-handling path I have missed. That `head -c 65536` is a sane cap and
+not one I will regret the first time a `STATUS.md` grows past it. Neither has
+bitten yet, which is not the same as neither being real.
 
-The shape here is reusable. Any time something inside a container needs to
-reach a host outside it: a credential that exists for nothing else, cut down to
-the one capability the feature needs, one narrow exception if it truly needs
-one, and a test that proves the wall is where you think it is.
+The shape here carries over. Any time something inside a container has to reach
+a host outside it: make a credential that exists for nothing else, cut it down
+to the one capability the feature actually needs, allow one narrow exception
+only if it genuinely cannot work without one, and then run the tests that prove
+the wall is where you think it is.
