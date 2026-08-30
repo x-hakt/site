@@ -33,7 +33,7 @@ const dateFmt = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
               <span class="note__title">{note.data.title}</span>
               <span class="note__summary">{note.data.summary}</span>
               <span class="note__topics">
-                {[note.data.sea, ...note.data.cargo].join(' · ')}
+                {[...note.data.tracks, ...note.data.tech].join(' · ')}
               </span>
             </span>
           </a>

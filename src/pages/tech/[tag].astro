@@ -4,11 +4,11 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
 export async function getStaticPaths() {
   const notes = await getCollection('notes', ({ data }) => import.meta.env.PROD ? !data.draft : true);
-  const cargoSlug = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  const techSlug = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   const byTag = new Map<string, { label: string; notes: typeof notes }>();
   for (const note of notes) {
-    for (const tag of note.data.cargo) {
-      const slug = cargoSlug(tag);
+    for (const tag of note.data.tech) {
+      const slug = techSlug(tag);
       if (!byTag.has(slug)) byTag.set(slug, { label: tag, notes: [] });
       byTag.get(slug)!.notes.push(note);
     }
@@ -26,11 +26,11 @@ const { label, notes } = Astro.props;
 const dateFmt = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
 ---
 
-<BaseLayout title={`cargo: ${label}`} description={`Notes carrying "${label}".`} current="map" wide>
+<BaseLayout title={`tech: ${label}`} description={`Notes that use ${label}.`} current="map" wide>
   <section class="tag-head">
-    <p class="tag-head__kicker"><a href="/map#the-hold">the hold</a> / cargo</p>
+    <p class="tag-head__kicker"><a href="/map#the-toolbox">the toolbox</a> / tech</p>
     <h1>{label}</h1>
-    <p>{notes.length} {notes.length === 1 ? 'note carries' : 'notes carry'} this.</p>
+    <p>{notes.length} {notes.length === 1 ? 'note uses' : 'notes use'} this.</p>
   </section>
 
   <ul class="notes" role="list">
@@ -42,7 +42,7 @@ const dateFmt = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
             <span class="note__body">
               <span class="note__title">{note.data.title}</span>
               <span class="note__summary">{note.data.summary}</span>
-              <span class="note__sea">{note.data.sea}</span>
+              <span class="note__tracks">{note.data.tracks.join(' · ')}</span>
             </span>
           </a>
         </li>
@@ -67,7 +67,7 @@ const dateFmt = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
   .note__body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
   .note__title { font-family: var(--font-mono); font-weight: 600; font-size: 14px; color: var(--color-fg); }
   .note__summary { color: var(--color-dim); font-size: 14px; max-width: 62ch; }
-  .note__sea { font-family: var(--font-mono); font-size: 11px; color: var(--color-faint); }
+  .note__tracks { font-family: var(--font-mono); font-size: 11px; color: var(--color-faint); }
   .back { font-family: var(--font-mono); font-size: 12px; margin-top: 2rem; }
 
   @media (max-width: 640px) {

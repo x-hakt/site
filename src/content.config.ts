@@ -4,15 +4,21 @@ import { glob } from 'astro/loaders';
 /*
   "a landlocked captain's log" — one collection of notes under src/content/notes/.
 
-  Taxonomy (XH-12), sea words but the plain meaning stays obvious:
-    sea     one named region this note belongs to      "Sea of Development"
-    waters  sub-areas within/around that sea           ["deploys", "traefik"]
-    cargo   loose keyword tags                         ["ssh", "systemd"]
+  Taxonomy (XH-12, revised): two axes, both plain-spoken.
 
-  `sea` is a free string on purpose (add one by typing it in a note's
-  frontmatter). Known seas get a blurb and an order in src/seas.ts; unknown
-  ones still render, just plainly.
+    tracks  what kind of work the note is about. A small fixed set, one or more
+            per note. See src/tracks.ts for the list and the blurbs.
+              standards       holding many things to one bar
+              control         seeing and steering what runs
+              infrastructure  the network, the servers, the deploy path
+              workstation     the local machine and its tooling
+
+    tech    the technologies that turn up in the note. Free keyword tags
+            ("docker", "openssh", "traefik"). Drives /tech/<tag> and the
+            toolbox on the map.
 */
+const TRACKS = ['standards', 'control', 'infrastructure', 'workstation'] as const;
+
 const notes = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/notes' }),
   schema: z.object({
@@ -21,9 +27,8 @@ const notes = defineCollection({
     summary: z.string(),
     date: z.coerce.date(),
     updated: z.coerce.date().optional(),
-    sea: z.string(),
-    waters: z.array(z.string()).default([]),
-    cargo: z.array(z.string()).default([]),
+    tracks: z.array(z.enum(TRACKS)).nonempty(),
+    tech: z.array(z.string()).default([]),
     // hero diagram: path under /public or an imported asset, plus its alt text
     hero: z
       .object({

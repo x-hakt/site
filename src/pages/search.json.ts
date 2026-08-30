@@ -16,9 +16,8 @@ export const GET: APIRoute = async () => {
     summary: note.data.summary,
     url: `/notes/${note.id}`,
     date: note.data.date.toISOString().slice(0, 10),
-    sea: note.data.sea,
-    waters: note.data.waters,
-    cargo: note.data.cargo,
+    tracks: note.data.tracks,
+    tech: note.data.tech,
     // crude text extraction: drop frontmatter, imports, JSX tags, markdown syntax
     text: note.body
       ?.replace(/^---[\s\S]*?---/, '')

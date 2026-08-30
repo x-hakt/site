@@ -168,13 +168,13 @@ export interface NoteFile {
   slug: string;
   title: string;
   date: string;
-  sea: string;
+  tracks: string;
   draft: boolean;
 }
 
 const FM_TITLE = /^title:\s*(.+)$/m;
 const FM_DATE = /^date:\s*(.+)$/m;
-const FM_SEA = /^sea:\s*(.+)$/m;
+const FM_TRACKS = /^tracks:\s*(.+)$/m;
 const FM_DRAFT = /^draft:\s*true\s*$/m;
 
 export async function listNotes(): Promise<NoteFile[]> {
@@ -187,7 +187,7 @@ export async function listNotes(): Promise<NoteFile[]> {
       slug: f.replace(/\.mdx?$/, ''),
       title: (fm.match(FM_TITLE)?.[1] ?? f).replace(/^["']|["']$/g, '').trim(),
       date: (fm.match(FM_DATE)?.[1] ?? '').trim(),
-      sea: (fm.match(FM_SEA)?.[1] ?? '').replace(/^["']|["']$/g, '').trim(),
+      tracks: (fm.match(FM_TRACKS)?.[1] ?? '').replace(/[[\]"']/g, '').trim(),
       draft: FM_DRAFT.test(fm),
     });
   }
@@ -212,7 +212,7 @@ export function frontmatterProblem(content: string): string | null {
   const m = content.match(/^---\n([\s\S]*?)\n---\n/);
   if (!m) return 'No frontmatter block (--- ... ---) at the top.';
   const fm = m[1];
-  for (const key of ['title', 'summary', 'date', 'sea']) {
+  for (const key of ['title', 'summary', 'date', 'tracks']) {
     if (!new RegExp(`^${key}:\\s*\\S`, 'm').test(fm)) return `Frontmatter is missing "${key}".`;
   }
   const date = fm.match(FM_DATE)?.[1]?.trim() ?? '';
@@ -229,11 +229,10 @@ export function newNoteTemplate(slug: string): string {
   const title = slug.replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase());
   return `---
 title: ${title}
-summary: One line. What this documents and why it matters.
+summary: One line. What the reader gets from spending time on this.
 date: ${today}
-sea: The Mesh
-waters: []
-cargo: []
+tracks: [infrastructure]
+tech: []
 draft: true
 ---
 

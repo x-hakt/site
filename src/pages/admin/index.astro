@@ -52,7 +52,7 @@ const result = authed ? await lastResult() : null;
             <li>
               <a href={`/admin/edit/${n.slug}`}>
                 <span class="notes__title">{n.title}{n.draft && <span class="notes__draft">draft</span>}</span>
-                <span class="notes__meta">{n.date} · {n.sea} · {n.slug}</span>
+                <span class="notes__meta">{n.date} · {n.tracks} · {n.slug}</span>
               </a>
             </li>
           ))}
