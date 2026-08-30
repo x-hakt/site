@@ -45,7 +45,7 @@ The clipboard does not scale. At some point you need a room you can stand in and
 see every deck at once.
 
 <Figure wide caption="Before: one person, a clipboard, and a lot of rowing. After: one room with a window onto every deck.">
-  <svg viewBox="0 0 340 180" role="img" aria-label="On the left, a single figure rows between many separate hulls carrying a checklist. On the right, the same hulls are visible together through the window of one room.">
+  <svg viewBox="0 0 344 180" role="img" aria-label="On the left, a single figure rows between many separate hulls carrying a checklist. On the right, the same hulls are visible together through the window of one room.">
     <text x="80" y="15" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#87898d">by hand</text>
     <g stroke="rgba(255,255,255,0.16)" stroke-width="1.2" fill="none">
       <path d="M20 40 q10 8 20 0" /><path d="M55 66 q10 8 20 0" /><path d="M28 98 q10 8 20 0" />
@@ -134,7 +134,7 @@ moves folders. The record for a beached project is as real as the record for a
 live one; it just answers fewer questions.
 
 <Figure wide caption="One project is one folder of plain files. Three kinds of writer read and write it directly; the detail page also pulls live facts from the machine it runs on.">
-  <svg viewBox="0 0 340 170" role="img" aria-label="A project folder containing project.yml, SPEC.md, STATUS.md, IDEAS.md and HANDOFF.md. Claude, Codex and a human all read and write it. The Control Room page also reads the Docker socket and the git working tree.">
+  <svg viewBox="0 0 362 170" role="img" aria-label="A project folder containing project.yml, SPEC.md, STATUS.md, IDEAS.md and HANDOFF.md. Claude, Codex and a human all read and write it. The Control Room page also reads the Docker socket and the git working tree.">
     <rect x="120" y="52" width="100" height="66" rx="6" fill="#101216" stroke="rgba(255,255,255,0.18)" />
     <text x="170" y="42" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#87898d">data/projects/&lt;slug&gt;/</text>
     <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#c9cacd">
@@ -156,12 +156,13 @@ live one; it just answers fewer questions.
     </g>
 
     <g stroke="#5cb3e6" stroke-width="1.2" stroke-opacity="0.8" fill="none">
-      <path d="M220 74 C 250 74, 260 40, 288 40" />
-      <path d="M220 96 C 250 96, 260 130, 288 130" />
+      <path d="M220 74 C 248 74, 256 42, 278 42" />
+      <path d="M220 96 C 248 96, 256 128, 278 128" />
     </g>
+    <g fill="#5cb3e6"><circle cx="278" cy="42" r="2.4" /><circle cx="278" cy="128" r="2.4" /></g>
     <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#5cb3e6">
-      <text x="292" y="43">docker socket</text>
-      <text x="292" y="133">git worktree</text>
+      <text x="286" y="45">docker socket</text>
+      <text x="286" y="131">git worktree</text>
     </g>
   </svg>
 </Figure>
@@ -187,7 +188,7 @@ things. A grid of green that includes three "I could not actually check this"
 cells dressed up as passes is worse than no grid.
 
 <Figure caption="A check does not read a stored result. It re-runs against git, the Docker socket, or the filesystem every time, and it is allowed to answer 'I don't know'.">
-  <svg viewBox="0 0 320 132" role="img" aria-label="A standards check queries git, the Docker socket or the filesystem live, and returns one of pass, fail, not-applicable, unknown or stale.">
+  <svg viewBox="0 0 332 132" role="img" aria-label="A standards check queries git, the Docker socket or the filesystem live, and returns one of pass, fail, not-applicable, unknown or stale.">
     <rect x="10" y="52" width="74" height="26" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
     <text x="47" y="69" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">a check</text>
 
@@ -247,7 +248,7 @@ snapshot from the last time the page asked, not a live feed, and the page says
 so rather than pretending otherwise.
 
 <Figure caption="The host Control Room lives on is read directly. The far hosts are read through one key that can only run one script.">
-  <svg viewBox="0 0 320 150" role="img" aria-label="Control Room reads Caspar directly through the Docker socket. It reads lighthouse, gp-forms-prod and podusa-prod through a single locked-down SSH key.">
+  <svg viewBox="0 0 356 150" role="img" aria-label="Control Room reads Caspar directly through the Docker socket. It reads lighthouse, gp-forms-prod and podusa-prod through a single locked-down SSH key.">
     <rect x="120" y="58" width="84" height="30" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
     <text x="162" y="77" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#26cb96">Control Room</text>
 
@@ -255,20 +256,21 @@ so rather than pretending otherwise.
     <text x="34" y="43" text-anchor="end" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">Caspar</text>
     <text x="66" y="34" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">socket, live</text>
 
-    <path d="M204 73 H 244" stroke="#5cb3e6" stroke-width="1.4" fill="none" />
-    <rect x="244" y="60" width="24" height="26" rx="4" fill="#101216" stroke="#5cb3e6" stroke-opacity="0.6" />
-    <text x="256" y="77" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#5cb3e6">key</text>
+    <path d="M204 73 H 232" stroke="#5cb3e6" stroke-width="1.4" fill="none" />
+    <rect x="232" y="60" width="22" height="26" rx="4" fill="#101216" stroke="#5cb3e6" stroke-opacity="0.6" />
+    <text x="243" y="77" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#5cb3e6">key</text>
     <g stroke="#5cb3e6" stroke-width="1.1" stroke-opacity="0.75" fill="none">
-      <path d="M268 66 C 288 66, 290 30, 308 30" />
-      <path d="M268 73 H 308" />
-      <path d="M268 80 C 288 80, 290 116, 308 116" />
+      <path d="M254 66 C 272 66, 274 30, 288 30" />
+      <path d="M254 73 H 288" />
+      <path d="M254 80 C 272 80, 274 116, 288 116" />
     </g>
+    <g fill="#5cb3e6"><circle cx="288" cy="30" r="2.4" /><circle cx="288" cy="73" r="2.4" /><circle cx="288" cy="116" r="2.4" /></g>
     <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#c9cacd">
-      <text x="292" y="24">lighthouse</text>
-      <text x="292" y="76">gp-forms</text>
-      <text x="292" y="119">podusa</text>
+      <text x="296" y="33">lighthouse</text>
+      <text x="296" y="76">gp-forms</text>
+      <text x="296" y="119">podusa</text>
     </g>
-    <text x="256" y="103" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">point-in-time</text>
+    <text x="271" y="103" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">point-in-time</text>
   </svg>
 </Figure>
 
@@ -297,7 +299,7 @@ agent that is not the current owner. That is what stops two sessions quietly
 writing over each other.
 
 <Figure caption="Everyone appends to HANDOFF.md. The next watch reads only HANDOFF.yml: the last checkpoint in full, plus a short trail so a thin one cannot erase the trajectory.">
-  <svg viewBox="0 0 340 176" role="img" aria-label="Claude, Codex and a human all append to HANDOFF.md. A resume step reads the bounded HANDOFF.yml snapshot, which feeds the next session.">
+  <svg viewBox="0 0 346 176" role="img" aria-label="Claude, Codex and a human all append to HANDOFF.md. A resume step reads the bounded HANDOFF.yml snapshot, which feeds the next session.">
     <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#c9cacd">
       <rect x="10" y="16" width="64" height="22" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="42" y="30" text-anchor="middle">Claude</text>
       <rect x="10" y="50" width="64" height="22" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="42" y="64" text-anchor="middle">Codex</text>
@@ -339,3 +341,58 @@ checks stay cheap as the fleet grows, rather than turning every page load into a
 minute of `git` and Docker calls. That the half-hour checkpoint cadence is the
 right one and not just the first one I picked. It has been a week. None of those
 has bitten yet, which is not the same as none of them being real.
+
+## The crew, such as it is
+
+I said at the top that I have no crew. That is true in the way it matters and
+false in the way that counts. I have two: Claude and Codex. They have never
+spoken to each other. Neither can see the other's work while it happens. What
+they share is the folder.
+
+Here is a normal week. I decide where the fleet is headed and what each hull is
+for. Control Room holds every one of them to the same articles, quietly, whether
+I am looking or not, and tells me the moment one slips. Claude takes a job,
+works it, and leaves a log entry that says what is done and what is not. Days
+later Codex opens that same log, picks the work up mid-sentence, carries it
+further, and leaves its own. I read the board with my coffee and know, in one
+look, which hulls are sound and where every job stands.
+
+That is a workforce of three. One who sets the course, and two who never sleep,
+kept in step not by a meeting or a manager but by a folder of plain text that
+all three of us can open in an editor.
+
+<Figure wide caption="The loop. Nothing in it is clever. A person sets the course, one dashboard holds the standard and the shared memory, two agents work the decks and hand the watch between each other through the same files, and the board reads back to the person.">
+  <svg viewBox="0 0 360 200" role="img" aria-label="A cycle: a human sets the course, feeding Control Room, which holds standards and the handoff log. Claude and Codex both read and write Control Room and hand off to each other. The board feeds back to the human.">
+    <rect x="140" y="8" width="80" height="24" rx="6" fill="#101216" stroke="rgba(255,255,255,0.2)" />
+    <text x="180" y="24" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#eaebec">x (the course)</text>
+
+    <rect x="118" y="78" width="124" height="46" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
+    <text x="180" y="97" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#26cb96">Control Room</text>
+    <text x="180" y="112" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">standards + the handoff log</text>
+
+    <path d="M172 32 V 78" stroke="rgba(255,255,255,0.3)" stroke-width="1.3" fill="none" marker-end="url(#a)" />
+    <path d="M210 78 C 240 60, 240 40, 214 32" stroke="#26cb96" stroke-opacity="0.5" stroke-width="1.2" fill="none" marker-end="url(#g)" />
+    <text x="246" y="56" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">the board</text>
+
+    <rect x="18" y="150" width="72" height="24" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="54" y="166" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#c9cacd">Claude</text>
+    <rect x="270" y="150" width="72" height="24" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="306" y="166" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#c9cacd">Codex</text>
+
+    <path d="M118 108 C 90 120, 78 138, 66 150" stroke="#26cb96" stroke-opacity="0.7" stroke-width="1.3" fill="none" marker-end="url(#g)" />
+    <path d="M78 150 C 96 132, 108 122, 122 114" stroke="#26cb96" stroke-opacity="0.7" stroke-width="1.3" fill="none" marker-end="url(#g)" />
+    <path d="M242 108 C 270 120, 282 138, 294 150" stroke="#26cb96" stroke-opacity="0.7" stroke-width="1.3" fill="none" marker-end="url(#g)" />
+    <path d="M282 150 C 264 132, 252 122, 238 114" stroke="#26cb96" stroke-opacity="0.7" stroke-width="1.3" fill="none" marker-end="url(#g)" />
+
+    <path d="M90 168 H 270" stroke="#5cb3e6" stroke-opacity="0.6" stroke-width="1.2" stroke-dasharray="3 3" fill="none" />
+    <text x="180" y="188" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#5cb3e6">the watch, handed over through the log</text>
+
+    <defs>
+      <marker id="g" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 z" fill="#26cb96" fill-opacity="0.8" /></marker>
+      <marker id="a" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 z" fill="rgba(255,255,255,0.4)" /></marker>
+    </defs>
+  </svg>
+</Figure>
+
+A captain with no ship, and a crew that is mostly text files. It is not the
+fleet I pictured. It is the one that actually sails.
