@@ -100,9 +100,11 @@ async function handleRebuild() {
 
 async function main() {
   await mkdir(STATE_DIR, { recursive: true });
+  // GIT_AUTHOR_* / GIT_COMMITTER_* env (set in compose) carry authorship without
+  // writing to the bind-mounted repo's own git config.
   await run('git', ['config', '--global', '--add', 'safe.directory', ROOT]);
-  await run('git', ['config', 'user.email', process.env.GIT_AUTHOR_EMAIL || 'x@x-hakt.com']);
-  await run('git', ['config', 'user.name', process.env.GIT_AUTHOR_NAME || 'x']);
+  await run('git', ['config', '--global', 'user.email', process.env.GIT_AUTHOR_EMAIL || 'x@x-hakt.com']);
+  await run('git', ['config', '--global', 'user.name', process.env.GIT_AUTHOR_NAME || 'x']);
   await run('git', ['pull', '--ff-only', '--quiet']);
 
   if (!existsSync(ENTRY)) await build();
