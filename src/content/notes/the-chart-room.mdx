@@ -167,6 +167,10 @@ live one; it just answers fewer questions.
   </svg>
 </Figure>
 
+<Figure wide plain caption="One vessel's page. Playtopia: the lifecycle stage, the containers read live off the Docker socket, the standards column, and the newest handoff with a staleness clock. Nothing on this page is stored; it is all read at the moment I open it.">
+  <img src="/shots/cr-project.webp" alt="The Control Room detail page for the playtopia project, showing its status, running containers, standards results and latest handoff." loading="lazy" />
+</Figure>
+
 ## Standards: seaworthiness, checked not claimed
 
 **Why it is here.** "Hold every project to the same bar" was the single most
@@ -212,6 +216,10 @@ cells dressed up as passes is worse than no grid.
       <text x="284" y="121" fill="#dca63c">stale</text>
     </g>
   </svg>
+</Figure>
+
+<Figure wide plain caption="The audit matrix: one row per hull, one column per article. Green is a pass checked against the real thing, amber is stale, a dash is 'not applicable to this vessel', a blank is 'I could not tell'. The point is being able to see the whole fleet's seaworthiness in one glance instead of one project at a time.">
+  <img src="/shots/cr-standards.webp" alt="The Control Room standards page: a grid of projects against standards checks, colour-coded pass, stale, not-applicable and unknown." loading="lazy" />
 </Figure>
 
 ## Planning: ideas need their own water
@@ -270,8 +278,12 @@ so rather than pretending otherwise.
       <text x="296" y="76">gp-forms</text>
       <text x="296" y="119">podusa</text>
     </g>
-    <text x="271" y="103" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">point-in-time</text>
+    <text x="290" y="135" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">point-in-time</text>
   </svg>
+</Figure>
+
+<Figure wide plain caption="Caspar's page: the host itself at the top (disk, memory, load, all off the fixed read-only script), then every container on it, grouped by the project it belongs to. The far anchorages get the same layout, marked point-in-time.">
+  <img src="/shots/cr-servers.webp" alt="The Control Room server page for Caspar: host resource stats followed by its containers grouped by project." loading="lazy" />
 </Figure>
 
 ## Handoff: the log the last watch left
@@ -299,25 +311,29 @@ agent that is not the current owner. That is what stops two sessions quietly
 writing over each other.
 
 <Figure caption="Everyone appends to HANDOFF.md. The next watch reads only HANDOFF.yml: the last checkpoint in full, plus a short trail so a thin one cannot erase the trajectory.">
-  <svg viewBox="0 0 346 176" role="img" aria-label="Claude, Codex and a human all append to HANDOFF.md. A resume step reads the bounded HANDOFF.yml snapshot, which feeds the next session.">
+  <svg viewBox="0 0 300 210" role="img" aria-label="Claude, Codex and a human all append to HANDOFF.md. A resume step reads the bounded HANDOFF.yml snapshot, which feeds the next session.">
     <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#c9cacd">
-      <rect x="10" y="16" width="64" height="22" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="42" y="30" text-anchor="middle">Claude</text>
-      <rect x="10" y="50" width="64" height="22" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="42" y="64" text-anchor="middle">Codex</text>
-      <rect x="10" y="84" width="64" height="22" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="42" y="98" text-anchor="middle">a human</text>
+      <rect x="8" y="14" width="62" height="22" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="39" y="28" text-anchor="middle">Claude</text>
+      <rect x="8" y="46" width="62" height="22" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="39" y="60" text-anchor="middle">Codex</text>
+      <rect x="8" y="78" width="62" height="22" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="39" y="92" text-anchor="middle">a human</text>
     </g>
     <g stroke="rgba(255,255,255,0.28)" stroke-width="1.2" fill="none">
-      <path d="M74 27 H 132" /><path d="M74 61 H 132" /><path d="M74 95 H 132" />
+      <path d="M70 25 C 96 25, 104 55, 128 57" />
+      <path d="M70 57 H 128" />
+      <path d="M70 89 C 96 89, 104 59, 128 57" />
     </g>
-    <rect x="132" y="18" width="80" height="88" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" />
-    <text x="172" y="46" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#26cb96">HANDOFF.md</text>
-    <text x="172" y="60" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#87898d">append-only</text>
-    <text x="172" y="71" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#87898d">newest first</text>
-    <path d="M172 106 V 130 H 238" stroke="#26cb96" stroke-width="1.4" fill="none" />
-    <rect x="238" y="118" width="74" height="26" rx="6" fill="#101216" stroke="#26cb96" stroke-opacity="0.55" />
-    <text x="275" y="131" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">HANDOFF.yml</text>
-    <text x="275" y="140" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">resume snapshot</text>
-    <path d="M275 144 V 166" stroke="#26cb96" stroke-width="1.4" fill="none" />
-    <text x="275" y="176" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#eaebec">next watch</text>
+    <rect x="128" y="34" width="92" height="46" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" />
+    <text x="174" y="52" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#26cb96">HANDOFF.md</text>
+    <text x="174" y="66" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">append-only, newest first</text>
+
+    <path d="M174 80 V 116" stroke="#26cb96" stroke-width="1.4" fill="none" />
+    <text x="182" y="102" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">resume</text>
+    <rect x="128" y="116" width="92" height="40" rx="6" fill="#101216" stroke="#26cb96" stroke-opacity="0.55" />
+    <text x="174" y="133" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#26cb96">HANDOFF.yml</text>
+    <text x="174" y="146" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">latest checkpoint + trail</text>
+
+    <path d="M174 156 V 184" stroke="#26cb96" stroke-width="1.4" fill="none" />
+    <text x="174" y="198" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#eaebec">the next watch</text>
   </svg>
 </Figure>
 
