@@ -1,7 +1,8 @@
 ---
 title: A key with one job
-summary: Control Room needs to see what is running on three other hosts. Here is how that key was scoped so a leak of it is worth almost nothing.
+summary: A dashboard needs to peek at three other machines. Handing it my real SSH key would trade one small feature for the whole network. Here is the key I made instead.
 date: 2026-08-29
+updated: 2026-08-30
 sea: The Mesh
 waters: [ssh, discovery]
 cargo: [authorized_keys, forced-command, permitopen, least-privilege, openssh]
@@ -10,109 +11,212 @@ draft: false
 
 import Figure from '../../components/Figure.astro';
 
+## The problem
+
 [Control Room](https://control.x-hakt.com) is a dashboard that watches this
-mesh. Part of what it shows is which containers are up on the other hosts, which
-means it has to reach across the network and ask them. The first version of that
-did the obvious thing: mount my own SSH key into the container read only and let
-it log in. It worked on the first try, which should have been the warning.
+mesh. One of the things it shows is which containers are up on the other hosts.
+To know that, it has to log in to each of them over SSH and ask.
 
-That key can become root on every box it touches. The job it was doing is "run
-`docker ps` and read four files." A container breakout would have handed an
-attacker the whole mesh in exchange for a feature that lists container names.
-The capability and the need were not in the same postcode.
+The obvious way to make that work is to give it my own SSH key, mounted into
+the container read only. I tried that first. It worked immediately, which
+should have been the warning.
 
-## The one diagram
+Think of it like a house-sitter. Someone is going to come in once a day and
+water the one plant on the porch. Do you hand them the whole keyring, the one
+that also opens the front door, the study, the safe? If they lose it, or
+someone lifts it from their bag, that is not "the plant got overwatered." That
+is your house.
 
-<Figure wide caption="One key. sshd ignores whatever the client asks for and runs the pinned script instead. The script's own allowlist is the second gate.">
-  <svg viewBox="0 0 340 176" role="img" aria-label="A key on the left connects through a forced-command box to three hosts on the right: lighthouse, gp-forms, podusa. The gp-forms line passes through a jump host.">
-    <rect x="10" y="70" width="92" height="36" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
-    <text x="56" y="92" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="10" fill="#eaebec">control&#8209;room</text>
+My SSH key is the whole keyring. It can become root on every box it touches.
+The job it is doing is "run `docker ps` and read four files." A container
+breakout would have handed an attacker the entire mesh in exchange for a
+feature that lists container names.
 
-    <line x1="102" y1="88" x2="140" y2="88" stroke="#26cb96" stroke-width="1.5" />
+<Figure wide caption="Same feature, two keys. The one on the left is what I nearly shipped.">
+  <svg viewBox="0 0 340 190" role="img" aria-label="Left: a compromised full SSH key gives root on lighthouse, gp-forms, podusa and caspar. Right: a compromised scoped key can only run one read-only report.">
+    <text x="85" y="16" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#87898d">my key, if it leaks</text>
+    <text x="255" y="16" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#87898d">the scoped key, if it leaks</text>
 
-    <rect x="140" y="70" width="74" height="36" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
-    <text x="177" y="86" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#26cb96">command=</text>
-    <text x="177" y="97" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#26cb96">restrict</text>
-
-    <g stroke="#26cb96" stroke-opacity="0.9" stroke-width="1.4" fill="none">
-      <path d="M214 82 C 244 82, 250 40, 276 40" />
-      <path d="M214 88 C 250 88, 250 88, 276 88" />
-      <path d="M214 94 C 244 94, 250 136, 276 136" />
+    <rect x="10" y="80" width="40" height="22" rx="5" fill="#101216" stroke="#e5484d" stroke-opacity="0.7" />
+    <text x="30" y="94" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#e5484d">key</text>
+    <g stroke="#e5484d" stroke-opacity="0.75" stroke-width="1.3" fill="none">
+      <path d="M50 88 C 90 88, 100 34, 138 34" />
+      <path d="M50 90 C 90 90, 100 70, 138 70" />
+      <path d="M50 92 C 90 92, 100 106, 138 106" />
+      <path d="M50 94 C 90 94, 100 142, 138 142" />
+    </g>
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#e5484d">
+      <text x="142" y="37">root @ lighthouse</text>
+      <text x="142" y="73">root @ gp-forms</text>
+      <text x="142" y="109">root @ podusa</text>
+      <text x="142" y="145">root @ caspar</text>
     </g>
 
-    <rect x="243" y="30" width="26" height="16" rx="3" fill="#101216" stroke="rgba(255,255,255,0.14)" />
-    <text x="256" y="41" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">jump</text>
+    <rect x="188" y="80" width="40" height="22" rx="5" fill="#101216" stroke="#26cb96" stroke-opacity="0.6" />
+    <text x="208" y="94" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">key</text>
+    <path d="M228 91 H 276" stroke="#26cb96" stroke-width="1.5" fill="none" />
+    <rect x="276" y="80" width="56" height="22" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
+    <text x="304" y="94" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#26cb96">one report</text>
+  </svg>
+</Figure>
 
-    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#c9cacd">
-      <circle cx="280" cy="40" r="3.5" fill="#26cb96" /><text x="290" y="43">lighthouse</text>
-      <circle cx="280" cy="88" r="3.5" fill="#26cb96" /><text x="290" y="91">gp&#8209;forms</text>
-      <circle cx="280" cy="136" r="3.5" fill="#26cb96" /><text x="290" y="139">podusa</text>
+The fix has three parts: the key can only run one script, that script can only
+reach out through one narrow tunnel, and the script itself only answers a fixed
+list of questions. Then I checked all three by trying to break them.
+
+## Building block 1: the key can only run one script
+
+The key lives in the target host's `authorized_keys` file, as one new line,
+with nothing removed:
+
+```
+restrict,command="/usr/local/bin/control-room-ro.sh" ssh-ed25519 AAAA... discovery
+```
+
+Think of a bank teller behind glass. You write what you want on a slip and push
+it through the slot. Whatever you wrote, they run one specific procedure. You
+cannot climb through the slot, you cannot walk around the counter, and you
+never see the vault.
+
+`restrict` is the glass. It is an allowlist, not a blocklist: it turns off pty
+allocation, port forwarding, agent forwarding, X11, and `~/.ssh/rc`, and it
+keeps turning off anything new that OpenSSH adds later. The forced `command=`
+is the one procedure. No matter what command the client sends, sshd runs that
+script instead. Control Room's SSH call literally passes the string
+`control-room-ro`, and the server pays it no attention.
+
+<Figure caption="Whatever the client sends, sshd runs the pinned script. The request is not so much rejected as ignored.">
+  <svg viewBox="0 0 320 150" role="img" aria-label="The SSH client sends an arbitrary command; sshd discards it and runs the pinned control-room-ro.sh script, which returns a fixed read-only report.">
+    <rect x="10" y="24" width="96" height="26" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="58" y="41" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#eaebec">SSH client</text>
+
+    <line x1="106" y1="37" x2="150" y2="37" stroke="#5c5e62" stroke-width="1.2" stroke-dasharray="3 3" />
+    <text x="128" y="30" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#5c5e62">"anything"</text>
+
+    <rect x="150" y="20" width="60" height="34" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="180" y="34" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#eaebec">sshd</text>
+    <text x="180" y="46" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#5c5e62">discards it</text>
+
+    <path d="M180 54 V 88 H 150" stroke="#26cb96" stroke-width="1.5" fill="none" />
+    <rect x="60" y="76" width="90" height="26" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
+    <text x="105" y="93" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">control-room-ro.sh</text>
+
+    <path d="M60 89 H 20 V 122 H 150" stroke="#26cb96" stroke-width="1.5" fill="none" />
+    <rect x="150" y="109" width="150" height="26" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="225" y="126" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#c9cacd">uname, df, docker ps, ...</text>
+  </svg>
+</Figure>
+
+## Building block 2: one tunnel, one destination
+
+One of the three hosts is not reachable directly. I get to it by jumping
+through another box, which SSH does with a `ProxyJump`. A `ProxyJump` needs to
+open a forwarded channel, and `restrict` just turned forwarding off.
+
+Back to the teller: the glass has one small pass-through drawer, and it only
+reaches one desk in the back office. Not the whole back office. One desk.
+
+That is `permitopen`. It re-enables forwarding to exactly one host and port and
+nothing else:
+
+```
+restrict,command="...",permitopen="10.10.10.x:22" ssh-ed25519 AAAA... discovery
+```
+
+<Figure caption="Forwarding is on for one hop only. Every other destination gets 'administratively prohibited'.">
+  <svg viewBox="0 0 320 160" role="img" aria-label="Control Room forwards through a jump host to gp-forms, the one permitted destination. Attempts to forward anywhere else are refused.">
+    <rect x="10" y="20" width="80" height="26" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="50" y="37" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#eaebec">control-room</text>
+
+    <path d="M90 33 H 140" stroke="#26cb96" stroke-width="1.5" fill="none" />
+    <text x="115" y="26" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#26cb96">permitopen</text>
+
+    <rect x="140" y="20" width="52" height="26" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="166" y="37" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#eaebec">jump</text>
+
+    <path d="M192 33 H 244" stroke="#26cb96" stroke-width="1.5" fill="none" />
+    <rect x="244" y="20" width="66" height="26" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
+    <text x="277" y="37" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">gp-forms</text>
+
+    <g stroke="#5c5e62" stroke-width="1.1" stroke-dasharray="2 4" fill="none">
+      <path d="M50 46 V 96 H 120" />
+      <path d="M50 46 V 128 H 120" />
+    </g>
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#5c5e62">
+      <text x="126" y="99">any other host:port</text>
+      <text x="126" y="131">a local port on the jump</text>
+      <text x="240" y="118" fill="#87898d">✕ administratively</text>
+      <text x="240" y="129" fill="#87898d">   prohibited</text>
     </g>
   </svg>
 </Figure>
 
-## What is doing the work
+## Building block 3: the script only answers a fixed list
 
-Three `authorized_keys` options, added as one new line on each target host and
-nothing removed:
-
-```
-restrict,command="/usr/local/bin/control-room-ro.sh",permitopen="10.10.10.x:22" ssh-ed25519 AAAA... discovery
-```
-
-`restrict` is the important word. It is an allowlist, not a blocklist: it turns
-off pty allocation, X11 forwarding, agent forwarding, and `~/.ssh/rc`, and it
-stays off as OpenSSH adds new things to turn off. The forced `command=` means
-sshd runs that one script no matter what the client sends. Control Room's SSH
-call literally passes the string `control-room-ro` as its command, and the
-server pays it no attention. The pinned script runs instead.
-
-`permitopen` is the single exception. One of the three hosts is only reachable
-by jumping through another box, and a `ProxyJump` needs a channel open. So
-port-forwarding is back on, scoped to exactly one destination host and port.
-Everywhere else it stays off.
-
-## The second gate
-
-The forced command is not a trusting script. `SSH_ORIGINAL_COMMAND` (what the
-client asked for) is matched against exact literal cases and never passed to a
-shell:
+The forced command is not a trusting script. `SSH_ORIGINAL_COMMAND`, the string
+the client asked for, is matched against exact literal patterns and never
+handed to a shell:
 
 ```sh
 case "$SSH_ORIGINAL_COMMAND" in
   doc:/opt/gp-forms:SPEC.md) DOC=/opt/gp-forms/SPEC.md ;;
-  # ...one line per allowed file...
+  # ...one line per file it is allowed to read...
   doc:*) echo "===REJECTED==="; exit 1 ;;
 esac
 ```
 
-The rest of it is a fixed sequence: `uname`, `nproc`, `free`, `df`, the load
-average, `docker ps -a`, `docker stats`. File reads are capped with `head -c`
-and refuse symlinks, so it cannot be talked into being a general file reader or
-into returning something unbounded.
+Even the teller's one procedure has a checklist taped to the counter. Ask for
+something that is not on it and the slip comes straight back.
 
-## Verified, not assumed
+Everything else the script does is a fixed sequence with no inputs: `uname`,
+`nproc`, `free`, `df`, the load average, `docker ps -a`, `docker stats`. The
+file reads are capped with `head -c` and refuse symlinks, so the script cannot
+be talked into being a general-purpose file reader or into returning something
+unbounded.
 
-A restriction you have not tried to break is not a restriction. After switching
-the forced command over I checked the boundary directly:
+<Figure caption="No pattern matches, no answer. The allowlist is a fixed switch in the script, not something the caller can extend.">
+  <svg viewBox="0 0 320 130" role="img" aria-label="SSH_ORIGINAL_COMMAND is checked against a fixed set of patterns; a match runs a read-only action, anything else returns REJECTED.">
+    <rect x="8" y="52" width="104" height="26" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="60" y="69" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#eaebec">SSH_ORIGINAL_CMD</text>
+
+    <path d="M112 65 H 150" stroke="#5c5e62" stroke-width="1.2" fill="none" />
+    <path d="M150 45 L 178 65 L 150 85 L 122 65 Z" fill="#101216" stroke="rgba(255,255,255,0.2)" />
+    <text x="150" y="68" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#c9cacd">case</text>
+
+    <path d="M178 60 H 214" stroke="#26cb96" stroke-width="1.5" fill="none" />
+    <rect x="214" y="36" width="98" height="24" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
+    <text x="263" y="52" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#26cb96">read-only action</text>
+
+    <path d="M178 74 H 214" stroke="#5c5e62" stroke-width="1.2" stroke-dasharray="3 3" fill="none" />
+    <rect x="214" y="76" width="98" height="24" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="263" y="92" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#87898d">===REJECTED===</text>
+  </svg>
+</Figure>
+
+## I checked the wall by pushing on it
+
+You do not trust a lock because the locksmith says so. You pull the handle.
+After switching the forced command over I tried the three things an attacker
+with this key would try:
 
 - Asked it to run `id`. It ran the pinned script instead and ignored me.
 - Asked for an interactive shell (`ssh -tt`). Rejected: `PTY allocation request failed`.
-- Opened a tunnel to a host that was not the one permitted destination. Rejected,
-  `administratively prohibited`. Relayed an SSH banner through the one tunnel that
-  is allowed and got bytes; every other destination got zero.
+- Opened a tunnel to a host that was not the permitted destination. Rejected,
+  `administratively prohibited`. Then relayed an SSH banner through the one
+  tunnel that is allowed and got bytes back, so the exception works and only
+  the exception works.
 
-## What is verified vs assumed
+## Verified vs assumed
 
-Verified: the three checks above, on the live hosts, after the change. Also that
-Control Room still gets its snapshot (2.4 to 2.9 seconds per host, cached five
-minutes).
+Verified: the three tests above, on the live hosts, after the change. Also that
+Control Room still gets its snapshot, in 2.4 to 2.9 seconds per host, cached
+five minutes.
 
-Assumed, and worth revisiting: that the pinned script has no argument-injection
-path I missed, and that `head -c 65536` is a sane cap rather than one I will
-regret when a `STATUS.md` gets long. Neither has bitten yet.
+Assumed, and worth another look: that the pinned script has no
+argument-handling path I missed, and that `head -c 65536` is a sane cap rather
+than one I will regret when a `STATUS.md` grows. Neither has bitten yet.
 
-The shape here is reusable. Any time something inside a container needs to reach
-a host outside it: a credential that exists for nothing else, cut down to the
-one capability the feature needs, and a test that proves the wall is where you
-think it is.
+The shape here is reusable. Any time something inside a container needs to
+reach a host outside it: a credential that exists for nothing else, cut down to
+the one capability the feature needs, one narrow exception if it truly needs
+one, and a test that proves the wall is where you think it is.
