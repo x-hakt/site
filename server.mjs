@@ -44,9 +44,14 @@ const build = async () => {
 };
 
 async function commitAndPush(msg) {
-  await run('git', ['add', '-A']);
-  if ((await run('git', ['commit', '-m', msg])) !== 0) {
+  // Only the notes directory — never sweep up unrelated working-tree changes.
+  await run('git', ['add', '--', CONTENT_DIR]);
+  if ((await run('git', ['diff', '--cached', '--quiet'])) === 0) {
     log('nothing to commit');
+    return;
+  }
+  if ((await run('git', ['commit', '-m', msg])) !== 0) {
+    log('commit failed');
     return;
   }
   if ((await run('git', ['push', 'origin', 'HEAD'])) !== 0) {
