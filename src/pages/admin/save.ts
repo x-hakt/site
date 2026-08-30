@@ -42,7 +42,9 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
   const form = await request.formData();
   const slug = String(form.get('slug') ?? '');
-  const content = String(form.get('content') ?? '');
+  // Browsers submit <textarea> values with CRLF line endings; normalise to LF
+  // before any of the content checks so the frontmatter regex still matches.
+  const content = String(form.get('content') ?? '').replace(/\r\n/g, '\n');
   const declaredNew = form.get('isNew') === '1';
 
   if (!validSlug(slug)) return holdingPage('Bad slug. Lower-case letters, digits and single hyphens only.', false);
@@ -54,7 +56,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
   if (declaredNew && existed) return holdingPage(`A note "${slug}" already exists.`, false);
 
   const prev = existed ? await readNote(slug) : null;
-  if (prev !== null && prev === content.replace(/\r\n/g, '\n')) {
+  if (prev !== null && prev === content) {
     return holdingPage('No changes to save.', false);
   }
 

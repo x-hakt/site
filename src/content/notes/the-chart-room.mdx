@@ -311,29 +311,29 @@ agent that is not the current owner. That is what stops two sessions quietly
 writing over each other.
 
 <Figure caption="Everyone appends to HANDOFF.md. The next watch reads only HANDOFF.yml: the last checkpoint in full, plus a short trail so a thin one cannot erase the trajectory.">
-  <svg viewBox="0 0 300 210" role="img" aria-label="Claude, Codex and a human all append to HANDOFF.md. A resume step reads the bounded HANDOFF.yml snapshot, which feeds the next session.">
+  <svg viewBox="0 0 252 210" role="img" aria-label="Claude, Codex and a human all append to HANDOFF.md. A resume step reads the bounded HANDOFF.yml snapshot, which feeds the next session.">
     <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#c9cacd">
-      <rect x="8" y="14" width="62" height="22" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="39" y="28" text-anchor="middle">Claude</text>
-      <rect x="8" y="46" width="62" height="22" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="39" y="60" text-anchor="middle">Codex</text>
-      <rect x="8" y="78" width="62" height="22" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="39" y="92" text-anchor="middle">a human</text>
+      <rect x="6" y="14" width="62" height="22" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="37" y="28" text-anchor="middle">Claude</text>
+      <rect x="6" y="46" width="62" height="22" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="37" y="60" text-anchor="middle">Codex</text>
+      <rect x="6" y="78" width="62" height="22" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="37" y="92" text-anchor="middle">a human</text>
     </g>
     <g stroke="rgba(255,255,255,0.28)" stroke-width="1.2" fill="none">
-      <path d="M70 25 C 96 25, 104 55, 128 57" />
-      <path d="M70 57 H 128" />
-      <path d="M70 89 C 96 89, 104 59, 128 57" />
+      <path d="M68 25 C 96 25, 100 52, 122 55" />
+      <path d="M68 57 H 122" />
+      <path d="M68 89 C 96 89, 100 62, 122 59" />
     </g>
-    <rect x="128" y="34" width="92" height="46" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" />
-    <text x="174" y="52" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#26cb96">HANDOFF.md</text>
-    <text x="174" y="66" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">append-only, newest first</text>
+    <rect x="122" y="34" width="116" height="46" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" />
+    <text x="180" y="52" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#26cb96">HANDOFF.md</text>
+    <text x="180" y="66" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">append-only, newest first</text>
 
-    <path d="M174 80 V 116" stroke="#26cb96" stroke-width="1.4" fill="none" />
-    <text x="182" y="102" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">resume</text>
-    <rect x="128" y="116" width="92" height="40" rx="6" fill="#101216" stroke="#26cb96" stroke-opacity="0.55" />
-    <text x="174" y="133" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#26cb96">HANDOFF.yml</text>
-    <text x="174" y="146" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">latest checkpoint + trail</text>
+    <path d="M180 80 V 116" stroke="#26cb96" stroke-width="1.4" fill="none" />
+    <text x="188" y="102" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">resume</text>
+    <rect x="122" y="116" width="116" height="40" rx="6" fill="#101216" stroke="#26cb96" stroke-opacity="0.55" />
+    <text x="180" y="133" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#26cb96">HANDOFF.yml</text>
+    <text x="180" y="146" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">latest checkpoint + trail</text>
 
-    <path d="M174 156 V 184" stroke="#26cb96" stroke-width="1.4" fill="none" />
-    <text x="174" y="198" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#eaebec">the next watch</text>
+    <path d="M180 156 V 184" stroke="#26cb96" stroke-width="1.4" fill="none" />
+    <text x="180" y="198" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#eaebec">the next watch</text>
   </svg>
 </Figure>
 
