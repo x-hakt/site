@@ -16,7 +16,10 @@ RUN apk add --no-cache git openssh-client tini
 
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+# The container runs as uid 1000 (node) in production. `astro build` — which the
+# /admin save path runs in-container — has vite write a dep-optimise cache under
+# node_modules/.vite, so node_modules must be owned by the runtime user, not root.
+RUN npm ci && chown -R node:node /app
 
 ENV HOST=0.0.0.0 PORT=4321 NODE_ENV=production
 EXPOSE 4321
