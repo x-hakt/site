@@ -1,0 +1,265 @@
+---
+title: What changed since you last played
+summary: Playtopia members connect their Steam libraries, then still have to visit each game's own page to catch its patch notes and events. Here is the personalised feed we built for that in an afternoon, and how it shipped as frontend-only code into a staging site that shares the production database.
+date: 2026-08-30
+tracks: [infrastructure, standards]
+tech: [nextjs, react, docker, steam-api]
+---
+
+import Figure from '../../components/Figure.astro';
+
+## Twenty tabs, none of them open
+
+Playtopia is one of the busier hulls in the fleet: a games community site,
+live and earning, where a member can connect their Steam account and pull in
+their whole library. Once that is done the site knows what you own, how long
+you have played each one, and when you last launched it.
+
+What it did nothing with, until today, was the obvious next thing. Every one of
+those games has a stream of official news: a patch on Tuesday, a weekend event,
+a roadmap post, a "the servers are down" notice. Steam publishes all of it, but
+one game at a time, each on its own page. If you own forty games you are not
+checking forty news pages. You find out a game had a big update when you happen
+to launch it and something looks different.
+
+And the question you actually have is one Steam does not answer at all: not
+"what is the latest news for this game" but "what has changed since the last
+time I played it." You put a game down for three months, you want the three
+months of changes in one place before you pick it back up.
+
+So that is the feature. A page, [My Game
+Feed](https://playtopia.com.au/news/my-games), that gathers the official Steam
+news for the games you own, newest first, and flags every item that was
+published after you last played. The interesting part is not the idea. It is
+that the whole thing had to be built without touching the parts of Playtopia
+that matter.
+
+<Figure wide caption="Before: one news page per game, and the 'since I last played' view exists nowhere. After: one feed, newest first, with the since-you-played items marked.">
+  <svg viewBox="0 0 360 210" role="img" aria-label="Before, a member's library points at many separate Steam news pages. After, it feeds a single combined feed with items published since last play highlighted.">
+    <text x="10" y="16" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#87898d">before</text>
+    <rect x="10" y="26" width="66" height="24" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="43" y="41" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">library</text>
+    <g stroke="rgba(255,255,255,0.2)" stroke-width="1.1" fill="none">
+      <path d="M76 34 H 150" />
+      <path d="M76 38 C 110 38, 116 54, 150 54" />
+      <path d="M76 40 C 110 40, 116 74, 150 74" />
+      <path d="M76 42 C 110 42, 116 94, 150 94" />
+    </g>
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">
+      <rect x="150" y="27" width="86" height="14" rx="3" fill="#0e0f12" stroke="rgba(255,255,255,0.12)" /><text x="156" y="37">game A / news</text>
+      <rect x="150" y="47" width="86" height="14" rx="3" fill="#0e0f12" stroke="rgba(255,255,255,0.12)" /><text x="156" y="57">game B / news</text>
+      <rect x="150" y="67" width="86" height="14" rx="3" fill="#0e0f12" stroke="rgba(255,255,255,0.12)" /><text x="156" y="77">game C / news</text>
+      <rect x="150" y="87" width="86" height="14" rx="3" fill="#0e0f12" stroke="rgba(255,255,255,0.12)" /><text x="156" y="97">game D / news</text>
+    </g>
+    <text x="248" y="66" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#5c5e62">you visit</text>
+    <text x="248" y="76" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#5c5e62">none of them</text>
+
+    <text x="10" y="130" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#87898d">after</text>
+    <rect x="10" y="140" width="66" height="24" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="43" y="155" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">library</text>
+    <path d="M76 152 H 150" stroke="#26cb96" stroke-width="1.4" fill="none" />
+    <rect x="150" y="132" width="120" height="56" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
+    <text x="210" y="150" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#26cb96">My Game Feed</text>
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#c9cacd">
+      <text x="160" y="165">game C update</text><text x="336" y="165" text-anchor="end" fill="#26cb96">new</text>
+      <text x="160" y="176">game A event</text><text x="336" y="176" text-anchor="end" fill="#26cb96">new</text>
+      <text x="160" y="187">game B patch</text><text x="336" y="187" text-anchor="end" fill="#5c5e62">seen</text>
+    </g>
+  </svg>
+</Figure>
+
+## Why the first version is frontend only
+
+**Why it is here.** Playtopia's staging site, `source.playtopia.com.au`, is not
+a full copy of production. It runs its own isolated preview copy of the
+frontend, but it points at the same live API and the same live database as the
+real site. That is fine for checking how a page looks. It is not fine for
+trying out a feature that wants new tables, because there is no safe place to
+put them: a migration on staging is a migration on production.
+
+**How it works.** So the rule for the first slice was that it adds no database
+tables, no new backend service, and no change to any running production
+service. Everything it needs already exists or lives in the browser:
+
+- The list of games comes from an endpoint Playtopia already has,
+  `GET /api/v1/gaming/library?platform=STEAM`, the same one the existing
+  library page uses. The feature reuses it as-is.
+- The news itself comes from Steam's own public API, fetched server-side.
+- Which games you pinned, which you muted, and which items you have read are
+  kept in `localStorage`, keyed to your user id. During testing that is the
+  whole preference store. It is per-browser, and that is a known limit, not an
+  oversight.
+
+<Figure caption="The staging frontend is isolated. The API and database behind it are the live ones, so the feature is built to need nothing new from them.">
+  <svg viewBox="0 0 330 150" role="img" aria-label="The source.playtopia.com.au preview frontend is isolated, but the API and database it talks to are shared with production. The new feature lives entirely inside the frontend.">
+    <rect x="10" y="18" width="150" height="70" rx="6" fill="#101216" stroke="rgba(255,255,255,0.18)" />
+    <text x="18" y="33" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#87898d">source.playtopia.com.au</text>
+    <text x="18" y="46" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">preview frontend</text>
+    <text x="18" y="57" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#5c5e62">isolated copy</text>
+    <rect x="18" y="63" width="134" height="18" rx="4" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" />
+    <text x="85" y="75" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#26cb96">the whole feature lives here</text>
+
+    <path d="M85 88 V 110" stroke="rgba(255,255,255,0.3)" stroke-width="1.3" fill="none" />
+    <rect x="24" y="110" width="122" height="30" rx="6" fill="#131417" stroke="#dca63c" stroke-opacity="0.5" />
+    <text x="85" y="123" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#dca63c">live API + database</text>
+    <text x="85" y="134" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">shared with production, no migrations</text>
+
+    <path d="M160 53 H 214" stroke="#5cb3e6" stroke-width="1.3" fill="none" />
+    <text x="187" y="48" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#5cb3e6">public API</text>
+    <rect x="214" y="40" width="104" height="26" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="266" y="56" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#c9cacd">Steam news API</text>
+  </svg>
+</Figure>
+
+## One route, fanned out, failure-tolerant
+
+**Why it is here.** The browser cannot call Steam directly for forty games:
+that is forty cross-origin requests, no caching, and a pile of Steam's markup
+to clean up on the client. It needs one call to Playtopia that comes back with
+a clean, sorted list.
+
+**How it works.** There is a single server-side Next.js route,
+`POST /gaming/steam-news`. It takes a list of Steam app ids, caps it at 24 per
+call, and fans out to Steam's `ISteamNews/GetNewsForApp` endpoint once per
+game, all in parallel with `Promise.allSettled` so that one game that is slow
+or returns a 500 does not sink the whole batch. What comes back is:
+
+- the news items, with Steam's BBCode and `{STEAM_CLAN_IMAGE}` tags stripped
+  out and the text trimmed to a preview length,
+- deduplicated, because Steam will return the same post under two feed labels,
+- sorted newest first,
+- plus a `failedAppIds` list, so the page can say "these three did not load"
+  instead of silently dropping them.
+
+Caching is layered: the upstream fetch to Steam is revalidated every 30
+minutes (`next: { revalidate: 1800 }`), and the response to the browser is
+`private, max-age=300`. The page loads news for your top 18 games on first
+visit, prioritised by pinned, then most recently played, then most hours, and a
+"load updates from more games" button pulls the next batch.
+
+<Figure wide caption="One POST, up to 24 app ids. The route calls Steam once per game in parallel; a game that fails comes back named, not dropped.">
+  <svg viewBox="0 0 360 170" role="img" aria-label="The browser POSTs app ids to the steam-news route. It calls Steam GetNewsForApp once per game with Promise.allSettled, then cleans, dedupes and sorts, returning items plus a list of failed app ids.">
+    <rect x="8" y="70" width="60" height="26" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="38" y="86" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#eaebec">browser</text>
+    <path d="M68 83 H 104" stroke="rgba(255,255,255,0.3)" stroke-width="1.3" fill="none" />
+    <text x="86" y="78" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">appIds</text>
+
+    <rect x="104" y="60" width="96" height="46" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
+    <text x="152" y="79" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">/gaming/steam-news</text>
+    <text x="152" y="91" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">allSettled, cap 24</text>
+
+    <g stroke="#5cb3e6" stroke-width="1.1" fill="none">
+      <path d="M200 70 C 224 70, 228 40, 250 40" />
+      <path d="M200 83 H 250" />
+      <path d="M200 96 C 224 96, 228 126, 250 126" />
+    </g>
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#c9cacd">
+      <rect x="250" y="32" width="100" height="16" rx="3" fill="#101216" stroke="rgba(255,255,255,0.14)" /><text x="256" y="43">Steam GetNewsForApp</text>
+      <rect x="250" y="75" width="100" height="16" rx="3" fill="#101216" stroke="rgba(255,255,255,0.14)" /><text x="256" y="86">Steam GetNewsForApp</text>
+      <rect x="250" y="118" width="100" height="16" rx="3" fill="#101216" stroke="rgba(255,255,255,0.14)" /><text x="256" y="129">Steam GetNewsForApp</text>
+    </g>
+
+    <path d="M152 106 V 140 H 200" stroke="#26cb96" stroke-width="1.3" fill="none" />
+    <rect x="60" y="128" width="140" height="26" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="130" y="141" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#eaebec">clean · dedupe · sort</text>
+    <text x="130" y="150" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">{'{ items, failedAppIds }'}</text>
+    <path d="M60 141 H 38 V 96" stroke="#26cb96" stroke-width="1.3" fill="none" />
+  </svg>
+</Figure>
+
+## The one view that took no code
+
+**Why it is here.** "Since you played" is the whole reason the feature is more
+useful than Steam's own news pages, and it is the thing a raw chronological
+feed cannot give you.
+
+**How it works.** It is a filter, not a feature. Playtopia already stores
+`lastPlayedAt` for every imported game. A news item is "since you played" when
+its publish time is later than that timestamp. The feed marks those items and
+offers a view that shows only them. No new data, no ranking model, one
+comparison.
+
+<Figure caption="For one game: the news items published after your last session are the ones the feed surfaces first.">
+  <svg viewBox="0 0 340 96" role="img" aria-label="A timeline for one game with a 'last played' marker. News items before it are marked seen; items after it are marked since you played.">
+    <line x1="16" y1="54" x2="324" y2="54" stroke="rgba(255,255,255,0.2)" stroke-width="1.2" />
+    <line x1="150" y1="34" x2="150" y2="74" stroke="#eaebec" stroke-width="1.3" />
+    <text x="150" y="28" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#eaebec">last played</text>
+
+    <g fill="#5c5e62">
+      <circle cx="52" cy="54" r="3.2" /><circle cx="96" cy="54" r="3.2" /><circle cx="132" cy="54" r="3.2" />
+    </g>
+    <text x="92" y="88" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#5c5e62">seen</text>
+
+    <g fill="#26cb96">
+      <circle cx="190" cy="54" r="3.2" /><circle cx="236" cy="54" r="3.2" /><circle cx="286" cy="54" r="3.2" />
+    </g>
+    <text x="240" y="88" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#26cb96">since you played</text>
+  </svg>
+</Figure>
+
+The rest of the page is presentation: a card layout and a compact monospace
+log view, the choice remembered per browser; exact Steam publish times in local
+time rather than "3 days ago"; titles that link straight to the source post;
+and an artwork fallback chain that tries the stored image, then Steam's icon
+hash, then the game's header image, then gives up and shows an emoji.
+
+## How it went live without a rebuild scare
+
+**Why it is here.** The Playtopia frontend is the one container in that stack
+with a hard rule around it: it runs a specific, digest-locked image, and it is
+not rebuilt, restarted, or replaced without a deliberate, checked promotion.
+A new feature does not get to bend that.
+
+**How it works.** The build only ever went to the isolated preview containers
+first. `source.playtopia.com.au` served the feature while it was tested and
+revised over the afternoon, four or five rounds of it, with the live site
+untouched on its existing image the whole time. Promotion to production was its
+own step, gated:
+
+- a static-versus-hydrated parity check on the new build,
+- capture of the current live image as a named rollback tag and a dated
+  baseline before anything changed,
+- a guarded promotion, then smoke checks against the live site: the page
+  answers, the menu links are present, the Steam route returns real items,
+- the new known-good image digest written down as the recorded baseline.
+
+<Figure wide caption="The feature ran on preview containers only for the whole build. Promotion was a separate, gated step with a rollback captured first.">
+  <svg viewBox="0 0 360 104" role="img" aria-label="Build goes to preview containers only. Then a parity gate, then capture rollback, then guarded promote, then smoke checks, then record the new digest.">
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5">
+      <rect x="6" y="40" width="52" height="24" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="32" y="55" text-anchor="middle" fill="#eaebec">build</text>
+      <rect x="70" y="40" width="66" height="24" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" /><text x="103" y="52" text-anchor="middle" fill="#26cb96">preview</text><text x="103" y="60" text-anchor="middle" fill="#87898d" font-size="6">only</text>
+      <rect x="148" y="40" width="60" height="24" rx="5" fill="#131417" stroke="#dca63c" stroke-opacity="0.5" /><text x="178" y="55" text-anchor="middle" fill="#dca63c">parity gate</text>
+      <rect x="220" y="40" width="70" height="24" rx="5" fill="#131417" stroke="#dca63c" stroke-opacity="0.5" /><text x="255" y="52" text-anchor="middle" fill="#dca63c">capture</text><text x="255" y="60" text-anchor="middle" fill="#87898d" font-size="6">rollback</text>
+      <rect x="302" y="40" width="52" height="24" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="328" y="52" text-anchor="middle" fill="#eaebec">promote</text><text x="328" y="60" text-anchor="middle" fill="#87898d" font-size="6">+ smoke</text>
+    </g>
+    <g stroke="rgba(255,255,255,0.3)" stroke-width="1.2" fill="none">
+      <path d="M58 52 H 70" /><path d="M136 52 H 148" /><path d="M208 52 H 220" /><path d="M290 52 H 302" />
+    </g>
+    <text x="180" y="88" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">live frontend untouched until the last step</text>
+  </svg>
+</Figure>
+
+## Verified vs assumed
+
+**Verified.** The page is live at `playtopia.com.au/news/my-games` and answers
+200. The Steam route returns real, deduplicated items with no failures for a
+test library. Both navigation links are in place, desktop and mobile. The
+parity gate and the post-promotion smoke checks passed, and a rollback image
+was captured before promotion and is retained.
+
+**Assumed, and deferred on purpose.** That members want owned games in the feed
+automatically rather than opting each one in. That recency and playtime are a
+good enough sense of importance without any semantic ranking. That per-browser
+preferences are acceptable for a test but not for the real thing. The
+production version, if the feed proves its worth, is a different shape: one
+canonical game record per Steam app id, news stored once and deduplicated by
+Steam's own id, follow and read state in the database, background ingestion
+that runs per game rather than per user, and catalogue-wide follow so you can
+track a game you do not own. None of that is built. This version exists to find
+out whether it should be.
+
+The transferable part: when staging shares production's data, the first version
+of a feature is the one that asks nothing new of the backend. Reuse the
+endpoints that exist, put the new logic in a stateless route, keep user state
+in the browser, and design the real storage only once real people have told you
+the feature is worth storing.
