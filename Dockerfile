@@ -1,19 +1,27 @@
 # syntax=docker/dockerfile:1
+#
+# XH-6: the site runs as the Astro node server (not static nginx) so the /admin
+# editor can be a live SSR route. The repo itself is bind-mounted at /app in
+# production (see ~/unified-services/docker-compose.x-hakt-site.yml) so the
+# working tree is the source of truth for edits, git, and the built output.
+# This image is just the runtime: node + git + ssh, and the supervisor.
+#
+#   docker compose -f docker-compose.x-hakt-site.yml up -d --build
+#
+# Local build (no bind mount) still works for `npm run preview`-style checks:
+# everything under the repo is COPYed as a fallback.
 
-# --- build ---------------------------------------------------------------
-FROM node:22-alpine AS build
+FROM node:22-alpine
+RUN apk add --no-cache git openssh-client tini
+
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
 COPY . .
-RUN npm run build
+RUN npm ci && npm run build
 
-# --- serve ---------------------------------------------------------------
-# Public pages are fully prerendered; we serve dist/client as static files.
-# dist/server exists for the future /admin SSR route (XH-6) and is unused here.
-FROM nginx:1.27-alpine AS serve
-COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/dist/client /usr/share/nginx/html
-EXPOSE 80
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-  CMD wget -qO- http://127.0.0.1/ >/dev/null 2>&1 || exit 1
+ENV HOST=0.0.0.0 PORT=4321 NODE_ENV=production
+EXPOSE 4321
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -qO- http://127.0.0.1:4321/ >/dev/null 2>&1 || exit 1
+
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["node", "server.mjs"]

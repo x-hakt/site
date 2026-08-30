@@ -2,6 +2,9 @@
 dist/
 .output/
 
+# XH-6 admin rebuild handshake (server.mjs <-> save.ts)
+.admin-state/
+
 # generated types
 .astro/
 

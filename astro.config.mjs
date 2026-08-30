@@ -12,6 +12,11 @@ export default defineConfig({
   site: 'https://x-hakt.com',
   output: 'static',
   adapter: node({ mode: 'standalone' }),
+  // Astro's checkOrigin computes the expected origin from proxy headers and was
+  // rejecting legitimate same-origin admin form posts. The /admin cookie is
+  // SameSite=Lax (not sent on cross-site POST), and login.ts / save.ts do their
+  // own Origin/Referer-vs-Host check. That is the CSRF story here.
+  security: { checkOrigin: false },
   integrations: [mdx(), sitemap()],
   vite: {
     plugins: [tailwindcss()],

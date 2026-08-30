@@ -1,0 +1,128 @@
+---
+export const prerender = false;
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { COOKIE, adminEnabled, sessionValid, listNotes, lastResult } from '../../lib/admin';
+
+if (!adminEnabled()) return new Response('Not found', { status: 404 });
+
+const authed = sessionValid(Astro.cookies.get(COOKIE)?.value);
+const err = Astro.url.searchParams.get('e');
+const errText =
+  err === 'bad' ? 'Wrong password.' :
+  err === 'locked' ? 'Too many attempts. Wait five minutes.' :
+  err === 'session' ? 'Session expired. Sign in again.' : null;
+
+const notes = authed ? await listNotes() : [];
+const result = authed ? await lastResult() : null;
+---
+
+<BaseLayout title="admin" description="Editor.">
+  <section class="admin">
+    <h1>the chart room</h1>
+
+    {!authed && (
+      <form method="post" action="/admin/login" class="login">
+        {errText && <p class="err">{errText}</p>}
+        <label>
+          <span>password</span>
+          <input type="password" name="password" autocomplete="current-password" autofocus required />
+        </label>
+        <button type="submit">sign in</button>
+      </form>
+    )}
+
+    {authed && (
+      <>
+        {result && (
+          <p class:list={['result', result.ok ? 'result--ok' : 'result--bad']}>
+            {result.ok
+              ? `saved ${result.slug} and rebuilt · ${new Date(result.at).toLocaleString()}`
+              : `last save of ${result.slug} failed: ${result.error} · change reverted`}
+          </p>
+        )}
+
+        <form id="new-note" class="new">
+          <label>
+            <span>new note slug</span>
+            <input name="slug" pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="wiring-the-mesh" required />
+          </label>
+          <button type="submit">create</button>
+        </form>
+
+        <ul class="notes" role="list">
+          {notes.map((n) => (
+            <li>
+              <a href={`/admin/edit/${n.slug}`}>
+                <span class="notes__title">{n.title}{n.draft && <span class="notes__draft">draft</span>}</span>
+                <span class="notes__meta">{n.date} · {n.sea} · {n.slug}</span>
+              </a>
+            </li>
+          ))}
+          {notes.length === 0 && <li class="notes__empty">No notes yet.</li>}
+        </ul>
+
+        <form method="post" action="/admin/logout" class="out">
+          <button type="submit">sign out</button>
+        </form>
+      </>
+    )}
+  </section>
+</BaseLayout>
+
+<script>
+  const f = document.getElementById('new-note') as HTMLFormElement | null;
+  f?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const slug = (f.elements.namedItem('slug') as HTMLInputElement).value.trim();
+    if (slug) location.href = `/admin/edit/${encodeURIComponent(slug)}?new=1`;
+  });
+</script>
+
+<style>
+  .admin { max-width: 40rem; }
+  .admin h1 { font-size: 1.4rem; margin: 0 0 1.5rem; }
+
+  .login, .new, .out { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  label { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 12rem; }
+  label span { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: var(--color-faint); }
+  input {
+    background: var(--color-surface);
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius-card);
+    color: var(--color-fg);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 9px 11px;
+  }
+  input:focus { outline: 0; border-color: var(--color-green); }
+  button {
+    background: var(--color-raised);
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius-card);
+    color: var(--color-fg-soft);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--color-green); color: var(--color-green); }
+  .out { margin-top: 2.5rem; }
+  .out button:hover { border-color: var(--color-red); color: var(--color-red); }
+
+  .err { color: var(--color-red); font-family: var(--font-mono); font-size: 12px; margin: 0 0 0.5rem; width: 100%; }
+  .result { font-family: var(--font-mono); font-size: 12px; padding: 9px 12px; border-radius: var(--radius-card); border: 1px solid var(--border); margin-bottom: 1.5rem; }
+  .result--ok { color: var(--color-green); border-color: rgba(38,203,150,0.3); }
+  .result--bad { color: var(--color-red); border-color: rgba(229,72,77,0.3); }
+
+  .notes { list-style: none; margin: 0; padding: 0; }
+  .notes li { border-top: 1px solid var(--border); }
+  .notes li:first-child { border-top: 0; }
+  .notes a { display: flex; flex-direction: column; gap: 3px; padding: 13px 0; color: inherit; }
+  .notes a:hover { text-decoration: none; }
+  .notes a:hover .notes__title { color: var(--color-green); }
+  .notes__title { font-family: var(--font-mono); font-weight: 600; font-size: 14px; color: var(--color-fg); display: flex; align-items: center; gap: 8px; }
+  .notes__draft { font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-amber); border: 1px solid rgba(223,161,26,0.4); border-radius: 3px; padding: 1px 5px; }
+  .notes__meta { font-family: var(--font-mono); font-size: 11px; color: var(--color-faint); }
+  .notes__empty { padding: 13px 0; font-family: var(--font-mono); font-size: 13px; color: var(--color-faint); }
+</style>
