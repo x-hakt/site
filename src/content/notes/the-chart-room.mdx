@@ -1,0 +1,318 @@
+---
+title: The chart room
+summary: I was running the better part of twenty projects, most of them built with AI agents, and holding all of them to the same standard by hand. It was a lot of rowing. So I built one room to watch the whole fleet from.
+date: 2026-08-30
+sea: Sea of Development
+waters: [control-room, agents, tooling]
+cargo: [dashboard, plain-files, standards, handoff, docker]
+draft: false
+---
+
+import Figure from '../../components/Figure.astro';
+
+## Too many hulls, one clipboard
+
+Some months back I had a fleet. Not ships. Projects: web apps, a couple of
+game backends, a documentation site, a few things that were live and earning
+their keep and a few that had run aground and I had not yet decided whether to
+refloat or scuttle. The better part of twenty of them, most built alongside an
+AI agent, either Claude or Codex, and every one of them running on the same
+handful of machines.
+
+A fleet needs the same few things kept true across every hull, or it stops
+being a fleet and becomes a scatter of boats. Mine needed:
+
+- The same **standard of seaworthiness.** Every project in version control, with
+  a remote so a lost disk is an inconvenience and not a funeral. A written spec.
+  Enough context checked in that a fresh agent could pick up the work without me
+  narrating the last three months.
+- The same **way of putting to sea.** A predictable deploy, the same shape of
+  container, the same reverse proxy in front, so that shipping a change to one
+  project did not mean relearning how that particular one was wired.
+- The same **way of handing over the watch.** When an agent ran out of context
+  partway through a job, the next session needed to know what was actually
+  finished and what had only been attempted.
+
+I was doing all of it by hand. Rowing out to each hull in turn with the same
+clipboard, checking the same boxes, rowing back. It worked in the sense that
+nothing sank. It did not work in the sense that it ate an afternoon a week, and
+it leaked constantly. A project would drift out of standard and I would not
+notice for a fortnight. An agent would start work against a stale note and
+redo something that was already done. I would go to deploy a small fix and have
+to remember which of five slightly different procedures this one used.
+
+The clipboard does not scale. At some point you need a room you can stand in and
+see every deck at once.
+
+<Figure wide caption="Before: one person, a clipboard, and a lot of rowing. After: one room with a window onto every deck.">
+  <svg viewBox="0 0 340 180" role="img" aria-label="On the left, a single figure rows between many separate hulls carrying a checklist. On the right, the same hulls are visible together through the window of one room.">
+    <text x="80" y="15" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#87898d">by hand</text>
+    <g stroke="rgba(255,255,255,0.16)" stroke-width="1.2" fill="none">
+      <path d="M20 40 q10 8 20 0" /><path d="M55 66 q10 8 20 0" /><path d="M28 98 q10 8 20 0" />
+      <path d="M62 128 q10 8 20 0" /><path d="M24 158 q10 8 20 0" />
+    </g>
+    <circle cx="95" cy="95" r="5" fill="none" stroke="#dca63c" stroke-width="1.3" />
+    <g stroke="#dca63c" stroke-opacity="0.6" stroke-width="1" stroke-dasharray="2 3" fill="none">
+      <path d="M95 95 L 35 40" /><path d="M95 95 L 70 66" /><path d="M95 95 L 43 98" />
+      <path d="M95 95 L 77 128" /><path d="M95 95 L 39 158" />
+    </g>
+    <rect x="88" y="88" width="14" height="10" rx="1" fill="none" stroke="#dca63c" stroke-width="1" />
+
+    <text x="255" y="15" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#87898d">one room</text>
+    <rect x="180" y="28" width="150" height="128" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" />
+    <g stroke="#26cb96" stroke-width="1.2" fill="none" stroke-opacity="0.85">
+      <path d="M196 52 q9 7 18 0" /><path d="M232 52 q9 7 18 0" /><path d="M268 52 q9 7 18 0" />
+      <path d="M196 84 q9 7 18 0" /><path d="M232 84 q9 7 18 0" /><path d="M268 84 q9 7 18 0" />
+      <path d="M214 116 q9 7 18 0" /><path d="M250 116 q9 7 18 0" />
+    </g>
+    <line x1="180" y1="140" x2="330" y2="140" stroke="#26cb96" stroke-opacity="0.3" stroke-width="1" />
+  </svg>
+</Figure>
+
+## So I built Control Room
+
+Control Room is a single web page I keep open on a second monitor. It lists
+every project and every machine, tells me which ones are healthy, which have
+drifted out of standard, and where an agent should pick the work back up.
+
+It is built around one rule, and the rule shaped everything else: **every fact
+it knows is a plain Markdown or YAML file on disk.** No database. The test I
+held every feature to was "could I do this with a text editor alone?" If the
+answer was no, the design was wrong.
+
+The reason is not nostalgia for text files. It is that more than one kind of
+crew has to read and write this. Claude does. Codex does. I do, sometimes
+straight in the editor. A folder of `.md` and `.yml` files means every one of
+them can take part with no integration work at all. A database would mean
+picking one way in and building a door in front of it that everything else has
+to learn to open.
+
+The rest of this is a walk through each part of the room, and for each one, why
+it is there and how it works.
+
+## Overview: the harbour master's board
+
+**Why it is here.** The first question every morning is "is anything on fire?"
+I wanted that answered in one glance, before coffee, without clicking into
+anything.
+
+**How it works.** The Overview reads every project's `project.yml` and shows
+three things per row: its real-world status, how many required standards it is
+currently failing, and how stale its last handoff is. A project that is Live,
+fully in standard, and was checkpointed an hour ago is a quiet grey line. One
+that is failing the "has a remote" check, or whose handoff went stale mid-task
+three days ago, is not. The board is sorted so the boats taking on water float
+to the top.
+
+## Projects: every vessel stays legible
+
+**Why it is here.** A fleet is not all the same. Some hulls are live and busy.
+Some are tied up at the dock, paused. Some I have quietly abandoned and just not
+admitted it. Some run at a far anchorage I can barely see. I did not want a
+system that forced the same checklist onto all of them and then drowned me in
+false warnings about the abandoned ones.
+
+**How it works.** Each project is a folder: `data/projects/<slug>/`. Inside is
+a `project.yml` with the metadata (name, lifecycle stage, which machine it runs
+on, its repo, its containers) and up to four documents kept in the project's own
+voice: `SPEC.md`, `STATUS.md`, `IDEAS.md`, and `HANDOFF.md`.
+
+The detail page for one project pulls together everything I used to gather by
+hand:
+
+- **Is it actually running?** Read live from the Docker socket on the machine it
+  is hosted on.
+- **Repo facts.** Last commit, how many uncommitted files, whether it has a
+  remote. Read straight from the working tree, which is mounted into Control
+  Room read-only.
+- **Computed standards.** Covered next.
+- **The documents**, rendered. The spec and the status in one scroll.
+- **The latest handoff**, and a clock on how stale it is.
+
+A project changes lifecycle by editing one field in its `project.yml`. It never
+moves folders. The record for a beached project is as real as the record for a
+live one; it just answers fewer questions.
+
+<Figure wide caption="One project is one folder of plain files. Three kinds of writer read and write it directly; the detail page also pulls live facts from the machine it runs on.">
+  <svg viewBox="0 0 340 170" role="img" aria-label="A project folder containing project.yml, SPEC.md, STATUS.md, IDEAS.md and HANDOFF.md. Claude, Codex and a human all read and write it. The Control Room page also reads the Docker socket and the git working tree.">
+    <rect x="120" y="52" width="100" height="66" rx="6" fill="#101216" stroke="rgba(255,255,255,0.18)" />
+    <text x="170" y="42" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#87898d">data/projects/&lt;slug&gt;/</text>
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#c9cacd">
+      <text x="132" y="66">project.yml</text>
+      <text x="132" y="79">SPEC.md</text>
+      <text x="132" y="92">STATUS.md</text>
+      <text x="132" y="105">HANDOFF.md</text>
+    </g>
+
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#c9cacd">
+      <text x="14" y="30">Claude</text>
+      <text x="14" y="88">Codex</text>
+      <text x="14" y="146">a human</text>
+    </g>
+    <g stroke="#26cb96" stroke-width="1.3" stroke-opacity="0.85" fill="none">
+      <path d="M52 27 C 90 27, 95 70, 118 74" />
+      <path d="M52 85 H 118" />
+      <path d="M52 143 C 90 143, 95 100, 118 96" />
+    </g>
+
+    <g stroke="#5cb3e6" stroke-width="1.2" stroke-opacity="0.8" fill="none">
+      <path d="M220 74 C 250 74, 260 40, 288 40" />
+      <path d="M220 96 C 250 96, 260 130, 288 130" />
+    </g>
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#5cb3e6">
+      <text x="292" y="43">docker socket</text>
+      <text x="292" y="133">git worktree</text>
+    </g>
+  </svg>
+</Figure>
+
+## Standards: seaworthiness, checked not claimed
+
+**Why it is here.** "Hold every project to the same bar" was the single most
+tedious part of the clipboard round, and the least reliable, because a checklist
+a person fills in starts drifting from the truth the moment nobody is looking.
+
+**How it works.** A file, `standards.yml`, lists the checks: has a git repo, has
+a remote, has agent context, has a spec, committed in the last thirty days.
+Every check is a fixed, named function that re-derives its answer from the
+actual state of the world each time it is asked. "Has a remote" runs
+`git remote`. "Is it running" asks the Docker socket. "Has a spec" looks at the
+filesystem. There is no field anywhere that a person or an agent can tick.
+
+The other half of honest checking is refusing to pretend. A check can come back
+**pass**, **fail**, **not applicable** (a vendored third-party service is not
+expected to have a spec), **unknown** (the host was unreachable), or **stale**.
+Those are five different answers and the page shows them as five different
+things. A grid of green that includes three "I could not actually check this"
+cells dressed up as passes is worse than no grid.
+
+<Figure caption="A check does not read a stored result. It re-runs against git, the Docker socket, or the filesystem every time, and it is allowed to answer 'I don't know'.">
+  <svg viewBox="0 0 320 132" role="img" aria-label="A standards check queries git, the Docker socket or the filesystem live, and returns one of pass, fail, not-applicable, unknown or stale.">
+    <rect x="10" y="52" width="74" height="26" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="47" y="69" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">a check</text>
+
+    <g stroke="#5cb3e6" stroke-width="1.1" stroke-opacity="0.8" fill="none">
+      <path d="M84 60 C 110 60, 116 30, 142 30" />
+      <path d="M84 65 H 142" />
+      <path d="M84 70 C 110 70, 116 100, 142 100" />
+    </g>
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#5cb3e6">
+      <text x="146" y="33">git log / git remote</text>
+      <text x="146" y="68">the Docker socket</text>
+      <text x="146" y="103">the filesystem</text>
+    </g>
+
+    <path d="M47 78 V 118 H 150" stroke="#26cb96" stroke-width="1.3" fill="none" />
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5">
+      <text x="156" y="121" fill="#26cb96">pass</text>
+      <text x="188" y="121" fill="#e26c62">fail</text>
+      <text x="214" y="121" fill="#87898d">n/a</text>
+      <text x="238" y="121" fill="#87898d">unknown</text>
+      <text x="284" y="121" fill="#dca63c">stale</text>
+    </g>
+  </svg>
+</Figure>
+
+## Planning: ideas need their own water
+
+**Why it is here.** Half-formed ideas kept washing into the real project list
+and cluttering it. An idea is not a project. It has no repo, no container, no
+standard to meet. It needs somewhere to sit and be thought about without
+pretending to be a ship.
+
+**How it works.** A parallel set of folders, `planning/IDEA-N/`, each with a
+short `task.yml` and a `NOTES.md`. An idea moves along a track: idea, then
+planning, then ready, then graduated. When it graduates, I do not move any
+files. I edit the stage in place and fill in the host, path and repo it now
+has. The planning note stays as the record of where the project came from.
+
+## Servers: the near deck and the far anchorages
+
+**Why it is here.** "What is actually running, and is a disk about to fill"
+should not require me to SSH around five machines and run `df` on each one.
+
+**How it works.** There are two cases.
+
+**Caspar**, the machine that does most of the work, is where Control Room itself
+runs. It reads that host directly: the Docker socket for every container, and a
+fixed read-only script for disk, memory, load and `docker stats`. Live, every
+few seconds.
+
+The **far hosts**, lighthouse and the two production boxes, are reached through
+a single dedicated SSH key that can only ever run one read-only reporting
+script and nothing else. No shell, no file writes, no reaching further into the
+network. That key, and how it was locked down, is
+[its own note](/notes/a-key-with-one-job). The data from those hosts is a
+snapshot from the last time the page asked, not a live feed, and the page says
+so rather than pretending otherwise.
+
+<Figure caption="The host Control Room lives on is read directly. The far hosts are read through one key that can only run one script.">
+  <svg viewBox="0 0 320 150" role="img" aria-label="Control Room reads Caspar directly through the Docker socket. It reads lighthouse, gp-forms-prod and podusa-prod through a single locked-down SSH key.">
+    <rect x="120" y="58" width="84" height="30" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
+    <text x="162" y="77" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#26cb96">Control Room</text>
+
+    <path d="M120 66 H 70 V 40 H 40" stroke="#26cb96" stroke-width="1.5" fill="none" />
+    <text x="34" y="43" text-anchor="end" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">Caspar</text>
+    <text x="66" y="34" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">socket, live</text>
+
+    <path d="M204 73 H 244" stroke="#5cb3e6" stroke-width="1.4" fill="none" />
+    <rect x="244" y="60" width="24" height="26" rx="4" fill="#101216" stroke="#5cb3e6" stroke-opacity="0.6" />
+    <text x="256" y="77" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#5cb3e6">key</text>
+    <g stroke="#5cb3e6" stroke-width="1.1" stroke-opacity="0.75" fill="none">
+      <path d="M268 66 C 288 66, 290 30, 308 30" />
+      <path d="M268 73 H 308" />
+      <path d="M268 80 C 288 80, 290 116, 308 116" />
+    </g>
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#c9cacd">
+      <text x="292" y="24">lighthouse</text>
+      <text x="292" y="76">gp-forms</text>
+      <text x="292" y="119">podusa</text>
+    </g>
+    <text x="256" y="103" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">point-in-time</text>
+  </svg>
+</Figure>
+
+## Handoff: the log the last watch left
+
+**Why it is here.** This is the one that actually hurt. An agent session would
+hit its context limit or its usage limit partway through a job, and the next
+session, sometimes a different agent entirely, had no reliable way to tell what
+had been finished from what had only been tried. A log that says "should work"
+when the truth is "untested" is worse than no log, because it invites the next
+watch to build on sand.
+
+**How it works.** Every project folder can carry a `HANDOFF.md`: an append-only
+log, newest entry on top, each entry a timestamp, which agent wrote it, what was
+just done, the state of things said plainly, and the concrete next step.
+Alongside it sits `HANDOFF.yml`, a bounded snapshot: the current checkpoint in
+full, plus a short trail of the last few compressed to one line each, so a
+hasty checkpoint cannot erase the trajectory that led to it.
+
+Both files are only ever written through one small command line tool. You run
+`start` when you begin, `checkpoint` after every verified milestone and at least
+every half hour, and `finish` before a planned stop. On takeover you run
+`resume` and read only that snapshot, never the whole history. The tool
+serialises writers with a per-project lock and refuses a checkpoint from an
+agent that is not the current owner. That is what stops two sessions quietly
+writing over each other.
+
+What makes it work is the discipline, more than the mechanism. A checkpoint has
+to separate verified from attempted, include the actual test output, name the
+blockers still open, and give exactly one next action. "Ran the suite, 14 pass,
+2 fail on the timezone helper, next is `toLocal()`" is a good checkpoint. "Made
+progress" is not.
+
+## What is verified vs assumed
+
+**Verified.** This is the page I open first, and it is now the only place I go
+to check the fleet. Claude and Codex have both handed work between each other
+through the handoff files on real projects, including this website, with the
+resume snapshot plus `git status` being enough to carry on. The standards grid
+has caught two projects that had drifted off their remotes.
+
+**Assumed, and worth watching.** That plain files stay comfortable past thirty
+or forty projects before the folder itself gets unwieldy. That the computed
+checks stay cheap as the fleet grows, rather than turning every page load into a
+minute of `git` and Docker calls. That the half-hour checkpoint cadence is the
+right one and not just the first one I picked. It has been a week. None of those
+has bitten yet, which is not the same as none of them being real.
