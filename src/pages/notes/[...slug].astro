@@ -18,13 +18,50 @@ const { Content } = await render(note);
 
 const dateFmt = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
 const techSlug = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+const url = new URL(`/notes/${note.id}`, site.url).href;
+const published = note.data.date.toISOString();
+const modified = (note.data.updated ?? note.data.date).toISOString();
+const keywords = [...note.data.tracks, ...note.data.tech];
+
+const blogPosting = {
+  '@type': 'BlogPosting',
+  '@id': `${url}#article`,
+  headline: note.data.title,
+  description: note.data.summary,
+  datePublished: published,
+  dateModified: modified,
+  author: { '@id': `${site.url}/#person` },
+  publisher: { '@id': `${site.url}/#person` },
+  isPartOf: { '@id': `${site.url}/#website` },
+  mainEntityOfPage: url,
+  url,
+  image: new URL(note.data.hero?.src ?? site.ogImage, site.url).href,
+  articleSection: note.data.tracks[0],
+  keywords: keywords.join(', '),
+  inLanguage: 'en',
+};
+const breadcrumb = {
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: site.name, item: site.url },
+    { '@type': 'ListItem', position: 2, name: note.data.title, item: url },
+  ],
+};
 ---
 
 <BaseLayout
   title={note.data.title}
   description={note.data.summary}
   current="notes"
+  type="article"
   ogImage={note.data.hero?.src ?? undefined}
+  ogImageAlt={note.data.hero?.alt ?? `${note.data.title} — ${site.name}`}
+  publishedTime={published}
+  modifiedTime={modified}
+  tags={keywords}
+  section={note.data.tracks[0]}
+  jsonLd={[blogPosting, breadcrumb]}
 >
   <article>
     <header class="note-head">

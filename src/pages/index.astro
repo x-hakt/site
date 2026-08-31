@@ -7,9 +7,27 @@ const notes = (await getCollection('notes', ({ data }) => import.meta.env.PROD ?
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 const dateFmt = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
+
+const blog = {
+  '@type': 'Blog',
+  '@id': `${site.url}/#blog`,
+  url: site.url,
+  name: `${site.name} — ${site.tagline}`,
+  description: site.description,
+  inLanguage: 'en',
+  publisher: { '@id': `${site.url}/#person` },
+  blogPost: notes.map((n) => ({
+    '@type': 'BlogPosting',
+    headline: n.data.title,
+    url: new URL(`/notes/${n.id}`, site.url).href,
+    datePublished: n.data.date.toISOString(),
+    dateModified: (n.data.updated ?? n.data.date).toISOString(),
+    author: { '@id': `${site.url}/#person` },
+  })),
+};
 ---
 
-<BaseLayout current="notes" wide>
+<BaseLayout current="notes" wide jsonLd={blog}>
   <section class="intro">
     <h1>{site.tagline}</h1>
     <img

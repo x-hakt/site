@@ -5,8 +5,13 @@ export const site = {
   url: 'https://x-hakt.com',
   // style guide s.01 — the tagline, lower-case, dry. XH-13: a captain's log kept ashore.
   tagline: 'a landlocked captain’s log',
-  // not shown on the page; only <meta description>, OG, and the feed
-  description: 'The workbench log of x, a captain with no ship and no crew.',
+  // not shown on the page; only <meta description>, OG, and the feed. Keep it
+  // substantive for search: say what the site actually is.
+  description:
+    'How one small self-hosted server fleet is actually run. Long-form, illustrated notes on Docker, SSH hardening, backups, a Nebula mesh, Postgres, Astro and the tooling around them, written by the person doing it.',
+  // 1200x630 social card in /public
+  ogImage: '/og-default.png',
+  ogImageAlt: 'x-hakt.com — a landlocked captain’s log',
   // The site is pseudonymous. The author is "x" (XH-3); every entry signs off "-x".
   author: 'x',
   byline: 'x',

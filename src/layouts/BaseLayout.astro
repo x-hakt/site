@@ -10,6 +10,17 @@ interface Props {
   current?: string;
   /** absolute or root-relative OG image; defaults to the site card */
   ogImage?: string;
+  ogImageAlt?: string;
+  /** "website" (default) or "article" for a note */
+  type?: 'website' | 'article';
+  /** article only, ISO strings */
+  publishedTime?: string;
+  modifiedTime?: string;
+  /** article only */
+  tags?: string[];
+  section?: string;
+  /** page-specific JSON-LD node(s), merged into the site graph */
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
   /** widen the main column (index / wide content) */
   wide?: boolean;
 }
@@ -18,7 +29,14 @@ const {
   title,
   description = site.description,
   current,
-  ogImage = '/og-default.png',
+  ogImage = site.ogImage,
+  ogImageAlt = site.ogImageAlt,
+  type = 'website',
+  publishedTime,
+  modifiedTime,
+  tags = [],
+  section,
+  jsonLd,
   wide = false,
 } = Astro.props;
 
@@ -26,6 +44,40 @@ const pageTitle = title ? `${title} · ${site.name}` : `${site.name} — ${site.
 const canonical = new URL(Astro.url.pathname, site.url).href;
 const ogImageAbs = new URL(ogImage, site.url).href;
 const year = new Date().getFullYear();
+
+// Meta descriptions and previews get truncated by every consumer anyway; keep a
+// tight one so search snippets read as whole sentences.
+const metaDescription =
+  description.length > 158 ? description.slice(0, 155).replace(/\s+\S*$/, '') + '…' : description;
+
+// Site-wide structured data: the blog, its author, and a search action that
+// deep-links the map's spyglass. Page-specific nodes (BlogPosting, breadcrumbs)
+// are appended by the caller via `jsonLd`.
+const person = {
+  '@type': 'Person',
+  '@id': `${site.url}/#person`,
+  name: site.author,
+  url: site.url,
+};
+const graph: Record<string, unknown>[] = [
+  person,
+  {
+    '@type': 'WebSite',
+    '@id': `${site.url}/#website`,
+    url: site.url,
+    name: site.name,
+    description: site.description,
+    inLanguage: 'en',
+    publisher: { '@id': `${site.url}/#person` },
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: { '@type': 'EntryPoint', urlTemplate: `${site.url}/map?q={search_term_string}` },
+      'query-input': 'required name=search_term_string',
+    },
+  },
+  ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : []),
+];
+const structuredData = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph });
 ---
 
 <!doctype html>
@@ -33,22 +85,45 @@ const year = new Date().getFullYear();
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#07080a" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="canonical" href={canonical} />
 
     <title>{pageTitle}</title>
-    <meta name="description" content={description} />
+    <meta name="description" content={metaDescription} />
     <meta name="author" content={site.author} />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
 
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={type} />
     <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={pageTitle} />
-    <meta property="og:description" content={description} />
+    <meta property="og:description" content={metaDescription} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImageAbs} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogImageAlt} />
+    <meta property="og:locale" content="en_US" />
+
+    {type === 'article' && (
+      <>
+        {publishedTime && <meta property="article:published_time" content={publishedTime} />}
+        {(modifiedTime ?? publishedTime) && (
+          <meta property="article:modified_time" content={modifiedTime ?? publishedTime} />
+        )}
+        <meta property="article:author" content={site.author} />
+        {section && <meta property="article:section" content={section} />}
+        {tags.map((t) => <meta property="article:tag" content={t} />)}
+      </>
+    )}
+
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={metaDescription} />
+    <meta name="twitter:image" content={ogImageAbs} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
 
     <link
       rel="alternate"
@@ -56,6 +131,8 @@ const year = new Date().getFullYear();
       title={`${site.name} — ${site.tagline}`}
       href="/rss.xml"
     />
+
+    <script type="application/ld+json" set:html={structuredData} is:inline />
   </head>
 
   <body>
