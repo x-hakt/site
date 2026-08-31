@@ -1,6 +1,6 @@
 ---
 title: What changed since you last played
-summary: Steam already shows a combined news feed for the games you own, but you cannot search or filter it and the ordering barely makes sense. Here is the feed Playtopia built instead, with the same official posts sorted properly, made searchable and filterable, and everything published since you last played each game marked.
+summary: Steam already shows a combined news feed for the games you own, but you cannot search or filter it and the ordering barely makes sense. Here is the feed I built for Playtopia.com.au instead, with the same official posts sorted properly, made searchable and filterable, and everything published since you last played each game marked.
 date: 2026-08-31
 tracks: [infrastructure]
 tech: [nextjs, react, steam-api]
@@ -10,14 +10,12 @@ import Figure from '../../components/Figure.astro';
 
 ## The feed Steam almost gives you
 
-Playtopia is one of the busier hulls in the fleet: a games community site, live
-and earning, where a member connects their Steam account and pulls in their
+Playtopia is one of the larger hulls in my fleet: a games community site, where members can connect their Steam account and pulls in their
 whole library. After that the site knows what you own, how many hours you have
 put into each game, and when you last launched it.
 
 Steam itself does show you a combined news feed for the games you own or have
-installed. The trouble is what it does not do. You cannot search it. You cannot
-narrow it to one game, or to just the big updates. And the order it arrives in
+installed. The trouble is what it does not do well. Searching is just narrowing it to one game, or to just the big updates. And the order it arrives in
 only loosely follows recency, so a minor community post from a busy game sits
 above a major patch for one you actually care about. It is a feed in the sense
 that it is a list. It is not one you would choose to sit down and read.
@@ -27,7 +25,7 @@ the latest" but "what has changed since I last played this." Put a game down
 for three months, come back, and you want those three months in one place
 before you start.
 
-So Playtopia built its own: [My Game
+So I built my own: [My Game
 Feed](https://playtopia.com.au/news/my-games). The same source, the official
 Steam posts, but sorted newest first for real, searchable, filterable, and with
 every item published after your last session marked.
