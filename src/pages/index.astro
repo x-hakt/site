@@ -19,7 +19,7 @@ const blog = {
   blogPost: notes.map((n) => ({
     '@type': 'BlogPosting',
     headline: n.data.title,
-    url: new URL(`/notes/${n.id}`, site.url).href,
+    url: new URL(`/notes/${n.id}/`, site.url).href,
     datePublished: n.data.date.toISOString(),
     dateModified: (n.data.updated ?? n.data.date).toISOString(),
     author: { '@id': `${site.url}/#person` },

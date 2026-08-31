@@ -19,7 +19,8 @@ const { Content } = await render(note);
 const dateFmt = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
 const techSlug = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 
-const url = new URL(`/notes/${note.id}`, site.url).href;
+// trailing slash to match the canonical Astro emits (directory build format)
+const url = new URL(`/notes/${note.id}/`, site.url).href;
 const published = note.data.date.toISOString();
 const modified = (note.data.updated ?? note.data.date).toISOString();
 const keywords = [...note.data.tracks, ...note.data.tech];
