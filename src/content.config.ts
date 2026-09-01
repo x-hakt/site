@@ -40,16 +40,4 @@ const notes = defineCollection({
   }),
 });
 
-// Long-form docs mirrored from a project's own repo (e.g. a README). Rendered on
-// its /locker/<slug> page so the site copy tracks what's on GitHub.
-const docs = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './src/content/docs' }),
-  schema: z.object({
-    title: z.string(),
-    summary: z.string(),
-    repo: z.string().url().optional(),
-    npm: z.string().optional(),
-  }),
-});
-
-export const collections = { notes, docs };
+export const collections = { notes };

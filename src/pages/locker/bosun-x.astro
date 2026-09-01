@@ -1,57 +1,369 @@
 ---
-import { getEntry, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Figure from '../../components/Figure.astro';
 import { site } from '../../site';
 
-const entry = await getEntry('docs', 'bosun-x');
-if (!entry) throw new Error('docs/bosun-x.md missing');
-const { Content } = await render(entry);
-const { title, summary, repo, npm } = entry.data;
+const repo = 'https://github.com/x-hakt/bosun-x';
+const npm = 'bosun-x';
 
-const app = {
+const nav = [
+  { id: 'what', label: 'what it is' },
+  { id: 'problem', label: 'the problem' },
+  { id: 'how', label: 'how it works' },
+  { id: 'nocode', label: "if you don't code" },
+  { id: 'install', label: 'get it' },
+  { id: 'use', label: 'use it' },
+  { id: 'agent', label: 'wire an AI' },
+  { id: 'model', label: 'under the hood' },
+];
+
+const jsonLd = {
   '@type': 'SoftwareSourceCode',
   '@id': `${site.url}/locker/bosun-x/#src`,
-  name: title,
-  description: summary,
+  name: 'bosun-x',
+  description: 'Cross-agent handoff and task tracking for projects worked by AI agents. Plain files, one lock, no vendor.',
   url: `${site.url}/locker/bosun-x/`,
   codeRepository: repo,
   programmingLanguage: 'JavaScript',
   runtimePlatform: 'Node.js',
   license: 'https://spdx.org/licenses/MIT.html',
 };
+
+const MONO = "'IBM Plex Mono', ui-monospace, monospace";
 ---
 
-<BaseLayout title={title} description={summary} current="locker" jsonLd={app}>
-  <section class="bhead">
-    <p class="bhead__crumb"><a href="/locker">x’s locker</a> / bosun-x</p>
-    <p class="bhead__kind">a tool you install — not one that runs here</p>
-    <div class="bhead__links">
-      {repo && (
-        <a href={repo} rel="noopener">
-          repo <span aria-hidden="true">↗</span>
-        </a>
-      )}
-      {npm && (
-        <a href={`https://www.npmjs.com/package/${npm}`} rel="noopener">
-          npm: {npm} <span aria-hidden="true">↗</span>
-        </a>
-      )}
-    </div>
-    <p class="bhead__mirror">
-      This page mirrors the project’s README. The source of truth is
-      {repo ? <a href={repo} rel="noopener">the repo</a> : 'the repo'}.
-    </p>
-  </section>
+<BaseLayout
+  title="bosun-x"
+  description="Cross-agent handoff and task tracking for projects worked by AI agents. Plain files, one lock, no vendor. A CLI and an MCP server."
+  current="locker"
+  wide
+  jsonLd={jsonLd}
+>
+  <p class="crumb"><a href="/locker">x’s locker</a> / bosun-x</p>
 
-  <article class="prose bdoc">
-    <Content />
-  </article>
+  <nav class="subnav" aria-label="On this page">
+    {nav.map((n) => <a href={`#${n.id}`}>{n.label}</a>)}
+  </nav>
+
+  <div class="doc">
+    <section id="what" class="s">
+      <span class="s__kind">a tool you install — not one that runs here</span>
+      <h1>bosun&#8209;x</h1>
+      <p class="lede">
+        Cross-agent handoff and task tracking for a set of projects you build with AI. The bosun is
+        the hand who keeps the ship and crew in working order; bosun&#8209;x does that for your
+        projects — a record of what’s actually done, a clean starting point for the next session, and
+        a task board that can’t drift.
+      </p>
+      <p class="sub">A command-line tool and an <abbr title="Model Context Protocol">MCP</abbr> server over the same plain files. MIT.</p>
+      <div class="btns">
+        <a class="btn" href={repo} rel="noopener">the repo <span aria-hidden="true">↗</span></a>
+        <a class="btn btn--ghost" href={`https://www.npmjs.com/package/${npm}`} rel="noopener">npm: {npm} <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+
+    <section id="problem" class="s">
+      <h2>the problem</h2>
+      <p>
+        If you build software with an AI assistant across more than one project, you know the tax.
+        Every session starts cold — you re-explain what the project is, what’s done, what you were
+        mid-way through, what not to touch. The record drifts: the assistant thinks a task is
+        finished, the code says otherwise. Two assistants in two windows edit the same project,
+        neither aware of the other. A session hits its limit mid-task and the next one has to guess
+        what was already decided.
+      </p>
+      <p>
+        bosun&#8209;x is the small amount of structure that fixes this — with no database, no web
+        app, and no subscription. If you have one project and one assistant, you probably don’t need
+        it. It earns its place once picking work back up has started to hurt.
+      </p>
+    </section>
+
+    <section id="how" class="s">
+      <h2>how it works</h2>
+      <p>
+        When you start work, you open a <strong>handoff</strong>. As you go, you <strong>checkpoint</strong>
+        what’s verified done, where things stand, and the one next action. Two files get written: an
+        append-only log of everything, and a small fixed-size snapshot. The next session reads only
+        the snapshot.
+      </p>
+
+      <Figure caption="A checkpoint writes both files. Resume reads only the bounded snapshot — the current state plus a trail of the last four one-liners, so a hasty checkpoint can’t erase the trajectory.">
+        <svg viewBox="0 0 640 214" role="img" aria-label="Session one checkpoints, writing the full HANDOFF.md log and the bounded HANDOFF.yml snapshot. Session two resumes by reading only the snapshot.">
+          <rect x="12" y="80" width="104" height="34" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+          <text x="64" y="101" text-anchor="middle" font-family={MONO} font-size="10" fill="#eaebec">session one</text>
+
+          <path d="M116 97 H 176" stroke="#26cb96" stroke-width="1.5" fill="none" marker-end="url(#a)" />
+          <text x="146" y="90" text-anchor="middle" font-family={MONO} font-size="8" fill="#87898d">checkpoint</text>
+
+          <rect x="188" y="24" width="180" height="52" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+          <text x="200" y="43" font-family={MONO} font-size="9" fill="#c9cacd">HANDOFF.md</text>
+          <text x="200" y="59" font-family={MONO} font-size="8" fill="#5c5e62">every entry, kept forever</text>
+
+          <rect x="188" y="118" width="180" height="66" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" />
+          <text x="200" y="137" font-family={MONO} font-size="9" fill="#26cb96">HANDOFF.yml</text>
+          <text x="200" y="153" font-family={MONO} font-size="8" fill="#87898d">latest state, in full</text>
+          <text x="200" y="167" font-family={MONO} font-size="8" fill="#87898d">+ a trail of the last 4</text>
+
+          <path d="M176 92 C 184 92, 184 50, 188 50" stroke="#5c5e62" stroke-width="1.3" fill="none" />
+          <path d="M176 102 C 184 102, 184 150, 188 150" stroke="#26cb96" stroke-width="1.5" fill="none" />
+
+          <path d="M368 150 H 452" stroke="#26cb96" stroke-width="1.5" fill="none" marker-end="url(#a)" />
+          <text x="410" y="143" text-anchor="middle" font-family={MONO} font-size="8" fill="#87898d">resume</text>
+
+          <rect x="464" y="130" width="104" height="34" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+          <text x="516" y="151" text-anchor="middle" font-family={MONO} font-size="10" fill="#eaebec">session two</text>
+
+          <text x="516" y="184" text-anchor="middle" font-family={MONO} font-size="7.5" fill="#5c5e62">reads this, nothing else</text>
+
+          <defs>
+            <marker id="a" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0 0 L8 4 L0 8 z" fill="#26cb96" />
+            </marker>
+          </defs>
+        </svg>
+      </Figure>
+
+      <p>
+        Writes go through one command that holds a per-project lock, so two assistants working the
+        same project take turns instead of clobbering each other — and a checkpoint from the wrong
+        one is rejected outright.
+      </p>
+
+      <Figure caption="One writer at a time. A checkpoint from an assistant that doesn’t hold the current turn is refused, not merged.">
+        <svg viewBox="0 0 600 196" role="img" aria-label="Claude and Codex both write through bosun, which serialises them with a lock and writes the project's plain files. A checkpoint from Codex while Claude holds the turn is rejected.">
+          <rect x="12" y="26" width="96" height="30" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+          <text x="60" y="45" text-anchor="middle" font-family={MONO} font-size="10" fill="#eaebec">Claude</text>
+          <rect x="12" y="118" width="96" height="30" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+          <text x="60" y="137" text-anchor="middle" font-family={MONO} font-size="10" fill="#eaebec">Codex</text>
+
+          <path d="M108 41 C 170 41, 180 84, 232 84" stroke="#26cb96" stroke-width="1.5" fill="none" marker-end="url(#b)" />
+          <path d="M108 133 C 170 133, 180 96, 232 96" stroke="#e5484d" stroke-width="1.3" stroke-dasharray="3 3" fill="none" marker-end="url(#c)" />
+          <text x="150" y="150" text-anchor="middle" font-family={MONO} font-size="7.5" fill="#e5484d">wrong turn → rejected</text>
+
+          <rect x="244" y="70" width="96" height="34" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
+          <text x="292" y="86" text-anchor="middle" font-family={MONO} font-size="10" fill="#26cb96">bosun</text>
+          <text x="292" y="98" text-anchor="middle" font-family={MONO} font-size="7.5" fill="#87898d">holds the lock</text>
+
+          <path d="M340 87 H 404" stroke="#26cb96" stroke-width="1.5" fill="none" marker-end="url(#b)" />
+
+          <rect x="416" y="58" width="168" height="58" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+          <text x="430" y="78" font-family={MONO} font-size="9" fill="#c9cacd">the project’s files</text>
+          <text x="430" y="94" font-family={MONO} font-size="8" fill="#5c5e62">HANDOFF · tasks · STATUS</text>
+          <text x="430" y="107" font-family={MONO} font-size="8" fill="#5c5e62">plain YAML and Markdown</text>
+
+          <defs>
+            <marker id="b" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0 0 L8 4 L0 8 z" fill="#26cb96" />
+            </marker>
+            <marker id="c" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0 0 L8 4 L0 8 z" fill="#e5484d" />
+            </marker>
+          </defs>
+        </svg>
+      </Figure>
+    </section>
+
+    <section id="nocode" class="s">
+      <h2>if you don’t write code</h2>
+      <p>
+        Plenty of people build real apps now without writing the code themselves — they describe what
+        they want and an AI assistant does the typing. If that’s you, bosun&#8209;x is still for you,
+        and you don’t run any of the commands on this page yourself.
+      </p>
+      <p>You point your assistant at it once:</p>
+      <blockquote class="say">
+        “Set up bosun&#8209;x for this project — the repo is
+        <span class="say__url">github.com/x-hakt/bosun-x</span>. From now on, checkpoint your progress
+        as you work, and when I say <em>resume</em>, pick up from the last checkpoint.”
+      </blockquote>
+      <p>
+        After that, the difference is: you stop re-explaining your project every time you sit down.
+        You open a session and say “resume the pricing page,” and the assistant already knows the
+        three-tier layout is done, the toggle is half-built, and the next job is wiring the prices —
+        because the last session wrote that down in a form the next one can read. You can also ask
+        “what’s the state of everything?” and get a straight list across all your projects.
+      </p>
+      <p class="aside">
+        It’s a folder of plain text files in your project. Nothing is uploaded anywhere, nothing runs
+        in the background, and you can open any of it in a normal text editor if you ever want to
+        look.
+      </p>
+    </section>
+
+    <section id="install" class="s">
+      <h2>get it</h2>
+      <p>Node 20 or newer. Once it’s published to npm:</p>
+      <pre class="code"><code>npm i -g bosun-x          # or run it ad-hoc with: npx bosun-x &lt;command&gt;</code></pre>
+      <p>Until then, from source:</p>
+      <pre class="code"><code>git clone https://github.com/x-hakt/bosun-x
+cd bosun-x && npm install && npm link</code></pre>
+      <p>
+        Run <code>bosun</code> from the directory that holds your project data, or point
+        <code>$BOSUN_DATA</code> at it. Projects live in <code>&lt;data&gt;/projects/&lt;slug&gt;/</code>.
+      </p>
+      <h3>configure</h3>
+      <table class="cfg">
+        <tbody>
+          <tr><td><code>$BOSUN_DATA</code></td><td>where the projects live (default: the current directory)</td></tr>
+          <tr><td><code>$BOSUN_TZ</code></td><td>timezone for timestamps (default: the system zone). Or <code>timezone</code> in <code>bosun.config.json</code>.</td></tr>
+          <tr><td><code>$BOSUN_STALE_MINUTES</code></td><td>when an open handoff is flagged stale (default: 30)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="use" class="s">
+      <h2>use it</h2>
+      <p>The loop, once per project:</p>
+      <pre class="code"><code># starting work
+bosun start pricing-page --agent Claude --summary "rebuild the pricing page" --task PP-1
+
+# after every verified milestone, at least every 30 min, and before anything risky
+bosun checkpoint pricing-page --agent Claude \
+  --done "three-tier layout done, responsive to 360px" \
+  --state "the annual/monthly toggle is stubbed, no real prices wired" \
+  --next "pull prices from config and wire the toggle" \
+  --task PP-2 --tests "visual check at 360/768/1200: clean"
+
+# before you stop
+bosun finish pricing-page --agent Claude --done "..." --state "..." --next "..." --task PP-2</code></pre>
+
+      <p>On the next session, before touching anything:</p>
+      <div class="term" role="img" aria-label="Output of 'bosun resume pricing-page': project, status active, agent Claude, the current work, state, verification and next step, then a trail of one older checkpoint.">
+        <div class="term__bar"><span></span><span></span><span></span></div>
+        <pre>$ bosun resume pricing-page
+
+project:       pricing-page
+status:        active
+agent:         Claude
+tasks:         PP-2
+checkpoint:    2026-09-01T14:50 (3m ago)
+work:          three-tier layout done, responsive to 360px
+current_state: the annual/monthly toggle is stubbed, no real prices wired
+verification:  visual check at 360/768/1200: clean
+next_step:     pull prices from config and wire the toggle
+
+trail (older, newest first):
+  - 14:12 Claude: rebuild the pricing page</pre>
+      </div>
+
+      <p>And to see the whole fleet at a glance, or catch anything that’s drifted:</p>
+      <div class="term" role="img" aria-label="Output of 'bosun status' and 'bosun doctor': one line per project, then a clean bill of health.">
+        <div class="term__bar"><span></span><span></span><span></span></div>
+        <pre>$ bosun status
+pricing-page:  active   · Claude · 3m · PP-2 · three-tier layout done
+marketing-api: finished · Codex  · 2d  · shipped rate limiting
+docs-site:     stale    · Claude · 5h  · mid-migration to Astro
+
+$ bosun doctor
+bosun doctor: all tracked projects are initialized, no drift</pre>
+      </div>
+    </section>
+
+    <section id="agent" class="s">
+      <h2>wire an AI to it</h2>
+      <p><strong>1. The convention, in the file your assistant reads.</strong> From inside a project:</p>
+      <pre class="code"><code>bosun init</code></pre>
+      <p>
+        adds a short managed block — the checkpoint discipline in a few lines — to whichever of
+        <code>CLAUDE.md</code>, <code>AGENTS.md</code>, <code>.cursorrules</code> or
+        <code>copilot-instructions.md</code> is already there.
+      </p>
+      <p><strong>2. The MCP server</strong>, so your assistant has real tools instead of shelling out:</p>
+      <pre class="code"><code>{`{
+  "mcpServers": {
+    "bosun-x": {
+      "command": "bosun-mcp",
+      "env": { "BOSUN_DATA": "/abs/path/to/your/data" }
+    }
+  }
+}`}</code></pre>
+      <p>
+        Drop that into Claude Code’s <code>.mcp.json</code>, Claude Desktop’s config, or the same
+        field in Cursor / Cline / Zed / Codex. It exposes <code>project_brief</code> (the
+        session-start bundle), <code>list_projects</code>, <code>list_tasks</code>, the handoff
+        verbs, <code>set_task_status</code> and <code>create_task</code>.
+      </p>
+      <p>
+        <strong>3. The skill</strong> (Claude Code) — <code>skill/bosun/SKILL.md</code> in the repo
+        teaches the discipline and triggers on “resume”, “checkpoint”, “pick up work on”.
+      </p>
+    </section>
+
+    <section id="model" class="s">
+      <h2>under the hood</h2>
+      <p>One directory per project. Every file is meant to be read and edited by hand as comfortably as by the tool — <code>grep</code> is a first-class client.</p>
+
+      <Figure caption="projects/&lt;slug&gt;/ — the whole contract. No database, no proprietary format.">
+        <svg viewBox="0 0 480 236" role="img" aria-label="The files under projects/pricing-page/: project.yml (metadata), HANDOFF.md (the full log), HANDOFF.yml (the resume snapshot), tasks.yml (the board), STATUS.md (your notes plus a generated summary).">
+          <rect x="10" y="10" width="460" height="216" rx="8" fill="#0d0e11" stroke="rgba(255,255,255,0.12)" />
+          <text x="26" y="32" font-family={MONO} font-size="9" fill="#87898d">projects/pricing-page/</text>
+
+          <g font-family={MONO} font-size="9.5">
+            <rect x="26" y="44" width="140" height="30" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+            <text x="38" y="63" fill="#eaebec">project.yml</text>
+            <text x="182" y="63" fill="#5c5e62" font-size="8.5">name, stage, repo, host</text>
+
+            <rect x="26" y="82" width="140" height="30" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+            <text x="38" y="101" fill="#eaebec">HANDOFF.md</text>
+            <text x="182" y="101" fill="#5c5e62" font-size="8.5">the full log, newest on top</text>
+
+            <rect x="26" y="120" width="140" height="30" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" />
+            <text x="38" y="139" fill="#26cb96">HANDOFF.yml</text>
+            <text x="182" y="139" fill="#5c5e62" font-size="8.5">the bounded resume snapshot</text>
+
+            <rect x="26" y="158" width="140" height="30" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+            <text x="38" y="177" fill="#eaebec">tasks.yml</text>
+            <text x="182" y="177" fill="#5c5e62" font-size="8.5">the board: PP-1, PP-2, …</text>
+
+            <rect x="26" y="196" width="140" height="24" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+            <text x="38" y="212" fill="#eaebec">STATUS.md</text>
+            <text x="182" y="212" fill="#5c5e62" font-size="8.5">your prose + a generated board</text>
+          </g>
+        </svg>
+      </Figure>
+
+      <p>
+        Anything an incoming assistant reads has a token budget: the snapshot is bounded, the trail
+        is clipped one-liners, and noisy work-in-progress is collapsed into one clean entry before
+        you finish. The full technical reference — every command, the config, the MCP tool list —
+        is in the <a href={repo} rel="noopener">README on GitHub</a>.
+      </p>
+    </section>
+  </div>
 </BaseLayout>
 
 <style>
-  .bhead { border-bottom: 1px solid var(--border); padding-bottom: 22px; margin-bottom: 28px; }
-  .bhead__crumb { font-family: var(--font-mono); font-size: 12px; color: var(--color-faint); margin: 0 0 0.6rem; }
-  .bhead__kind {
+  .crumb { font-family: var(--font-mono); font-size: 12px; color: var(--color-faint); margin: 0 0 1rem; }
+
+  .subnav {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    padding: 12px 0;
+    margin-bottom: 8px;
+    background: color-mix(in srgb, var(--color-bg) 90%, transparent);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .subnav a { color: var(--color-dim); }
+  .subnav a:hover { color: var(--color-green); text-decoration: none; }
+
+  .doc { max-width: 46rem; }
+
+  .s { padding-block: 30px; border-bottom: 1px solid var(--border); scroll-margin-top: 56px; }
+  .s:last-child { border-bottom: 0; }
+  .s h2 { font-size: 1.15rem; margin: 0 0 0.8rem; }
+  .s h3 { font-size: 0.9rem; margin: 1.8rem 0 0.6rem; color: var(--color-fg-soft); }
+  .s p { color: var(--color-fg-soft); margin: 0 0 1rem; line-height: 1.75; }
+  .s p:last-child { margin-bottom: 0; }
+
+  .s__kind {
     display: inline-block;
     font-family: var(--font-mono);
     font-size: 11px;
@@ -59,15 +371,76 @@ const app = {
     border: 1px solid var(--color-amber);
     border-radius: 999px;
     padding: 2px 10px;
-    margin: 0 0 0.9rem;
+    margin-bottom: 1rem;
   }
-  .bhead__links { display: flex; flex-wrap: wrap; gap: 16px; font-family: var(--font-mono); font-size: 12.5px; margin: 0 0 0.75rem; }
-  .bhead__links a { color: var(--color-green); }
-  .bhead__mirror { color: var(--color-dim); font-size: 13px; margin: 0; }
+  #what h1 { font-size: clamp(1.8rem, 5vw, 2.4rem); letter-spacing: -0.02em; margin: 0 0 0.6rem; }
+  .lede { font-size: 1.08rem; color: var(--color-fg-soft) !important; }
+  .sub { color: var(--color-dim) !important; font-size: 0.95rem; }
+  .aside { color: var(--color-dim) !important; font-size: 0.92rem; border-left: 2px solid var(--border-2); padding-left: 14px; }
 
-  .bdoc { margin-inline: 0; }
-  .bdoc :global(h1) { font-size: clamp(1.7rem, 4.4vw, 2.1rem); letter-spacing: -0.02em; margin: 0 0 0.4rem; }
-  .bdoc :global(h1 + p) { color: var(--color-fg-soft); font-size: 1.05rem; }
-  .bdoc :global(table) { font-size: 0.92rem; }
-  .bdoc :global(hr) { border: 0; border-top: 1px solid var(--border); margin: 2.2rem 0; }
+  .btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 0.5rem; }
+  .btn {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 9px 16px;
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-green);
+    background: color-mix(in srgb, var(--color-green) 14%, transparent);
+    color: var(--color-green);
+  }
+  .btn:hover { background: color-mix(in srgb, var(--color-green) 22%, transparent); text-decoration: none; }
+  .btn--ghost { border-color: var(--border-2); background: transparent; color: var(--color-dim); }
+  .btn--ghost:hover { color: var(--color-fg); background: var(--color-accent-bg); }
+
+  .say {
+    margin: 0 0 1rem;
+    padding: 14px 16px;
+    border-left: 2px solid var(--color-green);
+    background: var(--color-surface);
+    color: var(--color-fg-soft);
+    font-size: 0.98rem;
+    line-height: 1.7;
+  }
+  .say__url { color: var(--color-green); font-family: var(--font-mono); font-size: 0.9em; }
+
+  .code {
+    background: var(--color-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    padding: 12px 14px;
+    overflow-x: auto;
+    margin: 0 0 1rem;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.65;
+  }
+  .code code { color: var(--color-fg-soft); }
+
+  .cfg { width: 100%; border-collapse: collapse; font-size: 13px; margin: 0.5rem 0 0; }
+  .cfg td { padding: 8px 10px; border-top: 1px solid var(--border); color: var(--color-dim); vertical-align: top; }
+  .cfg td:first-child { white-space: nowrap; width: 1%; }
+  .cfg code { color: var(--color-green); }
+
+  .term {
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    margin: 0 0 1rem;
+    background: #0a0b0d;
+  }
+  .term__bar { display: flex; gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  .term__bar span { width: 9px; height: 9px; border-radius: 999px; background: var(--color-accent-bg); }
+  .term pre {
+    margin: 0;
+    padding: 14px 16px;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--color-fg-soft);
+  }
+
+  @media (max-width: 640px) {
+    .subnav { font-size: 11px; gap: 3px 10px; }
+  }
 </style>
