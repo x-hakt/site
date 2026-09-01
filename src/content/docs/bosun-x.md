@@ -4,7 +4,6 @@ summary: Cross-agent handoff and task tracking for projects worked by AI agents.
 repo: https://github.com/x-hakt/bosun-x
 npm: bosun-x
 ---
-
 # bosun-x
 
 **Cross-agent handoff and task tracking for projects worked by AI agents.**
@@ -62,11 +61,20 @@ picking work back up has started to hurt.
 
 ## Install
 
+Node 20+. Once it's on npm:
+
 ```
-npm i -g bosun-x      # or: npx bosun-x <command>
+npm i -g bosun-x          # or: npx bosun-x <command>
 ```
 
-Node 20+. Run `bosun` from your data directory (or point `$BOSUN_DATA` at it).
+Until then, from source:
+
+```
+git clone https://github.com/x-hakt/bosun-x
+cd bosun-x && npm install && npm link
+```
+
+Run `bosun` from your data directory, or point `$BOSUN_DATA` at it.
 
 ## The loop
 
