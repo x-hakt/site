@@ -68,9 +68,9 @@ see every deck at once.
   </svg>
 </Figure>
 
-## So I built Control Room
+## So I built bosun-x
 
-Control Room is a single web page I keep open on a second monitor. It lists
+bosun-x is a single web page I keep open on a second monitor. It lists
 every project and every machine, tells me which ones are healthy, which have
 drifted out of standard, and where an agent should pick the work back up.
 
@@ -133,7 +133,7 @@ moves folders. The record for a beached project is as real as the record for a
 live one; it just answers fewer questions.
 
 <Figure wide caption="One project is one folder of plain files. Three kinds of writer read and write it directly; the detail page also pulls live facts from the machine it runs on.">
-  <svg viewBox="0 0 362 170" role="img" aria-label="A project folder containing project.yml, SPEC.md, STATUS.md, IDEAS.md and HANDOFF.md. Claude, Codex and a human all read and write it. The Control Room page also reads the Docker socket and the git working tree.">
+  <svg viewBox="0 0 362 170" role="img" aria-label="A project folder containing project.yml, SPEC.md, STATUS.md, IDEAS.md and HANDOFF.md. Claude, Codex and a human all read and write it. The bosun-x page also reads the Docker socket and the git working tree.">
     <rect x="120" y="52" width="100" height="66" rx="6" fill="#101216" stroke="rgba(255,255,255,0.18)" />
     <text x="170" y="42" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#87898d">data/projects/&lt;slug&gt;/</text>
     <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#c9cacd">
@@ -167,7 +167,7 @@ live one; it just answers fewer questions.
 </Figure>
 
 <Figure wide plain caption="One vessel's page. Playtopia: the lifecycle stage, the containers read live off the Docker socket, the standards column, and the newest handoff with a staleness clock. Nothing on this page is stored; it is all read at the moment I open it.">
-  <img src="/shots/cr-project.webp" alt="The Control Room detail page for the playtopia project, showing its status, running containers, standards results and latest handoff." loading="lazy" />
+  <img src="/shots/cr-project.webp" alt="The bosun-x detail page for the playtopia project, showing its status, running containers, standards results and latest handoff." loading="lazy" />
 </Figure>
 
 ## Standards: seaworthiness, checked not claimed
@@ -218,7 +218,7 @@ cells dressed up as passes is worse than no grid.
 </Figure>
 
 <Figure wide plain caption="The audit matrix: one row per hull, one column per article. Green is a pass checked against the real thing, amber is stale, a dash is 'not applicable to this vessel', a blank is 'I could not tell'. The point is being able to see the whole fleet's seaworthiness in one glance instead of one project at a time.">
-  <img src="/shots/cr-standards.webp" alt="The Control Room standards page: a grid of projects against standards checks, colour-coded pass, stale, not-applicable and unknown." loading="lazy" />
+  <img src="/shots/cr-standards.webp" alt="The bosun-x standards page: a grid of projects against standards checks, colour-coded pass, stale, not-applicable and unknown." loading="lazy" />
 </Figure>
 
 ## Planning: ideas need their own water
@@ -241,7 +241,7 @@ should not require me to SSH around five machines and run `df` on each one.
 
 **How it works.** There are two cases.
 
-**Caspar**, the machine that does most of the work, is where Control Room itself
+**Caspar**, the machine that does most of the work, is where bosun-x itself
 runs. It reads that host directly: the Docker socket for every container, and a
 fixed read-only script for disk, memory, load and `docker stats`. Live, every
 few seconds.
@@ -254,10 +254,10 @@ network. That key, and how it was locked down, is
 snapshot from the last time the page asked, not a live feed, and the page says
 so rather than pretending otherwise.
 
-<Figure caption="The host Control Room lives on is read directly. The far hosts are read through one key that can only run one script.">
-  <svg viewBox="0 0 356 150" role="img" aria-label="Control Room reads Caspar directly through the Docker socket. It reads lighthouse, gp-forms-prod and podusa-prod through a single locked-down SSH key.">
+<Figure caption="The host bosun-x lives on is read directly. The far hosts are read through one key that can only run one script.">
+  <svg viewBox="0 0 356 150" role="img" aria-label="bosun-x reads Caspar directly through the Docker socket. It reads lighthouse, gp-forms-prod and podusa-prod through a single locked-down SSH key.">
     <rect x="120" y="58" width="84" height="30" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
-    <text x="162" y="77" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#26cb96">Control Room</text>
+    <text x="162" y="77" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#26cb96">bosun-x</text>
 
     <path d="M120 66 H 70 V 40 H 40" stroke="#26cb96" stroke-width="1.5" fill="none" />
     <text x="34" y="43" text-anchor="end" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">Caspar</text>
@@ -282,7 +282,7 @@ so rather than pretending otherwise.
 </Figure>
 
 <Figure wide plain caption="Caspar's page: the host itself at the top (disk, memory, load, all off the fixed read-only script), then every container on it, grouped by the project it belongs to. The far anchorages get the same layout, marked point-in-time.">
-  <img src="/shots/cr-servers.webp" alt="The Control Room server page for Caspar: host resource stats followed by its containers grouped by project." loading="lazy" />
+  <img src="/shots/cr-servers.webp" alt="The bosun-x server page for Caspar: host resource stats followed by its containers grouped by project." loading="lazy" />
 </Figure>
 
 ## Handoff: the log the last watch left
@@ -365,7 +365,7 @@ spoken to each other. Neither can see the other's work while it happens. What
 they share is the folder.
 
 Here is a normal week. I decide where the fleet is headed and what each hull is
-for. Control Room holds every one of them to the same articles, quietly, whether
+for. bosun-x holds every one of them to the same articles, quietly, whether
 I am looking or not, and tells me the moment one slips. Claude takes a job,
 works it, and leaves a log entry that says what is done and what is not. Days
 later Codex opens that same log, picks the work up mid-sentence, carries it
@@ -377,12 +377,12 @@ kept in step not by a meeting or a manager but by a folder of plain text that
 all three of us can open in an editor.
 
 <Figure wide caption="The loop. Nothing in it is clever. A person sets the course, one dashboard holds the standard and the shared memory, two agents work the decks and hand the watch between each other through the same files, and the board reads back to the person.">
-  <svg viewBox="0 0 360 200" role="img" aria-label="A cycle: a human sets the course, feeding Control Room, which holds standards and the handoff log. Claude and Codex both read and write Control Room and hand off to each other. The board feeds back to the human.">
+  <svg viewBox="0 0 360 200" role="img" aria-label="A cycle: a human sets the course, feeding bosun-x, which holds standards and the handoff log. Claude and Codex both read and write bosun-x and hand off to each other. The board feeds back to the human.">
     <rect x="140" y="8" width="80" height="24" rx="6" fill="#101216" stroke="rgba(255,255,255,0.2)" />
     <text x="180" y="24" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#eaebec">x (the course)</text>
 
     <rect x="118" y="78" width="124" height="46" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
-    <text x="180" y="97" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#26cb96">Control Room</text>
+    <text x="180" y="97" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#26cb96">bosun-x</text>
     <text x="180" y="112" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">standards + the handoff log</text>
 
     <path d="M172 32 V 78" stroke="rgba(255,255,255,0.3)" stroke-width="1.3" fill="none" marker-end="url(#a)" />

@@ -26,7 +26,7 @@ the state of the fleet I rowed the whole circuit myself. It is not hard. It is
 just something you stop bothering to do, and then you are running blind on the
 hosts that matter most.
 
-So I built [Control Room](https://control.x-hakt.com), a dashboard that keeps
+So I built [bosun-x](https://bosun-x.x-hakt.com), a dashboard that keeps
 an eye on the whole mesh, and I wanted it to row that circuit for me. One page
 that shows every container on every host, refreshing quietly while I drink my
 coffee, instead of me connecting to three machines in turn.
@@ -157,7 +157,7 @@ restrict,command="...",permitopen="192.168.6.180:22" ssh-ed25519 AAAA... discove
 ```
 
 <Figure caption="Forwarding is on for one hop only. Every other destination comes back 'administratively prohibited'.">
-  <svg viewBox="0 0 336 160" role="img" aria-label="Control Room forwards through a jump host to gp-forms, the one permitted destination. Attempts to forward anywhere else are refused.">
+  <svg viewBox="0 0 336 160" role="img" aria-label="bosun-x forwards through a jump host to gp-forms, the one permitted destination. Attempts to forward anywhere else are refused.">
     <rect x="10" y="20" width="80" height="26" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
     <text x="50" y="37" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#eaebec">control-room</text>
 
@@ -248,7 +248,7 @@ lifted this key would try:
 ## Verified vs assumed
 
 **Verified.** The three tests above, run against the live hosts, after the
-change. Also that Control Room still gets its snapshot from each host in 2.4 to
+change. Also that bosun-x still gets its snapshot from each host in 2.4 to
 2.9 seconds, cached for five minutes, and that a failed poll is only remembered
 for thirty seconds rather than pinning an empty result for the full five.
 
