@@ -10,6 +10,7 @@ const nav = [
   { id: 'what', label: 'what it is' },
   { id: 'problem', label: 'the problem' },
   { id: 'how', label: 'how it works' },
+  { id: 'dashboard', label: 'the dashboard' },
   { id: 'nocode', label: "if you don't code" },
   { id: 'install', label: 'get it' },
   { id: 'use', label: 'use it' },
@@ -41,11 +42,13 @@ const MONO = "'IBM Plex Mono', ui-monospace, monospace";
 >
   <p class="crumb"><a href="/locker">x’s locker</a> / bosun-x</p>
 
-  <nav class="subnav" aria-label="On this page">
-    {nav.map((n) => <a href={`#${n.id}`}>{n.label}</a>)}
-  </nav>
+  <div class="layout">
+    <nav class="pagenav" aria-label="On this page">
+      <p class="pagenav__title">on this page</p>
+      {nav.map((n) => <a href={`#${n.id}`}>{n.label}</a>)}
+    </nav>
 
-  <div class="doc">
+    <div class="doc">
     <section id="what" class="s">
       <span class="s__kind">a tool you install — not one that runs here</span>
       <h1>bosun&#8209;x</h1>
@@ -162,6 +165,34 @@ const MONO = "'IBM Plex Mono', ui-monospace, monospace";
           </defs>
         </svg>
       </Figure>
+    </section>
+
+    <section id="dashboard" class="s">
+      <h2>the dashboard</h2>
+      <p>
+        On its own, bosun&#8209;x is a CLI and an <abbr title="Model Context Protocol">MCP</abbr>
+        server — the engine that keeps the log honest. <strong>Control Room</strong> is the web
+        application built on the same plain files: every project’s containers read live off the
+        Docker socket, standards checked rather than claimed, the spec and handoff rendered and
+        editable, the planning lifecycle, whole servers across a fleet. bosun&#8209;x is the
+        discipline; Control Room is where you look at all of it at once.
+      </p>
+      <Figure
+        plain
+        caption="Control Room’s page for one project: lifecycle stage, live containers, the standards column, and the latest handoff with a staleness clock. The same plain files underneath."
+      >
+        <img
+          src="/shots/cr-project.webp"
+          alt="The Control Room detail page for a project, showing its status, running containers, standards results and latest handoff."
+          loading="lazy"
+          width="900"
+          height="620"
+        />
+      </Figure>
+      <p>
+        Control Room is being prepared for release — the same “plain files, nothing stored,
+        self-hosted” shape. bosun&#8209;x is the part you can take today.
+      </p>
     </section>
 
     <section id="nocode" class="s">
@@ -330,31 +361,64 @@ bosun doctor: all tracked projects are initialized, no drift</pre>
         is in the <a href={repo} rel="noopener">README on GitHub</a>.
       </p>
     </section>
+    </div>
   </div>
 </BaseLayout>
 
 <style>
   .crumb { font-family: var(--font-mono); font-size: 12px; color: var(--color-faint); margin: 0 0 1rem; }
 
-  .subnav {
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+
+  /* mobile: a horizontal sticky strip of anchors */
+  .pagenav {
     position: sticky;
     top: 0;
     z-index: 3;
+    min-width: 0;
     display: flex;
-    flex-wrap: wrap;
-    gap: 4px 14px;
-    padding: 12px 0;
-    margin-bottom: 8px;
+    gap: 14px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 11px 0;
+    margin-bottom: 6px;
     background: color-mix(in srgb, var(--color-bg) 90%, transparent);
     backdrop-filter: blur(6px);
     border-bottom: 1px solid var(--border);
     font-family: var(--font-mono);
     font-size: 12px;
   }
-  .subnav a { color: var(--color-dim); }
-  .subnav a:hover { color: var(--color-green); text-decoration: none; }
+  .pagenav__title { display: none; }
+  .pagenav a { color: var(--color-dim); white-space: nowrap; }
+  .pagenav a:hover { color: var(--color-green); text-decoration: none; }
 
-  .doc { max-width: 46rem; }
+  /* desktop: a sticky column on the left */
+  @media (min-width: 880px) {
+    .layout { grid-template-columns: 150px minmax(0, 1fr); gap: 44px; align-items: start; }
+    .pagenav {
+      position: sticky;
+      top: 76px;
+      flex-direction: column;
+      gap: 9px;
+      overflow: visible;
+      padding: 0;
+      margin: 6px 0 0;
+      background: none;
+      backdrop-filter: none;
+      border-bottom: 0;
+    }
+    .pagenav__title {
+      display: block;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--color-faint);
+      margin: 0 0 2px;
+    }
+    .pagenav a { white-space: normal; }
+  }
+
+  .doc { max-width: 44rem; min-width: 0; }
 
   .s { padding-block: 30px; border-bottom: 1px solid var(--border); scroll-margin-top: 56px; }
   .s:last-child { border-bottom: 0; }
@@ -441,6 +505,6 @@ bosun doctor: all tracked projects are initialized, no drift</pre>
   }
 
   @media (max-width: 640px) {
-    .subnav { font-size: 11px; gap: 3px 10px; }
+    .pagenav { font-size: 11px; gap: 12px; }
   }
 </style>
