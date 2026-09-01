@@ -171,27 +171,44 @@ const MONO = "'IBM Plex Mono', ui-monospace, monospace";
       <h2>the dashboard</h2>
       <p>
         On its own, bosun&#8209;x is a CLI and an <abbr title="Model Context Protocol">MCP</abbr>
-        server — the engine that keeps the log honest. <strong>Control Room</strong> is the web
+        server — the engine that keeps the log honest. The <strong>dashboard</strong> is the web
         application built on the same plain files: every project’s containers read live off the
         Docker socket, standards checked rather than claimed, the spec and handoff rendered and
-        editable, the planning lifecycle, whole servers across a fleet. bosun&#8209;x is the
-        discipline; Control Room is where you look at all of it at once.
+        editable, the planning lifecycle, whole servers across a fleet. The CLI is the discipline;
+        the dashboard is where you look at all of it at once.
       </p>
       <Figure
         plain
-        caption="Control Room’s page for one project: lifecycle stage, live containers, the standards column, and the latest handoff with a staleness clock. The same plain files underneath."
+        caption="One project’s page: lifecycle stage, live containers, the standards column, and the latest handoff with a staleness clock. The same plain files underneath."
       >
         <img
           src="/shots/cr-project.webp"
-          alt="The Control Room detail page for a project, showing its status, running containers, standards results and latest handoff."
+          alt="The dashboard detail page for a project, showing its status, running containers, standards results and latest handoff."
           loading="lazy"
           width="900"
           height="620"
         />
       </Figure>
       <p>
-        Control Room is being prepared for release — the same “plain files, nothing stored,
-        self-hosted” shape. bosun&#8209;x is the part you can take today.
+        You point it at your own setup from a <strong>Settings</strong> page — timezone, who can
+        sign in, which machines it watches, where your projects live. Every field has a default and
+        an explanation; nothing is baked into the code.
+      </p>
+      <Figure
+        plain
+        caption="Settings: each option with its help text, the resolved value, and the default when it’s left blank. Backed by one config.yml in the data folder — or run `bosun setup` in a terminal to write it."
+      >
+        <img
+          src="/shots/bosun-settings.webp"
+          alt="The dashboard Settings page: timezone, operators, host id and project-folder fields, each with help text and its effective value."
+          loading="lazy"
+          width="1600"
+          height="1250"
+        />
+      </Figure>
+      <p>
+        The dashboard is being prepared for release — the same “plain files, nothing stored,
+        self-hosted” shape. bosun&#8209;x’s CLI and MCP server are the part you can take today.
       </p>
     </section>
 
