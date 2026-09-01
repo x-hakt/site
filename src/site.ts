@@ -19,6 +19,7 @@ export const site = {
   // the wordmark already goes home, so no "notes" item here
   nav: [
     { label: 'map', href: '/map' },
+    { label: 'tools', href: '/tools' },
     { label: 'about', href: '/about' },
     { label: 'feed', href: '/rss.xml' },
   ],
