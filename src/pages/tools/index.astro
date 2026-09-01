@@ -1,0 +1,100 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { site } from '../../site';
+import { tools } from '../../lib/tools';
+
+const dateFmt = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
+const live = tools.filter((t) => t.status === 'live');
+
+const itemList = {
+  '@type': 'ItemList',
+  '@id': `${site.url}/tools/#list`,
+  name: 'x-hakt tools',
+  itemListElement: live.map((t, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    item: {
+      '@type': 'WebApplication',
+      name: t.name,
+      url: new URL(`/tools/${t.slug}/`, site.url).href,
+      applicationCategory: 'DeveloperApplication',
+      operatingSystem: 'Any',
+      description: t.tagline,
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    },
+  })),
+};
+---
+
+<BaseLayout
+  title="the workbench"
+  description="Small single-purpose tools, built and kept here. No sign-up, no backend — they run in your browser."
+  current="tools"
+  wide
+  jsonLd={itemList}
+>
+  <section class="head">
+    <h1>the workbench</h1>
+    <p>
+      Small single-purpose tools, built for a job that came up and left here in case it comes up for
+      you too. No sign-up, no backend. Each one runs in your browser and the source is on the site
+      repo.
+    </p>
+  </section>
+
+  <ul class="tools" role="list">
+    {tools.map((tool) => (
+      <li class="tool">
+        <a href={`/tools/${tool.slug}`} class="tool__link" aria-disabled={tool.status !== 'live'}>
+          <span class="tool__name">
+            {tool.name}
+            {tool.status !== 'live' && <span class="tool__tag">draft</span>}
+          </span>
+          <span class="tool__tagline">{tool.tagline}</span>
+          <span class="tool__blurb">{tool.blurb}</span>
+          <span class="tool__meta">
+            {tool.tech.join(' · ')}<span class="tool__dot">&middot;</span>updated {dateFmt.format(new Date(tool.updated))}
+          </span>
+        </a>
+      </li>
+    ))}
+    {tools.length === 0 && <li class="tool tool--empty">nothing on the bench yet.</li>}
+  </ul>
+</BaseLayout>
+
+<style>
+  .head { border-bottom: 1px solid var(--border); padding-bottom: 24px; margin-bottom: 8px; }
+  .head h1 { font-size: clamp(1.6rem, 4.4vw, 2rem); letter-spacing: -0.02em; margin: 0 0 0.5rem; }
+  .head > p { color: var(--color-fg-soft); max-width: 64ch; margin: 0; }
+
+  .tools { list-style: none; margin: 0; padding: 0; }
+  .tool { border-bottom: 1px solid var(--border); }
+  .tool__link { display: flex; flex-direction: column; gap: 6px; padding: 22px 0; color: inherit; }
+  .tool__link:hover { text-decoration: none; }
+  .tool__link:hover .tool__name { color: var(--color-green); }
+  .tool__link[aria-disabled='true'] { opacity: 0.55; pointer-events: none; }
+
+  .tool__name {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--color-fg);
+    letter-spacing: -0.01em;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .tool__tag {
+    font-size: 10px;
+    color: var(--color-amber);
+    border: 1px solid var(--color-amber);
+    border-radius: 999px;
+    padding: 1px 7px;
+  }
+  .tool__tagline { color: var(--color-fg-soft); font-size: 14.5px; }
+  .tool__blurb { color: var(--color-dim); font-size: 14px; max-width: 68ch; }
+  .tool__meta { font-family: var(--font-mono); font-size: 11px; color: var(--color-faint); margin-top: 2px; }
+  .tool__dot { margin-inline: 8px; color: var(--color-accent-bg); }
+
+  .tool--empty { padding: 22px 0; font-family: var(--font-mono); font-size: 13px; color: var(--color-faint); }
+</style>
