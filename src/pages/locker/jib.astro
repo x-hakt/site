@@ -252,12 +252,13 @@ const app = {
     const today = new Date().toISOString().slice(0, 10);
     const style: string[] = [];
     const samples: string[] = [];
+    const SAMPLE_IDS = new Set(['samples-pairs', 'admire', 'missed']);
 
     for (const q of qs) {
       const v = readQ(q);
       if (v === undefined) continue;
       const label = q.dataset.label as string;
-      const target = q.dataset.section === 'Samples' ? samples : style;
+      const target = SAMPLE_IDS.has(q.dataset.id as string) ? samples : style;
 
       if (q.dataset.kind === 'rewrite') {
         const given = (q.querySelector('.jq__given') as HTMLElement).dataset.given;
@@ -305,7 +306,7 @@ const app = {
       ...style,
     ];
 
-    if (samples.length) lines.push('---', '', '## Samples', '', ...samples);
+    if (samples.length) lines.push('---', '', '## Notes & samples', '', ...samples);
 
     return lines.join('\n').replace(/\n{3,}/g, '\n\n').trimEnd() + '\n';
   }

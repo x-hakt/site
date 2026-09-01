@@ -277,24 +277,37 @@ export const sections: Section[] = [
     ],
   },
   {
-    id: 'samples',
-    title: 'Samples',
+    id: 'inyourwords',
+    title: 'In your own words',
     intro:
-      'Real writing beats every answer above. The pair — an AI draft next to your rewrite — is the single most useful thing you can give a model.',
+      'A few more to rewrite — different situations this time. Reacting to a canned line is the same signal as pasting your own writing, without needing any to hand.',
     questions: [
       {
-        kind: 'text',
-        id: 'samples-good',
-        label: 'Paste 2–4 short things you’ve written that sound like you.',
-        hint: 'A Slack message, a paragraph from something you’re proud of, a blunt email. Note the channel for each.',
-        rows: 10,
+        kind: 'rewrite',
+        id: 'rw-slack',
+        label: 'A colleague sends “can you take a look at this when you get a chance?” with a link. You reply…',
+        given: 'Sure thing! I’d be happy to take a look. I’ll circle back to you with my thoughts shortly. 😊',
+      },
+      {
+        kind: 'rewrite',
+        id: 'rw-decline',
+        label: 'Turning down a request by email — say no, keep the door open.',
+        given:
+          'Thank you so much for thinking of me! Unfortunately, I don’t have the bandwidth to take this on right now, but I’d love to revisit it down the line.',
+      },
+      {
+        kind: 'rewrite',
+        id: 'rw-explain',
+        label: 'Explaining something technical to a smart non-expert.',
+        given:
+          'Essentially, a reverse proxy acts as an intermediary that sits in front of your servers and handles incoming requests on their behalf.',
       },
       {
         kind: 'text',
         id: 'samples-pairs',
-        label: 'Optional but gold: an AI draft, then your rewrite of it.',
-        hint: 'Label them DRAFT: and MINE:',
-        rows: 10,
+        label: 'Only if you happen to have one to hand: an AI draft you rejected, and your rewrite.',
+        hint: 'Skip it otherwise — the rewrites above cover the same ground. Label them DRAFT: and MINE:',
+        rows: 8,
       },
       { kind: 'text', id: 'admire', label: 'A writer whose style you’d nod along to.', rows: 1 },
       { kind: 'text', id: 'missed', label: 'Anything the questions missed?', rows: 2 },
