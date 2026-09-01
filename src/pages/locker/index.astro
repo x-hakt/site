@@ -48,7 +48,8 @@ const itemList = {
         <a href={`/locker/${tool.slug}`} class="tool__link" aria-disabled={tool.status !== 'live'}>
           <span class="tool__name">
             {tool.name}
-            {tool.status !== 'live' && <span class="tool__tag">draft</span>}
+            <span class="tool__tag">{tool.kind === 'package' ? 'install' : 'runs here'}</span>
+            {tool.status !== 'live' && <span class="tool__tag tool__tag--draft">draft</span>}
           </span>
           <span class="tool__tagline">{tool.tagline}</span>
           <span class="tool__blurb">{tool.blurb}</span>
@@ -86,11 +87,13 @@ const itemList = {
   }
   .tool__tag {
     font-size: 10px;
-    color: var(--color-amber);
-    border: 1px solid var(--color-amber);
+    color: var(--color-dim);
+    border: 1px solid var(--border-2);
     border-radius: 999px;
     padding: 1px 7px;
+    font-weight: 400;
   }
+  .tool__tag--draft { color: var(--color-amber); border-color: var(--color-amber); }
   .tool__tagline { color: var(--color-fg-soft); font-size: 14.5px; }
   .tool__blurb { color: var(--color-dim); font-size: 14px; max-width: 68ch; }
   .tool__meta { font-family: var(--font-mono); font-size: 11px; color: var(--color-faint); margin-top: 2px; }
