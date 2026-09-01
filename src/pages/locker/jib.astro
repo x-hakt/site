@@ -1,0 +1,531 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { site } from '../../site';
+import { sections, questionCount } from '../../lib/jib-questions';
+
+const app = {
+  '@type': 'WebApplication',
+  '@id': `${site.url}/locker/jib/#app`,
+  name: 'jib-x',
+  alternateName: 'the cut of your jib',
+  url: `${site.url}/locker/jib/`,
+  applicationCategory: 'DeveloperApplication',
+  operatingSystem: 'Any',
+  description:
+    'A quick questionnaire — mostly taps and sliders — that assembles a portable VOICE.md style card for AI writing tools. Runs entirely in the browser.',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+};
+---
+
+<BaseLayout
+  title="jib-x"
+  description="Answer a short questionnaire — mostly taps and sliders, a few rewrites — and get a VOICE.md any AI can write from. Runs in your browser, sends nothing anywhere."
+  current="locker"
+  wide
+  jsonLd={app}
+>
+  <section class="jhead">
+    <p class="jhead__crumb"><a href="/locker">x’s locker</a> / jib-x</p>
+    <h1>jib&#8209;x</h1>
+    <p class="jhead__lede">
+      “I like the cut of your jib” — the old way of saying you can recognise someone by their style
+      from a distance. Every AI writing tool will match a voice if you describe it well enough; the
+      describing is the hard part. This is mostly taps and sliders, with a few sentences to rewrite.
+      At the end it builds a <code>VOICE.md</code> you hand to Claude, ChatGPT, or a custom style.
+    </p>
+    <p class="jhead__note">
+      Nothing leaves your browser. Answers autosave locally. The rewrite cards and the samples at the
+      end carry the most weight — the rest is quick.
+    </p>
+  </section>
+
+  <form id="jib-form" class="jform">
+    {sections.map((section, si) => (
+      <fieldset class="jsec" id={`sec-${section.id}`}>
+        <legend>
+          <span class="jsec__n">{String(si + 1).padStart(2, '0')}</span>
+          {section.title}
+        </legend>
+        <p class="jsec__intro">{section.intro}</p>
+
+        {section.questions.map((q) => (
+          <div class="jq" data-id={q.id} data-kind={q.kind} data-label={q.label} data-section={section.title}>
+            {q.kind === 'rewrite' && (
+              <>
+                <p class="jq__label">{q.label}</p>
+                <blockquote class="jq__given" data-given={q.given}>{q.given}</blockquote>
+                <textarea data-field rows={3} placeholder="how you’d actually write it…"></textarea>
+              </>
+            )}
+
+            {q.kind === 'text' && (
+              <>
+                <label class="jq__label" for={q.id}>{q.label}</label>
+                {q.hint && <p class="jq__hint">{q.hint}</p>}
+                <textarea id={q.id} data-field rows={q.rows ?? 3} placeholder={q.placeholder}></textarea>
+              </>
+            )}
+
+            {q.kind === 'scale' && (
+              <>
+                <p class="jq__label">{q.label}</p>
+                <div class="scale">
+                  <span class="scale__end">{q.low}</span>
+                  <input type="range" min="0" max="10" value="5" step="1" data-field aria-label={q.label} />
+                  <span class="scale__end scale__end--hi">{q.high}</span>
+                </div>
+              </>
+            )}
+
+            {q.kind === 'tags' && (
+              <>
+                <p class="jq__label">{q.label}</p>
+                <div class="chips" role="group" aria-label={q.label}>
+                  {q.options.map((opt) => (
+                    <button type="button" class="chip" data-tag={opt} aria-pressed="false">{opt}</button>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {q.kind === 'choice' && (
+              <>
+                <p class="jq__label">{q.label}</p>
+                <div class="opts" data-multi={q.multi ? 'true' : 'false'}>
+                  {q.options.map((opt) => (
+                    <label class="opt">
+                      <input type={q.multi ? 'checkbox' : 'radio'} name={q.id} value={opt} data-field />
+                      <span>{opt}</span>
+                    </label>
+                  ))}
+                  {q.other && (
+                    <label class="opt opt--other">
+                      <span class="opt__otherlabel">something else</span>
+                      <input type="text" data-other placeholder="in your words…" />
+                    </label>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        ))}
+      </fieldset>
+    ))}
+  </form>
+
+  <div class="jbar" id="jib-bar">
+    <span class="jbar__count" id="jib-count">0 / {questionCount}</span>
+    <div class="jbar__actions">
+      <button type="button" class="btn btn--ghost" id="jib-reset">reset</button>
+      <button type="button" class="btn" id="jib-build">build VOICE.md</button>
+    </div>
+  </div>
+
+  <section class="jout" id="jib-out" hidden>
+    <h2>your VOICE.md</h2>
+    <p>
+      The file opens with per-tool instructions for where it goes. For Claude/ChatGPT
+      custom-instruction fields, paste just the <em>Style instructions</em> block; for a repo or a
+      Project, hand over the whole file.
+    </p>
+    <div class="jout__actions">
+      <button type="button" class="btn" id="jib-download">download VOICE.md</button>
+      <button type="button" class="btn btn--ghost" id="jib-copy">copy</button>
+      <span class="jout__msg" id="jib-msg" aria-live="polite"></span>
+    </div>
+    <pre class="jout__pre" id="jib-pre"></pre>
+  </section>
+</BaseLayout>
+
+<script>
+  const STORE = 'x-hakt:jib:v2';
+  const form = document.getElementById('jib-form') as HTMLFormElement;
+  const qs = Array.from(form.querySelectorAll('.jq')) as HTMLElement[];
+  const countEl = document.getElementById('jib-count') as HTMLElement;
+  const out = document.getElementById('jib-out') as HTMLElement;
+  const pre = document.getElementById('jib-pre') as HTMLElement;
+  const msg = document.getElementById('jib-msg') as HTMLElement;
+
+  type Val = string | number | string[];
+
+  function readQ(q: HTMLElement): Val | undefined {
+    const kind = q.dataset.kind;
+    if (kind === 'text' || kind === 'rewrite') {
+      const v = (q.querySelector('textarea[data-field]') as HTMLTextAreaElement)?.value.trim();
+      return v || undefined;
+    }
+    if (kind === 'scale') {
+      const el = q.querySelector('input[type="range"]') as HTMLInputElement;
+      return el.dataset.touched ? Number(el.value) : undefined;
+    }
+    if (kind === 'tags') {
+      const on = Array.from(q.querySelectorAll('button[aria-pressed="true"]')).map(
+        (b) => (b as HTMLElement).dataset.tag as string,
+      );
+      return on.length ? on : undefined;
+    }
+    if (kind === 'choice') {
+      const picked = Array.from(q.querySelectorAll('input[data-field]:checked')).map(
+        (i) => (i as HTMLInputElement).value,
+      );
+      const other = (q.querySelector('input[data-other]') as HTMLInputElement | null)?.value.trim();
+      if (other) picked.push(other);
+      return picked.length ? picked : undefined;
+    }
+    return undefined;
+  }
+
+  function writeQ(q: HTMLElement, v: Val) {
+    const kind = q.dataset.kind;
+    if (kind === 'text' || kind === 'rewrite') {
+      (q.querySelector('textarea[data-field]') as HTMLTextAreaElement).value = String(v);
+      return;
+    }
+    if (kind === 'scale') {
+      const el = q.querySelector('input[type="range"]') as HTMLInputElement;
+      el.value = String(v);
+      el.dataset.touched = '1';
+      return;
+    }
+    if (kind === 'tags' && Array.isArray(v)) {
+      for (const b of Array.from(q.querySelectorAll('button[data-tag]'))) {
+        const btn = b as HTMLElement;
+        btn.setAttribute('aria-pressed', v.includes(btn.dataset.tag as string) ? 'true' : 'false');
+      }
+      return;
+    }
+    if (kind === 'choice' && Array.isArray(v)) {
+      const opts = Array.from(q.querySelectorAll('input[data-field]')) as HTMLInputElement[];
+      const known = new Set(opts.map((o) => o.value));
+      for (const o of opts) o.checked = v.includes(o.value);
+      const extra = v.find((x) => !known.has(x));
+      const other = q.querySelector('input[data-other]') as HTMLInputElement | null;
+      if (other && extra) other.value = extra;
+    }
+  }
+
+  function collect(): Record<string, Val> {
+    const data: Record<string, Val> = {};
+    for (const q of qs) {
+      const v = readQ(q);
+      if (v !== undefined) data[q.dataset.id as string] = v;
+    }
+    return data;
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(STORE, JSON.stringify(collect()));
+    } catch {
+      /* private mode / quota — form still works, just won't persist */
+    }
+  }
+
+  function load() {
+    let saved: Record<string, Val> = {};
+    try {
+      saved = JSON.parse(localStorage.getItem(STORE) || '{}');
+    } catch {
+      saved = {};
+    }
+    for (const q of qs) {
+      const v = saved[q.dataset.id as string];
+      if (v !== undefined) writeQ(q, v);
+    }
+    refresh();
+  }
+
+  function refresh() {
+    const done = qs.filter((q) => readQ(q) !== undefined).length;
+    countEl.textContent = `${done} / ${qs.length}`;
+  }
+
+  function phrase(n: number, low: string, high: string): string {
+    if (n <= 2) return low;
+    if (n >= 8) return high;
+    if (n <= 4) return `leans ${low}`;
+    if (n >= 6) return `leans ${high}`;
+    return 'right in the middle';
+  }
+
+  function build(): string {
+    const today = new Date().toISOString().slice(0, 10);
+    const style: string[] = [];
+    const samples: string[] = [];
+
+    for (const q of qs) {
+      const v = readQ(q);
+      if (v === undefined) continue;
+      const label = q.dataset.label as string;
+      const target = q.dataset.section === 'Samples' ? samples : style;
+
+      if (q.dataset.kind === 'rewrite') {
+        const given = (q.querySelector('.jq__given') as HTMLElement).dataset.given;
+        target.push(`**${label}**`, '', `> AI wrote: ${given}`, `>`, `> I'd write: ${String(v)}`, '');
+      } else if (q.dataset.kind === 'text') {
+        target.push(`**${label}**`, '', String(v), '');
+      } else if (q.dataset.kind === 'scale') {
+        const q2 = q.querySelectorAll('.scale__end');
+        const low = q2[0].textContent!.trim();
+        const high = q2[1].textContent!.trim();
+        target.push(`- **${label}:** ${phrase(v as number, low, high)} (${v}/10, ${low} → ${high})`);
+      } else if (q.dataset.kind === 'tags') {
+        target.push(`- **${label}** never: ${(v as string[]).join(', ')}`);
+      } else if (q.dataset.kind === 'choice') {
+        target.push(`- **${label}:** ${(v as string[]).join('; ')}`);
+      }
+    }
+
+    const lines: string[] = [
+      `# Voice profile — ${today}`,
+      '',
+      'Built with jib-x at x-hakt.com/locker/jib. Give this to an AI so its writing sounds like the',
+      'person who filled it in.',
+      '',
+      '## How to use this',
+      '',
+      '- **Claude Code / Codex / Cursor:** save as `VOICE.md` in your project, then add to `CLAUDE.md` /',
+      '  `AGENTS.md`: "When you write prose, follow `./VOICE.md`."',
+      '- **Claude.ai:** Settings → Custom Styles → *Create style* → paste the **Style instructions** block.',
+      '  Or add this whole file to a Project’s knowledge.',
+      '- **ChatGPT:** Settings → Personalization → Custom Instructions → paste the **Style instructions**',
+      '  block. Or add this file to a Project.',
+      '- **Anything else:** prepend the **Style instructions** block as a system prompt.',
+      '',
+      'Optional first step — run it through your AI once to compress it:',
+      '',
+      '> Here is a description of how I write, plus samples. Produce a reusable style guide of at most',
+      '> 400 words that another AI can follow to write in my voice. Lead with the hard rules (what to',
+      '> never do), then rhythm, then vocabulary and tone. No preamble.',
+      '',
+      '---',
+      '',
+      '## Style instructions',
+      '',
+      ...style,
+    ];
+
+    if (samples.length) lines.push('---', '', '## Samples', '', ...samples);
+
+    return lines.join('\n').replace(/\n{3,}/g, '\n\n').trimEnd() + '\n';
+  }
+
+  function show(text: string) {
+    pre.textContent = text;
+    out.hidden = false;
+    out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // wiring
+  form.addEventListener('input', (e) => {
+    const t = e.target as HTMLElement;
+    if (t instanceof HTMLInputElement && t.type === 'range') t.dataset.touched = '1';
+    save();
+    refresh();
+  });
+  form.addEventListener('click', (e) => {
+    const chip = (e.target as HTMLElement).closest('.chip') as HTMLElement | null;
+    if (!chip) return;
+    chip.setAttribute('aria-pressed', chip.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+    save();
+    refresh();
+  });
+
+  document.getElementById('jib-build')!.addEventListener('click', () => {
+    if (qs.every((q) => readQ(q) === undefined)) {
+      show('Answer a few first — even just the taps and sliders.');
+      return;
+    }
+    show(build());
+  });
+
+  document.getElementById('jib-reset')!.addEventListener('click', () => {
+    if (!confirm('Clear every answer and start over?')) return;
+    for (const q of qs) {
+      q.querySelectorAll('textarea, input[type="text"]').forEach((el) => ((el as HTMLInputElement).value = ''));
+      q.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(
+        (el) => ((el as HTMLInputElement).checked = false),
+      );
+      q.querySelectorAll('input[type="range"]').forEach((el) => {
+        (el as HTMLInputElement).value = '5';
+        delete (el as HTMLInputElement).dataset.touched;
+      });
+      q.querySelectorAll('.chip').forEach((el) => el.setAttribute('aria-pressed', 'false'));
+    }
+    try {
+      localStorage.removeItem(STORE);
+    } catch {
+      /* ignore */
+    }
+    refresh();
+    out.hidden = true;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  document.getElementById('jib-download')!.addEventListener('click', () => {
+    const blob = new Blob([pre.textContent || ''], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'VOICE.md';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('jib-copy')!.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(pre.textContent || '');
+      msg.textContent = 'copied';
+    } catch {
+      msg.textContent = 'select the text and copy manually';
+    }
+    setTimeout(() => (msg.textContent = ''), 2000);
+  });
+
+  load();
+</script>
+
+<style>
+  .jhead { border-bottom: 1px solid var(--border); padding-bottom: 24px; margin-bottom: 8px; }
+  .jhead__crumb { font-family: var(--font-mono); font-size: 12px; color: var(--color-faint); margin: 0 0 0.75rem; }
+  .jhead h1 { font-size: clamp(1.6rem, 4.4vw, 2rem); letter-spacing: -0.02em; margin: 0 0 0.6rem; }
+  .jhead__lede { color: var(--color-fg-soft); max-width: 66ch; margin: 0 0 0.75rem; }
+  .jhead__note { color: var(--color-dim); font-size: 14px; max-width: 66ch; margin: 0; }
+
+  .jform { margin: 0; padding: 0; border: 0; }
+  .jsec { border: 0; border-bottom: 1px solid var(--border); margin: 0; padding: 26px 0; }
+  .jsec legend {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--color-fg);
+    letter-spacing: -0.01em;
+    padding: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .jsec__n { font-size: 12px; color: var(--color-green); }
+  .jsec__intro { color: var(--color-dim); font-size: 14px; max-width: 66ch; margin: 0.4rem 0 1.4rem; }
+
+  .jq { margin-bottom: 1.6rem; }
+  .jq__label { display: block; font-size: 14.5px; color: var(--color-fg-soft); margin: 0 0 0.5rem; max-width: 70ch; }
+  .jq__hint { color: var(--color-faint); font-size: 12.5px; margin: -0.25rem 0 0.5rem; max-width: 68ch; }
+
+  .jq__given {
+    margin: 0 0 0.6rem;
+    padding: 10px 14px;
+    border-left: 2px solid var(--color-accent-bg);
+    background: var(--color-surface);
+    color: var(--color-dim);
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+
+  textarea, input[type='text'] {
+    width: 100%;
+    max-width: 46rem;
+    display: block;
+    background: var(--color-surface);
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius-card);
+    color: var(--color-fg);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+    padding: 9px 12px;
+  }
+  textarea { resize: vertical; }
+  textarea:focus, input[type='text']:focus { outline: 0; border-color: var(--color-green); }
+  textarea::placeholder, input::placeholder { color: var(--color-faint); }
+
+  /* chips */
+  .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+  .chip {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 6px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--border-2);
+    background: transparent;
+    color: var(--color-dim);
+    cursor: pointer;
+  }
+  .chip:hover { color: var(--color-fg-soft); border-color: var(--color-fg-soft); }
+  .chip[aria-pressed='true'] {
+    border-color: var(--color-green);
+    background: color-mix(in srgb, var(--color-green) 16%, transparent);
+    color: var(--color-green);
+  }
+
+  /* choice */
+  .opts { display: flex; flex-direction: column; gap: 6px; }
+  .opt { display: flex; align-items: flex-start; gap: 9px; font-size: 13.5px; color: var(--color-fg-soft); cursor: pointer; max-width: 60rem; }
+  .opt input[type='radio'], .opt input[type='checkbox'] { margin-top: 3px; accent-color: var(--color-green); flex-shrink: 0; }
+  .opt--other { align-items: center; gap: 12px; margin-top: 3px; }
+  .opt__otherlabel { color: var(--color-faint); font-size: 12.5px; white-space: nowrap; }
+  .opt--other input[type='text'] { max-width: 22rem; }
+
+  /* scale */
+  .scale { display: flex; align-items: center; gap: 14px; max-width: 40rem; }
+  .scale__end { font-family: var(--font-mono); font-size: 11.5px; color: var(--color-faint); flex-shrink: 0; max-width: 12ch; }
+  .scale__end--hi { text-align: right; }
+  .scale input[type='range'] { flex: 1; accent-color: var(--color-green); }
+
+  .jbar {
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: color-mix(in srgb, var(--color-bg) 92%, transparent);
+    backdrop-filter: blur(6px);
+    border-top: 1px solid var(--border-2);
+    padding: 13px 0;
+    margin-top: 8px;
+  }
+  .jbar__count { font-family: var(--font-mono); font-size: 12px; color: var(--color-dim); }
+  .jbar__actions { display: flex; gap: 10px; }
+
+  .btn {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 9px 16px;
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-green);
+    background: color-mix(in srgb, var(--color-green) 14%, transparent);
+    color: var(--color-green);
+    cursor: pointer;
+  }
+  .btn:hover { background: color-mix(in srgb, var(--color-green) 22%, transparent); }
+  .btn--ghost { border-color: var(--border-2); background: transparent; color: var(--color-dim); }
+  .btn--ghost:hover { color: var(--color-fg); background: var(--color-accent-bg); }
+
+  .jout { padding-top: 30px; }
+  .jout h2 { font-size: 1rem; margin: 0 0 0.4rem; }
+  .jout > p { color: var(--color-dim); font-size: 14px; max-width: 66ch; margin: 0 0 1rem; }
+  .jout__actions { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; flex-wrap: wrap; }
+  .jout__msg { font-family: var(--font-mono); font-size: 11px; color: var(--color-green); }
+  .jout__pre {
+    background: var(--color-surface);
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius-card);
+    padding: 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--color-fg-soft);
+    white-space: pre-wrap;
+    overflow-x: auto;
+    max-height: 60vh;
+  }
+
+  @media (max-width: 640px) {
+    .jbar { flex-direction: column; align-items: stretch; gap: 10px; }
+    .jbar__actions { justify-content: flex-end; }
+    .scale { flex-wrap: wrap; }
+    .scale input[type='range'] { flex-basis: 100%; order: 3; }
+  }
+</style>

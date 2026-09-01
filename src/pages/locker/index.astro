@@ -1,22 +1,22 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { site } from '../../site';
-import { tools } from '../../lib/tools';
+import { tools } from '../../lib/locker';
 
 const dateFmt = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
 const live = tools.filter((t) => t.status === 'live');
 
 const itemList = {
   '@type': 'ItemList',
-  '@id': `${site.url}/tools/#list`,
-  name: 'x-hakt tools',
+  '@id': `${site.url}/locker/#list`,
+  name: 'x’s locker',
   itemListElement: live.map((t, i) => ({
     '@type': 'ListItem',
     position: i + 1,
     item: {
       '@type': 'WebApplication',
       name: t.name,
-      url: new URL(`/tools/${t.slug}/`, site.url).href,
+      url: new URL(`/locker/${t.slug}/`, site.url).href,
       applicationCategory: 'DeveloperApplication',
       operatingSystem: 'Any',
       description: t.tagline,
@@ -27,17 +27,17 @@ const itemList = {
 ---
 
 <BaseLayout
-  title="the workbench"
+  title="x’s locker"
   description="Small single-purpose tools, built and kept here. No sign-up, no backend — they run in your browser."
-  current="tools"
+  current="locker"
   wide
   jsonLd={itemList}
 >
   <section class="head">
-    <h1>the workbench</h1>
+    <h1>x’s locker</h1>
     <p>
       Small single-purpose tools, built for a job that came up and left here in case it comes up for
-      you too. No sign-up, no backend. Each one runs in your browser and the source is on the site
+      you too. No sign-up, no backend. Each one runs in your browser, and the source is on the site
       repo.
     </p>
   </section>
@@ -45,7 +45,7 @@ const itemList = {
   <ul class="tools" role="list">
     {tools.map((tool) => (
       <li class="tool">
-        <a href={`/tools/${tool.slug}`} class="tool__link" aria-disabled={tool.status !== 'live'}>
+        <a href={`/locker/${tool.slug}`} class="tool__link" aria-disabled={tool.status !== 'live'}>
           <span class="tool__name">
             {tool.name}
             {tool.status !== 'live' && <span class="tool__tag">draft</span>}
@@ -58,7 +58,7 @@ const itemList = {
         </a>
       </li>
     ))}
-    {tools.length === 0 && <li class="tool tool--empty">nothing on the bench yet.</li>}
+    {tools.length === 0 && <li class="tool tool--empty">nothing in the locker yet.</li>}
   </ul>
 </BaseLayout>
 
