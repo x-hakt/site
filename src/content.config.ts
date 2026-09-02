@@ -4,6 +4,11 @@ import { glob } from 'astro/loaders';
 /*
   "a landlocked captain's log" — one collection of notes under src/content/notes/.
 
+  House rule: wrap a technical term a non-expert wouldn't know in <Term> on its
+  first use — <Term k="ssh">SSH</Term>. Definitions live in src/glossary.ts;
+  the hover/tap explainer is Term.astro + a controller in BaseLayout.astro.
+
+
   Taxonomy (XH-12, revised): two axes, both plain-spoken.
 
     tracks  what kind of work the note is about. A small fixed set, one or more

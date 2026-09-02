@@ -8,13 +8,14 @@ draft: false
 ---
 
 import Figure from '../../components/Figure.astro';
+import Term from '../../components/Term.astro';
 
 ## The git remote was a comfort, not a backup
 
 A machine does not warn you before it dies. What survives is whatever you had
 already put somewhere else.
 
-Every project in the fleet has a git remote. So if Caspar lost its disk
+Every project in the fleet has a <Term k="git-remote">git remote</Term>. So if Caspar lost its disk
 tonight, I could clone all the code back onto a fresh box by morning and feel
 like I had lost nothing. That is the comfort. It is also not true.
 
@@ -30,8 +31,8 @@ is tidy and saves you from a bad migration but not from a dead drive. Another
 had a script meant to mirror code to private repositories twice a day. When I
 finally read its log it said `Successfully backed up 0 out of 5`, and had been
 saying that for weeks, because a token had expired and nobody was watching. On
-the NAS there was a folder with two tarballs in it from a migration back in
-March. Nothing anywhere could answer the one question that matters: is there a
+the <Term k="nas">NAS</Term> there was a folder with two tarballs in it from a
+migration back in March. Nothing anywhere could answer the one question that matters: is there a
 recent, working copy of everything, somewhere that is not the machine it came
 from?
 
@@ -83,9 +84,9 @@ covered, needs a database dump, needs a file archive, or genuinely does not
 matter.
 
 **How it works.** Each project gets a `backups.yml` next to its record in
-bosun-x. It lists stores. A store is one thing to save: a Postgres
-database, a directory, a Docker volume. For each one: how often, how many
-copies to keep, whether to encrypt.
+bosun-x. It lists stores. A store is one thing to save: a <Term k="postgres">Postgres</Term>
+database, a directory, a <Term k="docker">Docker</Term> volume. For each one: how
+often, how many copies to keep, whether to encrypt.
 
 Going through the six that matter:
 
@@ -96,7 +97,7 @@ Going through the six that matter:
   services treat as their own store. Four.
 - **gp-forms** has one Postgres database with real customer records in it. One
   store, and the only one that gets encrypted.
-- **bosun-x's own data** is a directory of Markdown and YAML. That one I
+- **bosun-x's own data** is a directory of <Term k="markdown">Markdown</Term> and <Term k="yaml">YAML</Term>. That one I
   handled differently: I made it a git repository with a private remote, so it
   versions itself and pushes on every change. Its `backups.yml` just says
   `method: git` and the agent leaves it alone.
@@ -180,12 +181,15 @@ out through the engine.
 
 **How it works.**
 
-- **Postgres:** `pg_dump --format=custom`. Custom format because it compresses,
-  and because `pg_restore --list` can read the table of contents out of it
-  without restoring anything, which is how I check a dump is real.
-- **Files and volumes:** `tar` piped through `zstd`. One stream, so it is
-  internally consistent, and `zstd` because it is fast with good ratios.
-- Then, for gp-forms only, the archive goes through `age` before it lands.
+- **Postgres:** <Term k="pg-dump">`pg_dump`</Term>` --format=custom`. Custom
+  format because it compresses, and because `pg_restore --list` can read the
+  table of contents out of it without restoring anything, which is how I check a
+  dump is real.
+- **Files and volumes:** `tar` piped through <Term k="zstd">`zstd`</Term>. One
+  stream, so it is internally consistent, and `zstd` because it is fast with
+  good ratios.
+- Then, for gp-forms only, the archive goes through <Term k="age">`age`</Term>
+  before it lands.
 
 The encryption is worth a paragraph. gp-forms holds the only customer data in
 the fleet, and "private network" is not a security model. So its dump is

@@ -9,14 +9,15 @@ draft: false
 ---
 
 import Figure from '../../components/Figure.astro';
+import Term from '../../components/Term.astro';
 
 ## The fleet was fine. The keyring was the problem.
 
 I keep a small number of machines running. Caspar does most of the work, tied
 up here in the harbour where I can see it. Three more sit further out: a
 lighthouse box on a public address, and two production hosts I can only reach
-by rowing through a jump box first. Between them they run the things that are
-actually live and earning their keep.
+by rowing through a <Term k="jump-host">jump box</Term> first. Between them they
+run the things that are actually live and earning their keep.
 
 For a long time, "what is running out on those three" was a job I did by hand.
 Open a terminal, connect to the lighthouse, list the containers, read the
@@ -31,15 +32,17 @@ an eye on the whole mesh, and I wanted it to row that circuit for me. One page
 that shows every container on every host, refreshing quietly while I drink my
 coffee, instead of me connecting to three machines in turn.
 
-For the dashboard to ask a host what it is running, it has to log in over SSH.
-The obvious way to make that work is to give it my own key. I did, for about an
-hour. It worked on the first try, which should have been the warning.
+For the dashboard to ask a host what it is running, it has to log in over
+<Term k="ssh">SSH</Term>. The obvious way to make that work is to give it my own
+key. I did, for about an hour. It worked on the first try, which should have
+been the warning.
 
 Here is what my key actually is. It opens every box I own, and on each one it
 can become root. It is the master key to the entire harbour. The job I was
-about to hand it is "run one `docker ps` and read a few text files." And that
-master key would then be sitting on disk inside a container, mounted in and
-readable, behind a web application. Web applications have bugs. One of those
+about to hand it is "run one <Term k="docker">`docker ps`</Term> and read a few
+text files." And that master key would then be sitting on disk inside a
+<Term k="container">container</Term>, mounted in and readable, behind a web
+application. Web applications have bugs. One of those
 bugs, one day, plus my key right there for the taking, and I have not lost a
 container list. I have lost the mesh.
 
@@ -51,8 +54,9 @@ any host it touches.
 
 ## So I cut a key with one job
 
-It is a brand new SSH keypair that exists for this feature and nothing else. On
-each of the far hosts it goes into `authorized_keys` as a single extra line,
+It is a brand new <Term k="ed25519">ed25519</Term> <Term k="ssh-key">SSH keypair</Term>
+that exists for this feature and nothing else. On each of the far hosts it goes
+into <Term k="authorized-keys">`authorized_keys`</Term> as a single extra line,
 with my own key left untouched beside it. That one line does three things, and
 the rest of this note is those three things, and how I checked that each of
 them holds when someone leans on it.
@@ -109,12 +113,13 @@ You cannot climb through the slot, you cannot walk around the counter, and you
 never see the vault. Mechanically:
 
 `restrict` is the glass. It is an allowlist, not a blocklist: it switches off
-pty allocation, port forwarding, agent forwarding, X11, and `~/.ssh/rc` in one
-word, and it keeps switching off anything new that OpenSSH adds in future
-versions. The forced `command=` is the one procedure. Whatever command the
-client actually sends, sshd ignores it and runs that script instead. Control
-Room's SSH call passes the string `control-room-ro`, and the server pays it no
-attention at all.
+<Term k="pty">pty</Term> allocation, port forwarding, agent forwarding, X11, and
+`~/.ssh/rc` in one word, and it keeps switching off anything new that
+<Term k="openssh">OpenSSH</Term> adds in future versions. The
+<Term k="forced-command">forced `command=`</Term> is the one procedure. Whatever
+command the client actually sends, <Term k="sshd">sshd</Term> ignores it and
+runs that script instead. bosun-x's SSH call passes the string
+`control-room-ro`, and the server pays it no attention at all.
 
 <Figure caption="Whatever the client sends, sshd runs the pinned script. The request is not so much refused as unread.">
   <svg viewBox="0 0 320 150" role="img" aria-label="The SSH client sends an arbitrary command; sshd discards it and runs the pinned control-room-ro.sh script, which returns a fixed read-only report.">
