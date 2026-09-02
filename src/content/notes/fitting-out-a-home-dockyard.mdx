@@ -78,9 +78,9 @@ great place to *work*. It is a bad place for things to *run*.
 
 ## 2 · A slip that stays in the water
 
-The fix is one machine that is always on. It does not have to be a "server". Mine
-is a laptop from about 2015 with a dead battery, lid shut, sitting on a shelf. It
-is called Caspar.
+The fix is one machine that is always on. It does not have to be a "server" — a
+laptop from about 2015 with a dead battery, lid shut on a shelf, does the job.
+Let's call it Marina.
 
 Two settings turn a laptop into a server. Tell <Term k="logind">logind</Term> to
 do nothing when the lid closes, and set it to power back on after a blackout.
@@ -90,38 +90,40 @@ log in without a password.
 
 Now the split is clean. You still work on your laptop — that is where the agent
 runs, where you read the diffs, where you think. But the <Term k="container">containers</Term>
-run on Caspar. You <Term k="ssh">ssh</Term> in, bring a project up with one
+run on Marina. You <Term k="ssh">ssh</Term> in, bring a project up with one
 <Term k="compose">Docker Compose</Term> command, and close your laptop. It keeps
 running. The fan noise, the port clashes and the "oh no I rebooted" all move off
 the machine you carry around.
 
 <Figure caption="You work on the laptop. The hulls sit on the machine that never leaves the water.">
-  <svg viewBox="0 0 344 150" role="img" aria-label="Your laptop connects over SSH to an always-on old laptop. The old laptop holds the running containers. Caption: you work here, it runs there.">
-    <rect x="20" y="52" width="92" height="34" rx="6" fill="#101216" stroke="rgba(255,255,255,0.2)" />
-    <text x="66" y="66" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">your laptop</text>
-    <text x="66" y="77" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">terminal + agent</text>
+  <svg viewBox="0 0 344 158" role="img" aria-label="Your laptop connects over SSH to an always-on old laptop called Marina. Marina holds four running containers. A line below reads: docker compose up, then close the lid.">
+    <rect x="16" y="46" width="92" height="34" rx="6" fill="#101216" stroke="rgba(255,255,255,0.2)" />
+    <text x="62" y="60" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">your laptop</text>
+    <text x="62" y="71" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">terminal + agent</text>
 
-    <path d="M112 69 h 84" stroke="#38bdf8" stroke-opacity="0.55" stroke-width="1.2" stroke-dasharray="3 3" fill="none" />
-    <text x="154" y="63" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#38bdf8">ssh</text>
+    <path d="M108 63 h 84" stroke="#38bdf8" stroke-opacity="0.55" stroke-width="1.2" stroke-dasharray="3 3" fill="none" />
+    <text x="150" y="57" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#38bdf8">ssh</text>
 
-    <rect x="196" y="34" width="128" height="86" rx="7" fill="#0c0d10" stroke="rgba(255,255,255,0.2)" />
-    <text x="260" y="48" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">Caspar — old laptop</text>
-    <text x="260" y="58" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#26cb96">lid shut · always on</text>
+    <rect x="192" y="26" width="136" height="88" rx="7" fill="#0c0d10" stroke="rgba(255,255,255,0.2)" />
+    <text x="260" y="41" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">Marina — old laptop</text>
+    <text x="260" y="51" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#26cb96">lid shut · always on</text>
     <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#c9cacd">
-      <rect x="208" y="66" width="48" height="13" rx="3" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="213" y="75">project a</text>
-      <rect x="264" y="66" width="48" height="13" rx="3" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="269" y="75">project b</text>
-      <rect x="208" y="84" width="48" height="13" rx="3" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="213" y="93">project c</text>
-      <rect x="264" y="84" width="48" height="13" rx="3" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="269" y="93">postgres</text>
+      <rect x="204" y="60" width="54" height="14" rx="3" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="210" y="70">project a</text>
+      <rect x="262" y="60" width="54" height="14" rx="3" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="268" y="70">project b</text>
+      <rect x="204" y="78" width="54" height="14" rx="3" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="210" y="88">project c</text>
+      <rect x="262" y="78" width="54" height="14" rx="3" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="268" y="88">postgres</text>
     </g>
-    <text x="260" y="112" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">docker compose up · keeps running</text>
+    <text x="260" y="104" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">runs whatever you bring up</text>
+
+    <text x="260" y="132" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#5c5e62">docker compose up — then close the lid</text>
   </svg>
 </Figure>
 
 ## 3 · The strongroom
 
-Something on Caspar will eventually break, or fill up, or get deleted by a
+Something on Marina will eventually break, or fill up, or get deleted by a
 command that looked safe. The question that matters is: *is there a recent copy
-of everything, somewhere that is not Caspar?*
+of everything, somewhere that is not Marina?*
 
 Two halves. The **code** is easy: every project gets a <Term k="git-remote">git remote</Term>,
 so a lost disk means a morning of cloning, not a funeral. The **state** is the
@@ -130,34 +132,40 @@ folder of files people uploaded, the <Term k="env">.env file</Term> of secrets
 that only ever existed on the running machine. Git does not touch any of that.
 
 So you need a second copy of the state. A <Term k="nas">NAS</Term> if you have
-one; a spare USB drive that Caspar <Term k="cron">cron</Term>s a nightly dump
+one; a spare USB drive that Marina <Term k="cron">cron</Term>s a nightly dump
 onto if you do not. It does not need to be clever. It needs to be *off the box*
 and *recent*. I ended up building this into the control layer so every project
 is held to it — that is [a lifeboat for every hull](/notes/a-lifeboat-for-every-hull/) —
 but a cron job and a cheap drive is a completely respectable start.
 
 <Figure wide caption="Git already carries the code. Everything else lives on one disk until something deliberately copies it off.">
-  <svg viewBox="0 0 344 164" role="img" aria-label="A project splits into two branches. Code goes to a git remote and is safe. Database, uploaded files and the .env go either to a NAS or spare drive, or they are lost.">
-    <rect x="12" y="66" width="74" height="28" rx="6" fill="#101216" stroke="rgba(255,255,255,0.2)" />
-    <text x="49" y="83" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">a project</text>
+  <svg viewBox="0 0 344 178" role="img" aria-label="A project splits into two branches. The code goes to a git remote and is already safe. The database, uploaded files and the .env go to a NAS or a spare drive on a nightly cron, or they are gone.">
+    <rect x="12" y="62" width="74" height="28" rx="6" fill="#101216" stroke="rgba(255,255,255,0.2)" />
+    <text x="49" y="79" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">a project</text>
 
-    <path d="M86 74 C 116 74, 122 40, 150 40" stroke="#26cb96" stroke-opacity="0.7" stroke-width="1.3" fill="none" />
-    <rect x="150" y="28" width="96" height="24" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
-    <text x="198" y="40" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">git remote</text>
-    <text x="198" y="49" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">the code</text>
-    <text x="254" y="43" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#5c5e62">already safe</text>
+    <path d="M86 70 C 116 70, 122 36, 150 36" stroke="#26cb96" stroke-opacity="0.7" stroke-width="1.3" fill="none" />
+    <rect x="150" y="24" width="100" height="24" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
+    <text x="200" y="36" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">git remote</text>
+    <text x="200" y="45" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">the code — already safe</text>
 
-    <path d="M86 86 C 116 86, 122 108, 150 108" stroke="#e5a1a3" stroke-opacity="0.6" stroke-width="1.3" fill="none" />
+    <path d="M86 82 C 116 82, 122 100, 150 100" stroke="#e5a1a3" stroke-opacity="0.6" stroke-width="1.3" fill="none" />
     <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#e5a1a3">
-      <rect x="150" y="76" width="118" height="14" rx="3" fill="#160f10" stroke="#e5484d" stroke-opacity="0.3" /><text x="156" y="86">the database</text>
-      <rect x="150" y="94" width="118" height="14" rx="3" fill="#160f10" stroke="#e5484d" stroke-opacity="0.3" /><text x="156" y="104">uploaded files</text>
-      <rect x="150" y="112" width="118" height="14" rx="3" fill="#160f10" stroke="#e5484d" stroke-opacity="0.3" /><text x="156" y="122">.env and keys</text>
+      <rect x="150" y="68" width="120" height="14" rx="3" fill="#160f10" stroke="#e5484d" stroke-opacity="0.3" /><text x="156" y="78">the database</text>
+      <rect x="150" y="86" width="120" height="14" rx="3" fill="#160f10" stroke="#e5484d" stroke-opacity="0.3" /><text x="156" y="96">uploaded files</text>
+      <rect x="150" y="104" width="120" height="14" rx="3" fill="#160f10" stroke="#e5484d" stroke-opacity="0.3" /><text x="156" y="114">.env and keys</text>
     </g>
+    <text x="278" y="96" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#e5484d">or gone</text>
 
-    <path d="M268 101 C 288 101, 292 132, 150 140" stroke="#26cb96" stroke-opacity="0.35" stroke-width="1.1" fill="none" />
-    <rect x="150" y="132" width="150" height="20" rx="4" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.4" />
-    <text x="225" y="145" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#26cb96">a NAS, or a drive on a cron  →  a second copy</text>
-    <text x="308" y="101" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#e5484d">or gone</text>
+    <path d="M210 118 C 210 134, 200 146, 186 150" stroke="#26cb96" stroke-opacity="0.4" stroke-width="1.2" fill="none" marker-end="url(#dyd-c3)" />
+    <rect x="52" y="146" width="180" height="24" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.45" />
+    <text x="142" y="158" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#26cb96">a NAS, or a drive on a cron</text>
+    <text x="142" y="167" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">the second copy, off the box</text>
+
+    <defs>
+      <marker id="dyd-c3" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M0 0 L8 4 L0 8 z" fill="#26cb96" fill-opacity="0.5" />
+      </marker>
+    </defs>
   </svg>
 </Figure>
 
@@ -165,7 +173,7 @@ but a cron job and a cheap drive is a completely respectable start.
 
 Two projects fit in your head. Six do not — especially when each was built over
 weeks of <Term k="agent">agent</Term> sessions, spread across your laptop and
-Caspar, and half of them have not been touched in a month. Which session
+Marina, and half of them have not been touched in a month. Which session
 finished the auth work? Is this spec still true? What is even running right now?
 
 This is what [bosun-x](/notes/the-chart-room/) is for. It is a folder of
@@ -193,7 +201,7 @@ of *[the chart room](/notes/the-chart-room/)* is about this piece.
       <rect x="18" y="92" width="58" height="15" rx="3" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="23" y="102">that tool</text><text x="67" y="102" fill="#dfa11a">?</text>
       <rect x="92" y="100" width="58" height="15" rx="3" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="97" y="110">the bot</text><text x="141" y="110" fill="#dfa11a">?</text>
     </g>
-    <text x="86" y="140" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#5c5e62">laptop + Caspar · states unknown</text>
+    <text x="86" y="140" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#5c5e62">laptop + Marina · states unknown</text>
 
     <path d="M162 88 h 26" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" fill="none" marker-end="url(#dyd-a2)" />
 
@@ -224,7 +232,7 @@ of *[the chart room](/notes/the-chart-room/)* is about this piece.
 ## 5 · When a hull is seaworthy
 
 Sooner or later one project stops being an experiment. Real people use it. "It
-goes down when I reboot Caspar" turns from a shrug into a problem. It wants its
+goes down when I reboot Marina" turns from a shrug into a problem. It wants its
 own address, its own <Term k="uptime">uptime</Term>, and it should not be
 sharing a disk with the thing you are still hacking on.
 
@@ -235,14 +243,14 @@ in front, the same <Term k="compose">Compose</Term> file. It is just running
 somewhere that is not your house, on a machine whose whole job is to stay up.
 
 Now you have machines in more than one place. And "just ssh to it" gets
-complicated: the VPS has a public address, but Caspar is behind your home
+complicated: the VPS has a public address, but Marina is behind your home
 router's <Term k="nat">NAT</Term>, your laptop moves between networks, and none
 of them can reliably start a connection to the others.
 
 <Figure caption="A project that has earned it lifts off the workshop bench and onto a machine whose only job is to stay up.">
-  <svg viewBox="0 0 344 156" role="img" aria-label="Caspar holds four projects. One of them lifts off along an arc to a separate box labelled production host, with its own address and its own uptime.">
+  <svg viewBox="0 0 344 156" role="img" aria-label="Marina holds four projects. One of them lifts off along an arc to a separate box labelled production host, with its own address and its own uptime.">
     <rect x="16" y="70" width="120" height="72" rx="7" fill="#0c0d10" stroke="rgba(255,255,255,0.2)" />
-    <text x="76" y="86" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">Caspar — the workshop</text>
+    <text x="76" y="86" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">Marina — the workshop</text>
     <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#c9cacd">
       <rect x="28" y="98" width="44" height="13" rx="3" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="33" y="107">experiment</text>
       <rect x="80" y="98" width="44" height="13" rx="3" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="85" y="107">half-idea</text>
@@ -269,7 +277,7 @@ of them can reliably start a connection to the others.
 ## 6 · Channel markers
 
 The answer is an <Term k="overlay">overlay network</Term>: a private network laid
-over the top of the real internet. You enrol each machine once — laptop, Caspar,
+over the top of the real internet. You enrol each machine once — laptop, Marina,
 every VPS — and each gets a fixed address on the overlay. After that any machine
 can reach any other directly and encrypted, wherever they physically sit.
 `ssh prod-1` works from a café.
@@ -287,56 +295,57 @@ single locked-down <Term k="ssh-key">key</Term> that can *only* list containers
 and nothing else — [a key with one job](/notes/a-key-with-one-job/) — so one
 page shows the whole fleet no matter which city each machine is in.
 
-<Figure wide caption="One private network over everything. Every machine gets an address on it; bosun-x reaches each one with a key that can only look, never touch.">
-  <svg viewBox="0 0 344 172" role="img" aria-label="Four machines — your laptop, Caspar, and two production hosts — each with an overlay address, all connected through a central lighthouse. A thin green line from bosun-x reaches each one, read-only.">
-    <rect x="132" y="12" width="80" height="22" rx="5" fill="#0c0d10" stroke="rgba(255,255,255,0.2)" />
-    <text x="172" y="26" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#eaebec">lighthouse</text>
+<Figure wide caption="One private network. Every machine hangs off it with a fixed address; bosun-x reads across it with a key that can only look, never touch.">
+  <svg viewBox="0 0 344 164" role="img" aria-label="A horizontal bar is the overlay network. Four machines — your laptop, Marina, prod-1 and prod-2 — hang below it, each with a 10-dot address. Below them, bosun-x fans four dashed read-only lines up to each machine.">
+    <text x="172" y="14" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#38bdf8">the overlay — Nebula or Tailscale</text>
+    <rect x="16" y="20" width="312" height="12" rx="4" fill="#0b1417" stroke="#38bdf8" stroke-opacity="0.4" />
 
-    <g stroke="rgba(56,189,248,0.4)" stroke-width="1.1" fill="none">
-      <path d="M150 34 C 110 60, 80 70, 62 92" />
-      <path d="M170 34 V 96" />
-      <path d="M190 34 C 220 60, 250 70, 268 92" />
-      <path d="M195 34 C 250 55, 280 110, 280 128" />
+    <g stroke="#38bdf8" stroke-opacity="0.4" stroke-width="1.1" fill="none">
+      <path d="M52 32 V 52" />
+      <path d="M136 32 V 52" />
+      <path d="M220 32 V 52" />
+      <path d="M304 32 V 52" />
     </g>
 
     <g font-family="'IBM Plex Mono', ui-monospace, monospace">
-      <rect x="20" y="96" width="84" height="30" rx="6" fill="#101216" stroke="rgba(255,255,255,0.2)" />
-      <text x="62" y="109" text-anchor="middle" font-size="7.5" fill="#eaebec">your laptop</text>
-      <text x="62" y="119" text-anchor="middle" font-size="6.5" fill="#38bdf8">10.0.0.6</text>
+      <rect x="18" y="52" width="68" height="30" rx="6" fill="#101216" stroke="rgba(255,255,255,0.2)" />
+      <text x="52" y="65" text-anchor="middle" font-size="7" fill="#eaebec">your laptop</text>
+      <text x="52" y="75" text-anchor="middle" font-size="6.5" fill="#38bdf8">10.0.0.6</text>
 
-      <rect x="128" y="96" width="84" height="30" rx="6" fill="#101216" stroke="rgba(255,255,255,0.2)" />
-      <text x="170" y="109" text-anchor="middle" font-size="7.5" fill="#eaebec">Caspar</text>
-      <text x="170" y="119" text-anchor="middle" font-size="6.5" fill="#38bdf8">10.0.0.4</text>
+      <rect x="102" y="52" width="68" height="30" rx="6" fill="#101216" stroke="rgba(255,255,255,0.2)" />
+      <text x="136" y="65" text-anchor="middle" font-size="7" fill="#eaebec">Marina</text>
+      <text x="136" y="75" text-anchor="middle" font-size="6.5" fill="#38bdf8">10.0.0.4</text>
 
-      <rect x="236" y="96" width="84" height="30" rx="6" fill="#101216" stroke="rgba(255,255,255,0.2)" />
-      <text x="278" y="109" text-anchor="middle" font-size="7.5" fill="#eaebec">prod-1</text>
-      <text x="278" y="119" text-anchor="middle" font-size="6.5" fill="#38bdf8">10.0.0.2</text>
+      <rect x="186" y="52" width="68" height="30" rx="6" fill="#101216" stroke="#26cb96" stroke-opacity="0.4" />
+      <text x="220" y="65" text-anchor="middle" font-size="7" fill="#26cb96">prod-1</text>
+      <text x="220" y="75" text-anchor="middle" font-size="6.5" fill="#38bdf8">10.0.0.2</text>
 
-      <rect x="236" y="132" width="84" height="30" rx="6" fill="#101216" stroke="rgba(255,255,255,0.2)" />
-      <text x="278" y="145" text-anchor="middle" font-size="7.5" fill="#eaebec">prod-2</text>
-      <text x="278" y="155" text-anchor="middle" font-size="6.5" fill="#38bdf8">10.0.0.3</text>
+      <rect x="270" y="52" width="68" height="30" rx="6" fill="#101216" stroke="#26cb96" stroke-opacity="0.4" />
+      <text x="304" y="65" text-anchor="middle" font-size="7" fill="#26cb96">prod-2</text>
+      <text x="304" y="75" text-anchor="middle" font-size="6.5" fill="#38bdf8">10.0.0.3</text>
     </g>
 
-    <rect x="20" y="132" width="84" height="30" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" />
-    <text x="62" y="145" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#26cb96">bosun-x</text>
-    <text x="62" y="155" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">read-only</text>
-    <g stroke="#26cb96" stroke-opacity="0.4" stroke-width="1" fill="none" stroke-dasharray="2 2">
-      <path d="M104 144 C 118 130, 150 126, 168 126" />
-      <path d="M100 138 C 180 150, 236 118, 258 112" />
-      <path d="M100 146 C 180 168, 240 150, 262 148" />
+    <g stroke="#26cb96" stroke-opacity="0.4" stroke-width="1" fill="none" stroke-dasharray="2.5 2.5">
+      <path d="M172 128 C 120 120, 70 100, 52 84" />
+      <path d="M172 128 C 150 116, 140 96, 136 84" />
+      <path d="M172 128 C 194 116, 210 96, 220 84" />
+      <path d="M172 128 C 240 118, 290 100, 304 84" />
     </g>
+    <rect x="136" y="128" width="72" height="26" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" />
+    <text x="172" y="141" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#26cb96">bosun-x</text>
+    <text x="172" y="150" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">read-only · one key</text>
   </svg>
 </Figure>
 
 ## 7 · The whole harbour
 
 Put it together and it is not complicated, just layered. You and the agent work
-on the laptop. An old laptop on a shelf runs the projects and pushes their state
-to a drive. An <Term k="overlay">overlay network</Term> joins your laptop, the
-old one, and any rented boxes into one addressable fleet. bosun-x sits across the
-top as the chart room — every deck visible from one page — and every project has
-a <Term k="git-remote">git remote</Term> so no single machine is a single point
-of failure.
+on the laptop. Marina runs the projects and pushes their state to a drive. An
+<Term k="overlay">overlay network</Term> joins your laptop, Marina and any rented
+boxes into one addressable fleet. bosun-x sits across the top as the chart room —
+every deck visible from one page — and every project has a
+<Term k="git-remote">git remote</Term> so no single machine is a single point of
+failure.
 
 You do not build it in this order on day one. You start with a laptop and an
 agent. You add the always-on box when the fan noise and the lost work get
@@ -344,46 +353,61 @@ annoying. You add backups the first time you feel the cold at the thought of a
 dead drive. You add bosun-x when you lose track. You add the overlay when a
 project graduates. Every piece earns its place by the pain it removes.
 
-<Figure wide caption="The finished yard. Nothing here was bought as a product — an old laptop, a drive, and free software, added a piece at a time.">
-  <svg viewBox="0 0 360 210" role="img" aria-label="The full ecosystem. Your laptop with the agent sits at the left. A horizontal band across the middle is the overlay network. Behind it: a home yard cluster of Caspar plus a NAS, and two production host berths. bosun-x spans the top as the control layer. Git remotes sit off to one side. Backup arrows flow from every machine to the NAS.">
-    <rect x="12" y="6" width="336" height="20" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.45" />
-    <text x="180" y="19" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#26cb96">bosun-x — the chart room · every deck from one page</text>
+<Figure wide caption="The finished yard, top to bottom: bosun-x sees everything, the overlay carries everything, the machines do the work, and a copy of every project lives somewhere else.">
+  <svg viewBox="0 0 344 208" role="img" aria-label="Four stacked layers. Top: a bosun-x bar spanning the width, the chart room. Below it: an overlay network bar. Below that: three groups hanging off the overlay — your laptop on the left, the home yard (Marina plus a NAS) in the middle, and two production berths on the right. Bottom left: a git remotes box holding a copy of every repo off-site.">
+    <rect x="12" y="8" width="320" height="20" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.45" />
+    <text x="172" y="21" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#26cb96">bosun-x — the chart room · every deck from one page</text>
 
-    <rect x="14" y="86" width="78" height="40" rx="6" fill="#101216" stroke="rgba(255,255,255,0.2)" />
-    <text x="53" y="101" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#eaebec">your laptop</text>
-    <text x="53" y="112" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">you + agent</text>
-    <text x="53" y="121" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#5c5e62">WSL · Omarchy · Ubuntu</text>
+    <rect x="12" y="36" width="320" height="16" rx="4" fill="#0b1417" stroke="#38bdf8" stroke-opacity="0.35" />
+    <text x="172" y="47" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#38bdf8">the overlay — Nebula or Tailscale</text>
 
-    <rect x="104" y="70" width="244" height="16" rx="4" fill="#0b1417" stroke="#38bdf8" stroke-opacity="0.35" />
-    <text x="226" y="81" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#38bdf8">the overlay — Nebula or Tailscale</text>
-    <path d="M92 100 C 100 92, 100 88, 104 84" stroke="#38bdf8" stroke-opacity="0.4" stroke-width="1.1" fill="none" />
-
-    <rect x="104" y="100" width="130" height="96" rx="7" fill="#0c0d10" stroke="rgba(255,255,255,0.18)" />
-    <text x="169" y="114" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">the home yard</text>
-    <rect x="114" y="122" width="110" height="30" rx="5" fill="#101216" stroke="rgba(255,255,255,0.2)" />
-    <text x="169" y="135" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#eaebec">Caspar</text>
-    <text x="169" y="145" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">experiments + new builds</text>
-    <rect x="114" y="160" width="110" height="26" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.4" />
-    <text x="169" y="176" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#26cb96">NAS / a spare drive</text>
-
-    <rect x="248" y="100" width="100" height="44" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.45" />
-    <text x="298" y="114" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#26cb96">prod-1</text>
-    <text x="298" y="124" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">graduated · public</text>
-    <rect x="248" y="152" width="100" height="44" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.45" />
-    <text x="298" y="166" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#26cb96">prod-2</text>
-    <text x="298" y="176" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">graduated · public</text>
-
-    <g stroke="#26cb96" stroke-opacity="0.28" stroke-width="1" fill="none" stroke-dasharray="2 2">
-      <path d="M138 160 C 150 158, 158 156, 166 154" />
-      <path d="M248 138 C 220 158, 200 164, 176 166" />
-      <path d="M248 190 C 220 190, 195 182, 176 176" />
+    <g stroke="#38bdf8" stroke-opacity="0.35" stroke-width="1.1" fill="none">
+      <path d="M58 52 V 66" />
+      <path d="M172 52 V 62" />
+      <path d="M286 52 V 62" />
     </g>
-    <text x="120" y="204" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#5c5e62">backups → off the box</text>
 
-    <rect x="12" y="150" width="78" height="24" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" />
-    <text x="51" y="161" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#c9cacd">git remotes</text>
-    <text x="51" y="170" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#5c5e62">every repo, off-site</text>
+    <rect x="16" y="66" width="84" height="46" rx="6" fill="#101216" stroke="rgba(255,255,255,0.2)" />
+    <text x="58" y="80" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#eaebec">your laptop</text>
+    <text x="58" y="91" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">you + the agent</text>
+    <text x="58" y="101" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="5.5" fill="#5c5e62">WSL · Omarchy · Ubuntu</text>
+
+    <rect x="116" y="62" width="112" height="104" rx="7" fill="#0c0d10" stroke="rgba(255,255,255,0.16)" />
+    <text x="172" y="75" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">the home yard</text>
+    <rect x="126" y="82" width="92" height="30" rx="5" fill="#101216" stroke="rgba(255,255,255,0.2)" />
+    <text x="172" y="95" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#eaebec">Marina</text>
+    <text x="172" y="105" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="5.5" fill="#87898d">experiments + new builds</text>
+    <rect x="126" y="128" width="92" height="26" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.4" />
+    <text x="172" y="144" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#26cb96">NAS / spare drive</text>
+    <path d="M172 112 V 128" stroke="#26cb96" stroke-opacity="0.4" stroke-width="1.1" fill="none" marker-end="url(#dyd-h1)" />
+
+    <rect x="244" y="62" width="88" height="104" rx="7" fill="#0c0d10" stroke="rgba(255,255,255,0.16)" />
+    <text x="288" y="75" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">the berths</text>
+    <rect x="254" y="82" width="70" height="32" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.45" />
+    <text x="289" y="96" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#26cb96">prod-1</text>
+    <text x="289" y="106" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="5.5" fill="#87898d">graduated · public</text>
+    <rect x="254" y="122" width="70" height="32" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.45" />
+    <text x="289" y="136" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#26cb96">prod-2</text>
+    <text x="289" y="146" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="5.5" fill="#87898d">graduated · public</text>
+
+    <rect x="16" y="128" width="84" height="30" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="58" y="141" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#c9cacd">git remotes</text>
+    <text x="58" y="151" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="5.5" fill="#5c5e62">every repo, off-site</text>
+
+    <text x="172" y="190" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#5c5e62">add a piece only when its absence has cost you something</text>
+
+    <defs>
+      <marker id="dyd-h1" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M0 0 L8 4 L0 8 z" fill="#26cb96" fill-opacity="0.5" />
+      </marker>
+    </defs>
   </svg>
 </Figure>
 
-That is the dockyard. Start with the workbench; add a slip when you need one.
+That is the dockyard. Start with the workbench and a sharp agent; add a slip when
+the lost work starts to sting, a strongroom the first time you feel the cold, a
+harbourmaster when you lose count. Do that and you are not bailing water any more
+— you are running a tight ship, and you can put out to sea knowing the harbour
+will still be standing when you sail back in.
+
+Fair winds.
