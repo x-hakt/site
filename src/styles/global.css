@@ -11,7 +11,7 @@
 
 /*
   x-hakt.com design tokens.
-  Ported from the XH-7 style guide, which imports Control Room's dark palette
+  Ported from the XH-7 style guide, which imports bosun-x's dark palette
   token-for-token from control-room/src/app/globals.css and adds one accent.
   There is one look and it is dark (style guide, section 08).
 */
@@ -27,7 +27,7 @@
   --color-faint:     #5c5e62;   /* furthest back */
 
   --color-green:     #26cb96;   /* the one identity accent (CR chart-1) */
-  --color-link:      #38bdf8;   /* sky, as Control Room */
+  --color-link:      #38bdf8;   /* sky, as bosun-x */
   --color-amber:     #dfa11a;   /* rare, "note" */
   --color-red:       #e5484d;   /* errors only */
 
