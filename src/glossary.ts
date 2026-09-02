@@ -195,4 +195,79 @@ export const glossary: Record<string, GlossaryEntry> = {
     short:
       'Telling a container "this folder on the host is that folder inside you". It is how a container keeps data that outlives it, and how the dashboard reads project files without a copy.',
   },
+  'docker-socket': {
+    term: 'Docker socket',
+    short:
+      'The local file (/var/run/docker.sock) that programs talk to in order to ask Docker what is running or to control it. Mounting it into a container, even read-only, is powerful — handle with care.',
+  },
+  sshd: {
+    term: 'sshd',
+    short:
+      'The SSH server — the program running on a machine that accepts incoming SSH logins and decides what each key is allowed to do.',
+  },
+  openssh: {
+    term: 'OpenSSH',
+    short:
+      'The near-universal implementation of SSH on Linux and macOS — both the `ssh` command you run and the `sshd` server that answers it.',
+  },
+  'authorized-keys': {
+    term: 'authorized_keys',
+    short:
+      'A file in a user’s ~/.ssh/ listing the public keys allowed to log in as them. Each line can carry options that restrict what presenting that key can do.',
+  },
+  'forced-command': {
+    term: 'forced command',
+    short:
+      'An `authorized_keys` option (command="…") that makes the server run one fixed program no matter what the client asks for. The client’s requested command is ignored entirely.',
+  },
+  pty: {
+    term: 'pty',
+    short:
+      'A pseudo-terminal — what you get when you open an interactive shell over SSH. Turning it off means a key can run a command and read its output but never get a live prompt.',
+  },
+  'jump-host': {
+    term: 'jump host',
+    short:
+      'A machine you connect through to reach another that isn’t directly reachable — SSH opens a tunnel to the jump box, then a second hop from there to the real target.',
+  },
+  ed25519: {
+    term: 'ed25519',
+    short:
+      'The modern default key type for SSH — small, fast, and secure. `ssh-keygen -t ed25519` makes one.',
+  },
+  age: {
+    term: 'age',
+    short:
+      'A small, modern file-encryption tool. You encrypt to a public "recipient" string; only the matching secret identity can decrypt. Used here for the one backup with real customer data in it.',
+  },
+  'pg-dump': {
+    term: 'pg_dump',
+    short:
+      'PostgreSQL’s built-in export command. It writes the whole contents of a database to a single file you can restore from later.',
+  },
+  zstd: {
+    term: 'zstd',
+    short:
+      'Zstandard — a compression tool that is fast and squeezes well, so backup archives take less space and less time than the older gzip.',
+  },
+  nextjs: {
+    term: 'Next.js',
+    short:
+      'A widely used framework for building websites and web apps in React — it handles routing, rendering pages on the server, and the build step.',
+  },
+  react: {
+    term: 'React',
+    short:
+      'A JavaScript library for building user interfaces out of reusable components. The thing most interactive web apps are written in.',
+  },
+  api: {
+    term: 'API',
+    short:
+      'A defined way for one program to ask another for data or an action — usually over the web, request in, structured response out. "Steam’s API" is how other software reads Steam data.',
+  },
+  standards: {
+    term: 'standards',
+    short:
+      'The fixed bar every project is held to — has a git remote, has a spec, has a current handoff, backups are fresh. Checked automatically rather than trusted.',
+  },
 };

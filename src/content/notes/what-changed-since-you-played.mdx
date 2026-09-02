@@ -7,6 +7,7 @@ tech: [nextjs, react, steam-api]
 ---
 
 import Figure from '../../components/Figure.astro';
+import Term from '../../components/Term.astro';
 
 ## The feed Steam almost gives you
 
@@ -93,13 +94,13 @@ loaded.
 
 ## One route, fanned out, failure-tolerant
 
-**Why it is here.** Steam's public API gives you news one game at a time
-(`ISteamNews/GetNewsForApp`), not the combined feed. To build a good combined
-feed you have to fetch each game and merge them yourself, and the browser
-cannot do two dozen cross-origin requests cleanly, cache them, or tidy up
-Steam's markup on its own.
+**Why it is here.** Steam's public <Term k="api">API</Term> gives you news one
+game at a time (`ISteamNews/GetNewsForApp`), not the combined feed. To build a
+good combined feed you have to fetch each game and merge them yourself, and the
+browser cannot do two dozen cross-origin requests cleanly, cache them, or tidy
+up Steam's markup on its own.
 
-**How it works.** There is a single server-side Next.js route,
+**How it works.** There is a single server-side <Term k="nextjs">Next.js</Term> route,
 `POST /gaming/steam-news`. It takes a list of Steam app ids, caps it at 24 per
 call, and fans out to `GetNewsForApp` once per game, all in parallel with
 `Promise.allSettled` so one game that is slow or returns a 500 does not sink

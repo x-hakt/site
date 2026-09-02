@@ -8,6 +8,7 @@ draft: false
 ---
 
 import Figure from '../../components/Figure.astro';
+import Term from '../../components/Term.astro';
 
 ## Too many hulls, one clipboard
 
@@ -26,8 +27,9 @@ being a fleet and becomes a scatter of boats. Mine needed:
   Enough context checked in that a fresh agent could pick up the work without me
   narrating the last three months.
 - The same **way of putting to sea.** A predictable deploy, the same shape of
-  container, the same reverse proxy in front, so that shipping a change to one
-  project did not mean relearning how that particular one was wired.
+  <Term k="container">container</Term>, the same <Term k="reverse-proxy">reverse proxy</Term>
+  in front, so that shipping a change to one project did not mean relearning how
+  that particular one was wired.
 - The same **way of handing over the watch.** When an agent ran out of context
   partway through a job, the next session needed to know what was actually
   finished and what had only been attempted.
@@ -75,7 +77,8 @@ every project and every machine, tells me which ones are healthy, which have
 drifted out of standard, and where an agent should pick the work back up.
 
 It is built around one rule, and the rule shaped everything else: **every fact
-it knows is a plain Markdown or YAML file on disk.** No database. The test I
+it knows is a plain <Term k="markdown">Markdown</Term> or <Term k="yaml">YAML</Term>
+file on disk.** No database. The test I
 held every feature to was "could I do this with a text editor alone?" If the
 answer was no, the design was wrong.
 
@@ -119,8 +122,8 @@ voice: `SPEC.md`, `STATUS.md`, `IDEAS.md`, and `HANDOFF.md`.
 The detail page for one project pulls together everything I used to gather by
 hand:
 
-- **Is it actually running?** Read live from the Docker socket on the machine it
-  is hosted on.
+- **Is it actually running?** Read live from the <Term k="docker-socket">Docker socket</Term>
+  on the machine it is hosted on.
 - **Repo facts.** Last commit, how many uncommitted files, whether it has a
   remote. Read straight from the working tree, which is mounted into Control
   Room read-only.
@@ -177,7 +180,8 @@ tedious part of the clipboard round, and the least reliable, because a checklist
 a person fills in starts drifting from the truth the moment nobody is looking.
 
 **How it works.** A file, `standards.yml`, lists the checks: has a git repo, has
-a remote, has agent context, has a spec, committed in the last thirty days.
+a <Term k="git-remote">remote</Term>, has agent context, has a spec, committed in
+the last thirty days.
 Every check is a fixed, named function that re-derives its answer from the
 actual state of the world each time it is asked. "Has a remote" runs
 `git remote`. "Is it running" asks the Docker socket. "Has a spec" looks at the
@@ -237,7 +241,8 @@ has. The planning note stays as the record of where the project came from.
 ## Servers: the near deck and the far anchorages
 
 **Why it is here.** "What is actually running, and is a disk about to fill"
-should not require me to SSH around five machines and run `df` on each one.
+should not require me to <Term k="ssh">SSH</Term> around five machines and run
+`df` on each one.
 
 **How it works.** There are two cases.
 
