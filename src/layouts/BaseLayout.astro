@@ -295,5 +295,73 @@ const structuredData = JSON.stringify({ '@context': 'https://schema.org', '@grap
         if (e.key === 'Escape' && !lb.hidden) close();
       });
     </script>
+
+    <!-- glossary <Term> controller: hover/focus to peek, click to pin, Escape/outside to close -->
+    <script>
+      const termWraps = () => Array.from(document.querySelectorAll<HTMLElement>('.term-wrap'));
+      let pinnedTerm: HTMLElement | null = null;
+      const popOf = (w: HTMLElement) => w.querySelector<HTMLElement>('.term__pop');
+      const btnOf = (w: HTMLElement) => w.querySelector<HTMLButtonElement>('.term');
+
+      function placeTerm(wrap: HTMLElement, pop: HTMLElement) {
+        pop.style.left = '0px';
+        pop.style.top = 'calc(100% + 8px)';
+        pop.style.bottom = 'auto';
+        const margin = 12;
+        const r = pop.getBoundingClientRect();
+        const wr = wrap.getBoundingClientRect();
+        if (r.right > window.innerWidth - margin) {
+          pop.style.left = `${-(r.right - (window.innerWidth - margin))}px`;
+        }
+        if (pop.getBoundingClientRect().left < margin) {
+          pop.style.left = `${margin - wr.left}px`;
+        }
+        if (r.bottom > window.innerHeight - margin && wr.top > r.height + 20) {
+          pop.style.top = 'auto';
+          pop.style.bottom = 'calc(100% + 8px)';
+        }
+      }
+      function openTerm(w: HTMLElement) {
+        const pop = popOf(w), btn = btnOf(w);
+        if (!pop || !btn) return;
+        pop.hidden = false;
+        btn.setAttribute('aria-expanded', 'true');
+        placeTerm(w, pop);
+      }
+      function closeTerm(w: HTMLElement) {
+        const pop = popOf(w), btn = btnOf(w);
+        if (!pop || !btn) return;
+        pop.hidden = true;
+        btn.setAttribute('aria-expanded', 'false');
+        if (pinnedTerm === w) pinnedTerm = null;
+      }
+      const closeAllTerms = () => termWraps().forEach(closeTerm);
+
+      for (const wrap of termWraps()) {
+        const btn = btnOf(wrap);
+        if (!btn) continue;
+        wrap.addEventListener('mouseenter', () => { if (!pinnedTerm) openTerm(wrap); });
+        wrap.addEventListener('mouseleave', () => { if (pinnedTerm !== wrap) closeTerm(wrap); });
+        btn.addEventListener('focus', () => { if (!pinnedTerm) openTerm(wrap); });
+        btn.addEventListener('blur', () => { if (pinnedTerm !== wrap) closeTerm(wrap); });
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (pinnedTerm === wrap) { closeTerm(wrap); return; }
+          closeAllTerms();
+          pinnedTerm = wrap;
+          openTerm(wrap);
+        });
+      }
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && pinnedTerm) {
+          const w = pinnedTerm;
+          closeTerm(w);
+          btnOf(w)?.focus();
+        }
+      });
+      document.addEventListener('click', (e) => {
+        if (pinnedTerm && !pinnedTerm.contains(e.target as Node)) closeAllTerms();
+      });
+    </script>
   </body>
 </html>

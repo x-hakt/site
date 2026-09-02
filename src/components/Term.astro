@@ -1,0 +1,90 @@
+---
+/*
+  Term — an inline glossary link. <Term k="ssh">SSH</Term> (or just <Term k="ssh" />)
+  renders the word with a dotted underline; hovering, focusing or tapping it shows a
+  small card with the plain-language definition from src/glossary.ts.
+
+  One hoisted script drives every instance on the page: hover/focus to peek, click to
+  pin open, Escape or an outside click to close, and it nudges the card back into view
+  near an edge. CSS alone still shows it on hover if the script never runs.
+*/
+import { glossary } from '../glossary';
+
+interface Props {
+  k: string;
+}
+const { k } = Astro.props;
+const entry = glossary[k];
+if (!entry) {
+  throw new Error(`<Term k="${k}"> — no glossary entry. Add it to src/glossary.ts.`);
+}
+const domId = `gl-${k}-${Math.random().toString(36).slice(2, 8)}`;
+---
+<span class="term-wrap"><button type="button" class="term" aria-describedby={domId} aria-expanded="false"><slot>{entry.term}</slot></button><span role="tooltip" id={domId} class="term__pop" hidden><span class="term__pop-head">{entry.term}</span><span class="term__pop-body">{entry.short}</span></span></span><style>
+  .term-wrap {
+    position: relative;
+    display: inline;
+  }
+  .term {
+    appearance: none;
+    border: 0;
+    background: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    cursor: help;
+    text-decoration: underline dotted var(--color-dim);
+    text-underline-offset: 3px;
+    transition: color 0.12s ease;
+  }
+  .term:hover,
+  .term:focus-visible {
+    color: var(--color-green);
+    text-decoration-color: var(--color-green);
+  }
+
+  .term__pop {
+    position: absolute;
+    left: 0;
+    top: calc(100% + 8px);
+    z-index: 60;
+    display: block;
+    width: max-content;
+    max-width: min(21rem, calc(100vw - 2rem));
+    padding: 10px 12px;
+    background: var(--color-surface);
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius-card);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.55;
+    text-align: left;
+    white-space: normal;
+    cursor: auto;
+  }
+  .term__pop[hidden] { display: none; }
+
+  .term__pop-head {
+    display: block;
+    color: var(--color-green);
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .term__pop-body {
+    display: block;
+    color: var(--color-fg-soft);
+  }
+
+  /* no-JS courtesy: still reveal on hover */
+  @media (hover: hover) {
+    .term-wrap:hover .term__pop { display: block; }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .term { transition: color 0.12s ease; }
+  }
+</style>
