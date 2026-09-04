@@ -1,0 +1,253 @@
+---
+title: Launching the lifeboat
+summary: The last note ended with a lifeboat I had never put in the water. Since then bosun-x restores every backup into a throwaway database once a week and counts the rows, it can put any Postgres store back with one type-to-confirm button that dumps the old contents first as the undo, the recovery order is written down per project, and the one thing that was backed up nowhere — the .env files and keys — now goes off the box nightly, encrypted. This is the restore half.
+date: 2026-09-03
+updated: 2026-09-04
+tracks: [infrastructure, control]
+tech: [postgres, docker, age, zstd]
+draft: false
+---
+
+import Figure from '../../components/Figure.astro';
+import Term from '../../components/Term.astro';
+
+## The hope with evidence under it
+
+[The last note](/notes/a-lifeboat-for-every-hull) built the backups: every
+database and file tree that a dead machine would take with it now gets dumped,
+compressed, and written to the <Term k="nas">NAS</Term> off the box, with the
+sensitive one <Term k="age">age</Term>-encrypted. One screen shows whether each
+project has a current copy.
+
+It ended on an honest note. I had listed the contents of every dump — a
+<Term k="postgres">Postgres</Term> archive will tell you its table of contents
+without restoring — but I had never stood a whole project back up from one.
+"Restorable" was a hope with good evidence under it. And the `.env` files and
+SSH keys, the things that are correctly in no <Term k="git">git</Term>
+repository, were backed up nowhere at all.
+
+This note is what closed both gaps: a restore that proves itself on a schedule,
+a button that does the scary version safely, the recovery order written down,
+and the secrets finally on the list.
+
+## A restore that runs itself
+
+**Why it is here.** A backup that has never been restored is a guess. The dump
+can be truncated, the compression can be subtly wrong, the archive on the NAS
+can have rotted since it was written. You find out at the worst possible moment
+unless you find out on purpose, regularly, when nothing is on fire.
+
+**How it works.** Once a week a job walks every "latest" receipt the backup
+agent wrote. For each one it:
+
+- checks the archive still exists on the NAS and its `sha256` still matches the
+  receipt — catches a NAS-side corruption or a half-written file;
+- decrypts it (if encrypted) and decompresses it with <Term k="zstd">zstd</Term>;
+- for a Postgres store: starts a throwaway `postgres:17-alpine`
+  <Term k="container">container</Term>, runs a real `pg_restore` into it, then
+  counts the tables and the live rows;
+- for a file or <Term k="redis">Redis</Term> archive: lists it and confirms the
+  structure is intact;
+- writes `<store>.restore.json` — which the dashboard reads as **last verified
+  restore**, right next to *last backup*.
+
+The throwaway container is the important part. It starts with `--rm`, no name,
+and `--network none`: it cannot be reached, cannot reach out, and cannot collide
+with a real container even by accident. It exists for about fifteen seconds and
+then it is gone.
+
+One wrinkle worth writing down: the official Postgres image starts, runs its
+first-boot initialisation, *stops*, and then starts again for real. Restore too
+early and you are loading into a database that is about to be thrown away. The
+test waits for `select 1` to succeed three times in a row before it trusts the
+container.
+
+<Figure wide caption="Once a week, per store: verify the archive on the NAS, unpack it, restore it for real into a container that has no network and no name, count what came back, write the receipt, delete the container.">
+  <svg viewBox="0 0 680 150" role="img" aria-label="A pipeline: the latest archive on the NAS is checked for existence and sha256 match, then decrypted and decompressed, then restored into a throwaway postgres container started with rm, no name and no network, then tables and rows are counted, then a restore receipt is written and the container is deleted.">
+    <rect x="8" y="52" width="96" height="44" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="56" y="72" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#c9cacd">NAS archive</text>
+    <text x="56" y="84" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">exists? sha256?</text>
+
+    <path d="M104 74 H 138" stroke="#5c5e62" stroke-width="1.2" fill="none" />
+    <rect x="138" y="52" width="104" height="44" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="190" y="72" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#c9cacd">age -d | zstd -d</text>
+    <text x="190" y="84" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">decrypt, decompress</text>
+
+    <path d="M242 74 H 276" stroke="#5c5e62" stroke-width="1.2" fill="none" />
+    <rect x="276" y="44" width="136" height="60" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
+    <text x="344" y="62" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#26cb96">throwaway postgres</text>
+    <text x="344" y="75" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">--rm · no name · --network none</text>
+    <text x="344" y="90" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#26cb96">pg_restore (for real)</text>
+
+    <path d="M412 74 H 446" stroke="#5c5e62" stroke-width="1.2" fill="none" />
+    <rect x="446" y="52" width="96" height="44" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="494" y="72" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#c9cacd">count</text>
+    <text x="494" y="84" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">tables, live rows</text>
+
+    <path d="M542 74 H 576" stroke="#5c5e62" stroke-width="1.2" fill="none" />
+    <rect x="576" y="52" width="96" height="44" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="624" y="70" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#26cb96">receipt</text>
+    <text x="624" y="82" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">+ delete container</text>
+
+    <path d="M344 104 V 128 H 56 V 128" stroke="#e5484d" stroke-width="1" stroke-dasharray="3 3" fill="none" />
+    <text x="200" y="142" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">any failure → receipt says ok:false, the dashboard shows it red</text>
+  </svg>
+</Figure>
+
+The most recent full run: nine stores, no failures. gp-forms decrypts and
+restores to 16 tables and 13,504 rows; playtopia's main database to 139 tables
+and 94,759 rows; its tournament database to 37 and 507; sportsball-coach to 8
+and 80. The file archives — cgburchell's CMS data and uploads, playtopia's Redis
+and leaderboard volumes — list their entries and check out. The dashboard now
+says, per store, not just *backed up 6 hours ago* but *restored clean 2 days
+ago, 139 tables*.
+
+## The week I deleted the thing I was testing
+
+**Why it is here.** The first version of this job did real damage. It was
+supposed to only ever touch its own throwaway containers. It was edited while
+its own <Term k="cron">cron</Term> was mid-run, and a stale copy of the script
+executed a teardown that matched by *name pattern* instead of by *label*. It
+stopped and removed six containers, two of them `playtopia-db` and
+`playtopia-tournament-db`. playtopia.com.au was partly down for about eight
+hours while I restored them — from the backups, which is at least the system
+working as designed, but not like this.
+
+**How it works now.** The fleet scripts run under a set of rules that are not
+allowed to bend:
+
+- containers are started only through one helper that forces
+  `--rm --network none`, no `--name`, and a unique per-run label;
+- containers are removed only through one helper that filters by *that label
+  only*, re-checked with `docker inspect` before the `rm`. Never `docker rm
+  <name>`, never `--filter name=` or `ancestor=`. No `docker stop`, `kill`,
+  `prune`, `volume rm`, or `compose down` anywhere in these scripts, at all;
+- the dashboard's own Docker client is list-and-inspect only — it has no method
+  that can stop, remove, or create anything;
+- after any change to a fleet script, a safety-check must print `ALL SAFETY
+  CHECKS PASSED` — it stands up canary containers with tempting names like
+  `postgres` and `playtopia-db` and asserts every one survives a full backup and
+  restore-test run;
+- the request runner refuses to execute a script that was modified in the last
+  two minutes or that fails a syntax check.
+
+A backup system that cannot be trusted around your live containers is not a
+backup system. This is the price of it being one.
+
+## The one button
+
+**Why it is here.** The restore-test proves the archives are good. It does not
+help you at 11pm when a bad migration has mangled a real table and you want
+*this database, from last night, now*. That is a different action, and it is the
+single most destructive thing in the fleet: it overwrites a live database.
+
+**How it works.** On the project's backup panel there is a collapsed control
+titled *restore into the live database*. Opening it, choosing a store, and
+typing the project slug to confirm runs a restore with four hard guards:
+
+1. it refuses to run at all without a matching confirmation token in its
+   environment — the UI supplies it, a fat-fingered command line does not;
+2. **step one is always a fresh dump of the current database**, written as
+   `<store>-pre-restore-<timestamp>`. If that dump fails, the restore aborts.
+   That dump *is* the undo — the panel has an "undo last restore" option that
+   simply restores from it;
+3. the target container must be exactly the one named in that project's
+   `backups.yml` — no guessing, no matching by image;
+4. restoring "latest" re-checks the archive's `sha256` against its receipt
+   first.
+
+Version one does container-based Postgres only. The two remote databases still
+restore by hand, following the written procedure — a locked-down restore key on
+each box is the next piece.
+
+<Figure caption="The restore takes a dump of the current database before it overwrites anything. That pre-restore dump is a normal archive — restoring from it is the undo.">
+  <svg viewBox="0 0 420 132" role="img" aria-label="A restore into the live database first writes a pre-restore dump of the current contents, then overwrites the database from the chosen backup. Restoring from the pre-restore dump reverses it.">
+    <rect x="10" y="20" width="120" height="26" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="70" y="37" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#c9cacd">live database (now)</text>
+
+    <path d="M70 46 V 66" stroke="#26cb96" stroke-width="1.4" fill="none" />
+    <rect x="6" y="66" width="128" height="30" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
+    <text x="70" y="80" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#26cb96">pre-restore dump</text>
+    <text x="70" y="90" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">fails → whole restore aborts</text>
+
+    <path d="M134 32 H 210" stroke="#5c5e62" stroke-width="1.2" fill="none" />
+    <text x="172" y="26" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">then</text>
+    <rect x="210" y="18" width="120" height="30" rx="5" fill="#160f10" stroke="#e5484d" stroke-opacity="0.5" />
+    <text x="270" y="32" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#e5484d">overwrite from backup</text>
+    <text x="270" y="42" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">chosen archive, sha256 checked</text>
+
+    <path d="M70 96 V 112 H 270 V 112" stroke="#26cb96" stroke-width="1" stroke-dasharray="3 3" fill="none" />
+    <text x="200" y="126" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#26cb96">undo = restore from the pre-restore dump</text>
+  </svg>
+</Figure>
+
+## The order, written down
+
+**Why it is here.** Knowing each individual archive restores does not tell you
+how to bring a whole machine back. What has to come up before what? Which key
+unlocks which bundle? When you are doing this you are stressed and it is
+probably late, and that is not when you want to be working out a dependency
+graph.
+
+**How it works.** There is now a disaster-recovery document that is the
+*order*, not the mechanics. A fresh box comes back in this sequence, each step
+assuming the last one worked:
+
+1. **the mesh** — <Term k="nebula">Nebula</Term> first, because nothing else can
+   talk until the overlay is up;
+2. **the secrets** — the encrypted bundle, unpacked with a key from the password
+   manager, before any app <Term k="compose">compose</Term> file will start;
+3. **the data repos** — bosun-x's own state is a git repo, so this is a clone,
+   not a restore;
+4. **the app repos**;
+5. **restore the databases and files** — per-project, from the tables in the
+   same document;
+6. **bring the stacks up**;
+7. **verify** — a health check, one login, one known record, and log the drill.
+
+Each project also carries a short `RESTORE.md` in its own repo — which archive,
+which container, which command — so the instructions travel with the code. And
+the document is honest about the case it does not cover: Caspar and the NAS
+share one room, so a fire takes both. What survives that is the code, the
+git-backed dashboard state, the password manager, and gp-forms' uploads in
+object storage. Everything else would be gone. There is a built, switched-off
+job to push the critical set to an off-site bucket if that risk ever stops being
+acceptable.
+
+## The last loose end: the secrets
+
+**Why it is here.** The `.env` files, the SSH keys, the Nebula certificates —
+the things that are deliberately in no repository — were the one category with
+no backup at all. Correct not to commit them; wrong to have exactly one copy.
+
+**How it works.** Same shape as everything else in the lifeboat: name it, dump
+it, encrypt it, check it. A nightly job tars the operator and per-project
+`.env` files, `~/.ssh/`, the backup agent's key directory, and `/etc/nebula/`
+(the certificate *and* the private key — the latter is root-owned, so that one
+path is read with `sudo`), pipes it through zstd and then age, and writes
+`secrets-<date>.tar.zst.age` to the NAS.
+
+It decrypts only with an identity called `_secrets.age`, and that identity is
+the one thing that is in no backup anywhere — it would be sitting next to its
+own ciphertext. It lives in a password manager and nowhere else. The weekly
+restore-test unpacks the bundle too: last run, 29 paths, intact.
+
+## Verified vs assumed, again
+
+**Verified.** Every store restores, weekly, into a real database or a real
+listing, with table and row counts recorded — nine of them on the last full
+run, no failures. The in-place restore has been run against a real database,
+and the pre-restore dump brought it back. The secrets bundle has been unpacked
+end to end on Caspar. The restore-test cannot harm a live container, and there
+is a canary suite that proves that after every change.
+
+**Assumed, and the next job.** That the per-machine order in the document is
+right — I have restored databases into running boxes, I have not yet wiped a
+whole machine and rebuilt it from zero against a stopwatch. The remote
+databases still restore by hand; they want the same locked-down forced-command
+treatment the dumps already have. And the off-site copy is built but off, which
+means "fire in the server room" is still an accepted loss rather than a
+recoverable one.
+
+The lifeboat is in the water now, and I have rowed it around the harbour. I
+still have not had to row it to shore in the dark.
