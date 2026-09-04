@@ -4,7 +4,7 @@ There is no database and no backup archive. Every note is MDX committed and
 pushed to this repo (`x-hakt/site`) on each `/admin` save — the git remote *is*
 the backup.
 
-Fleet context: `control-room-data/docs/DISASTER-RECOVERY.md` ("x-hakt").
+Fleet context: `bosun-x-data/docs/DISASTER-RECOVERY.md` ("x-hakt").
 
 ## Restore
 
