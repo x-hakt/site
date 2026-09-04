@@ -59,11 +59,12 @@ Every client-facing page reads through a single module. That module is the only
 code on the client side allowed to touch the real data loaders. Everything else
 reads from it: every page, every component.
 
-A build rule enforces that. If any other file in the client-facing tree imports
-a real loader directly, the build fails. Not a warning, a failure. The person
-most likely to reach past the gate is me, six months from now, half asleep,
-adding a feature and grabbing the loader that is closest to hand. The rule does
-not trust me to remember.
+A build rule enforces that. Not a convention, and not a code that turns out to
+be "more what you'd call guidelines". If any other file in the client-facing
+tree imports a real loader directly, the build fails. Not a warning, a failure.
+The person most likely to reach past the gate is me, six months from now, half
+asleep, adding a feature and grabbing the loader that is closest to hand. The
+rule does not trust me to remember.
 
 And the module builds what it returns field by field, from a list of what is
 allowed out. It never takes a whole project record and trims it. A field I add
@@ -121,6 +122,6 @@ say *share this project with this client*. The portal itself, its front door,
 its themed pages, the mailed link. And a client logging in and seeing their
 project, which is the only test that counts.
 
-None of it is serving anyone yet. But the decision that is easy to get wrong is
-made. It is a filtered view of the one store, not a second copy, and there is
-exactly one place the filtering happens.
+None of it is serving anyone yet. But the part that is easy to get wrong is
+settled: a filtered view of the one store, never a copy that can drift, and the
+filtering kept to a single module the build will not let anything sail around.
