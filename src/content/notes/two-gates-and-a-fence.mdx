@@ -1,6 +1,6 @@
 ---
 title: Two gates and a fence
-summary: bosun-x shows one person everything — every project, every server, every private note. But I also build things for other people, and they would like to see how it is going without me mailing them a screenshot. Today's work is the mechanism — a client login that can only ever reach the projects done for them, enforced in one function, behind a build rule that fails if any other code reads the data directly.
+summary: bosun-x shows one person everything. Every project, every server, every private note. But I also build things for other people, and they would like to see how it is going without me mailing them a screenshot. Today's work is the mechanism for that. A client login that can only ever reach the projects done for them, enforced in one function, behind a build rule that fails if any other code reads the data directly.
 date: 2026-09-04
 tracks: [control, infrastructure]
 tech: [nextjs, typescript]
@@ -22,8 +22,8 @@ allowed to see this", you are maintaining a second thing, and the whole value
 was one honest picture in one place.
 
 I also build things for other people. Those clients want to know how their
-project is going, reasonably, and right now they find out because I tell them —
-a message, a screenshot, "the part you asked about ships Friday". bosun-x
+project is going, reasonably, and right now they find out because I tell them.
+A message, a screenshot, "the part you asked about ships Friday". bosun-x
 already has that answer, on a page, kept current. I cannot show them that page.
 It also carries every other client's project, the servers, and the notes I
 write when something is a mess.
@@ -45,19 +45,19 @@ filtered look at it.
 A project reaches a client through two gates, and it has to pass both.
 
 - **Gate one** is a tag on the project that says *this is client work*. My own
-  things — the half-built ideas, the infrastructure notes — carry no tag and
+  things, the half-built ideas and the infrastructure notes, carry no tag and
   reach no client view, ever.
 - **Gate two** is a list, on a tagged project, of which clients may see it. One
-  client sees two projects; another sees a third. Nobody sees everything.
+  client sees two projects, another sees a third. Nobody sees everything.
 
-Absent tag, absent list — which is what every project starts as — means
-invisible. You have to say yes twice for anything to appear.
+Every project starts with no tag and no list. That means invisible. You have to
+say yes twice for anything to appear.
 
 ## One place it can happen, and a fence around it
 
 Every client-facing page reads through a single module. That module is the only
 code on the client side allowed to touch the real data loaders. Everything else
-— every page, every component — reads from it.
+reads from it: every page, every component.
 
 A build rule enforces that. If any other file in the client-facing tree imports
 a real loader directly, the build fails. Not a warning, a failure. The person
@@ -67,7 +67,7 @@ not trust me to remember.
 
 And the module builds what it returns field by field, from a list of what is
 allowed out. It never takes a whole project record and trims it. A field I add
-next year — a server address, a billing note — is absent from the client's view
+next year, a server address or a billing note, is absent from the client's view
 by default, not present by accident.
 
 <Figure wide caption="A project reaches a client only if it is tagged as client work (gate one) and shared with that client (gate two). Every client-facing page reads through one function; a build rule fails if any other code touches the store directly.">
@@ -104,23 +104,23 @@ That is the mechanism. The rest is the plan.
 
 The client portal will be the same application, deployed a second time in a
 portal mode, themed to look like the business's own site rather than mine,
-reading the same files but never writing to them. The way in is not my way in —
-a client gets a link mailed to their address, not a shared password. On that
+reading the same files but never writing to them. The way in is not my way in.
+A client gets a link mailed to their address, not a shared password. On that
 deployment my own sign-in sees every client project; a client sees their slice
 and nothing else.
 
 ## What is built and what is next
 
 **Built today.** The two-gate model, on projects, on planning ideas, and on
-notes. The client registry — who exists, which business they belong to, which
+notes. The client registry: who exists, which business they belong to, which
 address logs them in. The one projecting function, with the gate logic and the
 field-by-field output. The build rule that guards it.
 
-**Next.** The controls in bosun-x for setting the gates — the button I press to
-say *share this project with this client*. The portal itself: its front door,
+**Next.** The controls in bosun-x for setting the gates: the button I press to
+say *share this project with this client*. The portal itself, its front door,
 its themed pages, the mailed link. And a client logging in and seeing their
 project, which is the only test that counts.
 
 None of it is serving anyone yet. But the decision that is easy to get wrong is
-made: it is a filtered view of the one store, not a second copy, and there is
+made. It is a filtered view of the one store, not a second copy, and there is
 exactly one place the filtering happens.
