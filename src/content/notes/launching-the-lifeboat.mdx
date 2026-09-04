@@ -1,6 +1,6 @@
 ---
 title: Launching the lifeboat
-summary: The last note built the backups but never restored one. Since then bosun-x runs every backup through a real restore once a week — into a throwaway database with no network and no name — and counts what comes back. Any database can be put back from a button that dumps the old contents first, so the move is reversible. The recovery order is written down. And the keys and env files, saved nowhere before, now go off the box nightly, encrypted.
+summary: An earlier note built the backups but never restored one. Since then bosun-x runs every backup through a real restore once a week, into a throwaway database with no network and no name, and counts what comes back. Any database can be put back from a button that dumps the old contents first, so the move is reversible. The recovery order is written down. And the keys and env files, saved nowhere before, now go off the box nightly, encrypted.
 date: 2026-09-03
 updated: 2026-09-04
 tracks: [infrastructure, control]
@@ -11,17 +11,17 @@ draft: false
 import Figure from '../../components/Figure.astro';
 import Term from '../../components/Term.astro';
 
-## What the last note left undone
+## What the backups note left undone
 
 A backup you have never restored is a rumour.
 
-The [last note](/notes/a-lifeboat-for-every-hull) built the first half of this:
-a job that dumps every database and every folder of files a dead machine would
-take with it, writes the copies to a box in another room, and encrypts the ones
-that hold anything sensitive. Since then I have also extended
-[bosun-x](https://bosun-x.x-hakt.com) so that each project's backup and recovery
-state — is there a current copy, when did it last verify, the controls to run
-either on demand — sits on that project's own page.
+An [earlier note](/notes/a-lifeboat-for-every-hull) built the backup half of
+this: a job that dumps every database and every folder of files a dead machine
+would take with it, writes the copies to a box in another room, and encrypts the
+ones that hold anything sensitive. Since then I have also extended
+[bosun-x](/locker/bosun-x) so that each project's backup and recovery state is
+visible on its project page, along with info like is there a current copy, when
+did it last verify, and the controls to run either on demand.
 
 What it did not have was a single restore that had actually happened. I had
 asked each dump for its table of contents and it had answered. That is not the
@@ -30,7 +30,7 @@ a hope with good evidence under it.
 
 ## A restore that tests itself
 
-So now it tests itself, once a week, when nothing is wrong.
+So now it tests itself, once a week.
 
 The job walks every current backup and, for each one:
 
@@ -54,35 +54,32 @@ a database that is about to be wiped. The check waits until the container
 answers a trivial query three times running before it trusts it is the one that
 will stick.
 
-<Figure wide caption="Once a week, per store: verify the archive on the far box, unpack it, restore it for real into a container with no name and no network, count what came back, write the result, delete the container.">
-  <svg viewBox="0 0 680 150" role="img" aria-label="A pipeline. The current archive is checked for existence and a matching checksum, then decrypted and decompressed, then restored for real into a throwaway postgres container started with no name and no network, then tables and rows are counted, then a result is written and the container deleted. Any failure marks the result as not ok and the dashboard shows it red.">
-    <rect x="8" y="52" width="96" height="44" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
-    <text x="56" y="72" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#c9cacd">archive</text>
-    <text x="56" y="84" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">there? checksum?</text>
+<Figure wide caption="Once a week, per backup: check the archive and its checksum, unpack it, restore it for real into a container that has no name and no network and deletes itself after, count what came back, show the result. Any failure shows red on the project page.">
+  <svg viewBox="0 0 600 118" role="img" aria-label="A four-step pipeline. Step one: the archive is checked for existence and a matching checksum. Step two: it is decrypted and decompressed. Step three: a fresh Postgres container is started, the backup is restored into it for real, and the tables and rows are counted. Step four: the result is written to the project page. A failure at any step marks the result red.">
+    <rect x="8" y="34" width="118" height="46" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="67" y="55" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#c9cacd">the archive</text>
+    <text x="67" y="68" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">there? checksum?</text>
 
-    <path d="M104 74 H 138" stroke="#5c5e62" stroke-width="1.2" fill="none" />
-    <rect x="138" y="52" width="104" height="44" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
-    <text x="190" y="72" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#c9cacd">decrypt · decompress</text>
-    <text x="190" y="84" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">age -d | zstd -d</text>
+    <path d="M126 57 H 158" stroke="#5c5e62" stroke-width="1.3" fill="none" />
 
-    <path d="M242 74 H 276" stroke="#5c5e62" stroke-width="1.2" fill="none" />
-    <rect x="276" y="44" width="136" height="60" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
-    <text x="344" y="62" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#26cb96">throwaway database</text>
-    <text x="344" y="75" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">no name · no network · self-deletes</text>
-    <text x="344" y="90" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#26cb96">restore, for real</text>
+    <rect x="158" y="34" width="118" height="46" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="217" y="55" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#c9cacd">unpack</text>
+    <text x="217" y="68" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">decrypt, decompress</text>
 
-    <path d="M412 74 H 446" stroke="#5c5e62" stroke-width="1.2" fill="none" />
-    <rect x="446" y="52" width="96" height="44" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
-    <text x="494" y="72" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#c9cacd">count</text>
-    <text x="494" y="84" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">tables, live rows</text>
+    <path d="M276 57 H 308" stroke="#5c5e62" stroke-width="1.3" fill="none" />
 
-    <path d="M542 74 H 576" stroke="#5c5e62" stroke-width="1.2" fill="none" />
-    <rect x="576" y="52" width="96" height="44" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
-    <text x="624" y="70" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#26cb96">result</text>
-    <text x="624" y="82" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">shown on the page</text>
+    <rect x="308" y="34" width="132" height="46" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.6" />
+    <text x="374" y="55" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#26cb96">throwaway database</text>
+    <text x="374" y="68" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">restore for real · count</text>
 
-    <path d="M344 104 V 128 H 56 V 128" stroke="#e5484d" stroke-width="1" stroke-dasharray="3 3" fill="none" />
-    <text x="200" y="142" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">any failure → not ok → red on the project page</text>
+    <path d="M440 57 H 472" stroke="#5c5e62" stroke-width="1.3" fill="none" />
+
+    <rect x="472" y="34" width="118" height="46" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="531" y="55" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#c9cacd">result</text>
+    <text x="531" y="68" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">on the project page</text>
+
+    <path d="M374 80 V 98 H 67 V 80" stroke="#e5484d" stroke-width="1" stroke-dasharray="3 3" fill="none" />
+    <text x="220" y="112" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">any failure → the result goes red</text>
   </svg>
 </Figure>
 
@@ -90,15 +87,15 @@ The last full run put nine stores back and lost none. The largest came back as a
 hundred and thirty-nine tables and ninety thousand rows; the smallest, eight
 tables and eighty. The encrypted one decrypts and restores like the rest. What a
 project's page shows now is not *backed up six hours ago* — it is *restored
-clean two days ago, and here is what came back*.
+clean, and here is what came back*.
 
-## The week I deleted what I was testing
+## That time I deleted what I was testing
 
 The first version of this job did real damage.
 
-It was meant to only ever touch its own throwaway containers. It was edited
-while its own <Term k="cron">cron</Term> was mid-run, and a stale copy executed
-a teardown that matched containers by name pattern rather than by label. It
+It was meant to only ever touch its own throwaway containers. I edited it while
+its own <Term k="cron">cron</Term> was mid-run, and a stale copy executed a
+teardown that matched containers by name pattern rather than by label. It
 stopped and removed six of them, two of which were live production databases.
 The site they belonged to was half down for about eight hours while I restored
 them — from the backups, which is the system working, but not like that.
@@ -137,28 +134,31 @@ database that is live. So it is behind four locks:
   not one that merely looks right;
 - restoring the latest backup re-checks its checksum first.
 
-For now it does databases running in containers. The two that run on other
-machines still go back by hand, off the written procedure — a locked-down key on
-each of those boxes is the next job.
+It works for a database running in a container on the main server. Two of the
+projects keep their database on a separate production machine of their own, and
+the button does not reach those yet — the dump already comes back over a
+locked-down key that can run one command and nothing else, and giving that key
+a matching restore command is the next job. Until then those two go back by
+hand, off the written steps.
 
-<Figure caption="The restore dumps the current database before it overwrites anything. That pre-restore dump is an ordinary archive — restoring from it is the undo.">
-  <svg viewBox="0 0 420 132" role="img" aria-label="A restore into the live database first writes a pre-restore dump of the current contents; if that dump fails the whole restore aborts. Then it overwrites the database from the chosen backup. Restoring from the pre-restore dump reverses it.">
-    <rect x="10" y="20" width="120" height="26" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" />
-    <text x="70" y="37" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#c9cacd">live database, now</text>
+<Figure caption="A restore into the live database dumps the current contents first. If that dump fails the whole thing aborts. That pre-restore dump is an ordinary archive — restoring from it is the undo.">
+  <svg viewBox="0 0 460 132" role="img" aria-label="A restore into the live database. Step one: dump the current database; if that dump fails, the restore aborts. Step two: overwrite the database from the chosen backup. Restoring from the step-one dump reverses the whole thing.">
+    <rect x="150" y="10" width="160" height="26" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="230" y="27" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#c9cacd">the live database, now</text>
 
-    <path d="M70 46 V 66" stroke="#26cb96" stroke-width="1.4" fill="none" />
-    <rect x="6" y="66" width="128" height="30" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
-    <text x="70" y="80" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#26cb96">pre-restore dump</text>
-    <text x="70" y="90" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">fails → the restore aborts</text>
+    <path d="M230 36 V 54" stroke="#26cb96" stroke-width="1.5" fill="none" />
 
-    <path d="M134 32 H 210" stroke="#5c5e62" stroke-width="1.2" fill="none" />
-    <text x="172" y="26" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">then</text>
-    <rect x="210" y="18" width="120" height="30" rx="5" fill="#160f10" stroke="#e5484d" stroke-opacity="0.5" />
-    <text x="270" y="32" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#e5484d">overwrite from backup</text>
-    <text x="270" y="42" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">chosen archive, checksum checked</text>
+    <rect x="120" y="54" width="220" height="30" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.6" />
+    <text x="230" y="68" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">1 · dump the current database</text>
+    <text x="230" y="79" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">if this fails, the restore aborts</text>
 
-    <path d="M70 96 V 112 H 270 V 112" stroke="#26cb96" stroke-width="1" stroke-dasharray="3 3" fill="none" />
-    <text x="200" y="126" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#26cb96">undo = restore from the pre-restore dump</text>
+    <path d="M230 84 V 100" stroke="#5c5e62" stroke-width="1.3" fill="none" />
+
+    <rect x="120" y="100" width="220" height="26" rx="5" fill="#160f10" stroke="#e5484d" stroke-opacity="0.55" />
+    <text x="230" y="117" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#e5484d">2 · overwrite from the chosen backup</text>
+
+    <path d="M120 69 H 40 V 113 H 120" stroke="#26cb96" stroke-width="1.1" stroke-dasharray="3 3" fill="none" />
+    <text x="40" y="128" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#26cb96">undo</text>
   </svg>
 </Figure>
 
@@ -181,12 +181,17 @@ The order is:
   write down that you did.
 
 Each project also carries a short recovery file in its own repository, so the
-steps travel with the code. And the document is honest about the case it does
-not cover: the server and the box its backups sit on share one room, and a fire
-takes both. What survives that is the code, the git-backed state, and whatever
-is in the password manager. There is a job built to push the important few
-things to storage in another country. It is switched off. That is a decision,
-not an oversight — for now.
+steps travel with the code.
+
+There is one case the document is honest about not covering. The server and the
+box its backups sit on are in the same room. A fire or a theft takes both, and
+then all that is left is the code in version control and whatever is in a
+password manager — every database's contents would be gone. There is a job built
+to copy the few archives that matter most, encrypted, to rented storage in
+another region, so that one event cannot take everything. It is switched off.
+Turning it on costs money every month and adds a company to the list of people
+who could lose my data, and for now that trade is not worth making. That is a
+decision, not an oversight.
 
 ## The secrets, finally on the list
 
@@ -214,8 +219,7 @@ container, and there is a decoy suite that proves it after every change.
 **Does not, yet.** I have restored databases into machines that were still
 standing. I have not wiped a whole machine and rebuilt it from nothing with a
 clock running — until I do, the recovery order is a plan I believe rather than
-one I have run. The two remote databases still go back by hand. And the copy in
-another country is built and switched off, which means a fire in one room is
-still a real loss.
+one I have run. The two databases on their own machines still go back by hand.
+And the copy in another region is built and switched off.
 
 It floats. I have not had to launch it in weather.
