@@ -1,0 +1,126 @@
+---
+title: Two gates and a fence
+summary: bosun-x shows one person everything — every project, every server, every private note. But I also build things for other people, and they would like to see how it is going without me mailing them a screenshot. Today's work is the mechanism — a client login that can only ever reach the projects done for them, enforced in one function, behind a build rule that fails if any other code reads the data directly.
+date: 2026-09-04
+tracks: [control, infrastructure]
+tech: [nextjs, typescript]
+draft: false
+---
+
+import Figure from '../../components/Figure.astro';
+
+## A tool built for one pair of eyes
+
+A tool that shows you everything cannot be handed to someone who should see
+almost nothing.
+
+[bosun-x](/locker/bosun-x) is deliberately a single-operator tool. One person
+signs in and sees all of it: every project and its state, every server, every
+task, every note I have left myself. There are no per-user permissions, nothing
+hidden behind a role. That is the point of it. The moment you add "who is
+allowed to see this", you are maintaining a second thing, and the whole value
+was one honest picture in one place.
+
+I also build things for other people. Those clients want to know how their
+project is going, reasonably, and right now they find out because I tell them —
+a message, a screenshot, "the part you asked about ships Friday". bosun-x
+already has that answer, on a page, kept current. I cannot show them that page.
+It also carries every other client's project, the servers, and the notes I
+write when something is a mess.
+
+## A view, not a copy
+
+The obvious fix is the wrong one: a second database that I feed the client-safe
+parts into, on a schedule. Now there are two sources of truth. The copy drifts,
+or lags, or the sync breaks quietly and a client is reading last week while
+thinking it is today. I have written the note about backups; I am not going to
+build the same failure into a feature.
+
+The client sees the same files I do. They are read through one function that can
+only ever return what that client is allowed to see. One store. One truth. A
+filtered look at it.
+
+## Two gates
+
+A project reaches a client through two gates, and it has to pass both.
+
+- **Gate one** is a tag on the project that says *this is client work*. My own
+  things — the half-built ideas, the infrastructure notes — carry no tag and
+  reach no client view, ever.
+- **Gate two** is a list, on a tagged project, of which clients may see it. One
+  client sees two projects; another sees a third. Nobody sees everything.
+
+Absent tag, absent list — which is what every project starts as — means
+invisible. You have to say yes twice for anything to appear.
+
+## One place it can happen, and a fence around it
+
+Every client-facing page reads through a single module. That module is the only
+code on the client side allowed to touch the real data loaders. Everything else
+— every page, every component — reads from it.
+
+A build rule enforces that. If any other file in the client-facing tree imports
+a real loader directly, the build fails. Not a warning, a failure. The person
+most likely to reach past the gate is me, six months from now, half asleep,
+adding a feature and grabbing the loader that is closest to hand. The rule does
+not trust me to remember.
+
+And the module builds what it returns field by field, from a list of what is
+allowed out. It never takes a whole project record and trims it. A field I add
+next year — a server address, a billing note — is absent from the client's view
+by default, not present by accident.
+
+<Figure wide caption="A project reaches a client only if it is tagged as client work (gate one) and shared with that client (gate two). Every client-facing page reads through one function; a build rule fails if any other code touches the store directly.">
+  <svg viewBox="0 0 560 156" role="img" aria-label="On the left, the full store: every project, server and note. It feeds one function that applies both gates and returns output built from a safe list. On the right, the client's view: only their projects. Below the function, every client-facing page reads from it and not from the store, enforced by a build rule.">
+    <rect x="8" y="42" width="128" height="46" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="72" y="63" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#c9cacd">the store</text>
+    <text x="72" y="76" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">everything, unfiltered</text>
+
+    <path d="M136 65 H 178" stroke="#5c5e62" stroke-width="1.3" fill="none" />
+
+    <rect x="160" y="20" width="200" height="90" rx="6" fill="none" stroke="#5c5e62" stroke-width="1" stroke-dasharray="4 3" />
+    <rect x="178" y="34" width="164" height="62" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.6" />
+    <text x="260" y="55" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#26cb96">the one function</text>
+    <text x="260" y="70" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">gate one AND gate two</text>
+    <text x="260" y="82" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">output from a safe list</text>
+
+    <path d="M342 65 H 384" stroke="#5c5e62" stroke-width="1.3" fill="none" />
+
+    <rect x="384" y="42" width="128" height="46" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="448" y="63" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#c9cacd">the client's view</text>
+    <text x="448" y="76" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">their projects only</text>
+
+    <path d="M260 132 V 110" stroke="#26cb96" stroke-width="1.2" fill="none" />
+    <rect x="150" y="132" width="220" height="20" rx="4" fill="#101216" stroke="rgba(255,255,255,0.12)" />
+    <text x="260" y="145" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#c9cacd">every client-facing page reads from here</text>
+
+    <text x="260" y="14" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">build fails if anything else reads the store</text>
+  </svg>
+</Figure>
+
+## A separate front door
+
+That is the mechanism. The rest is the plan.
+
+The client portal will be the same application, deployed a second time in a
+portal mode, themed to look like the business's own site rather than mine,
+reading the same files but never writing to them. The way in is not my way in —
+a client gets a link mailed to their address, not a shared password. On that
+deployment my own sign-in sees every client project; a client sees their slice
+and nothing else.
+
+## What is built and what is next
+
+**Built today.** The two-gate model, on projects, on planning ideas, and on
+notes. The client registry — who exists, which business they belong to, which
+address logs them in. The one projecting function, with the gate logic and the
+field-by-field output. The build rule that guards it.
+
+**Next.** The controls in bosun-x for setting the gates — the button I press to
+say *share this project with this client*. The portal itself: its front door,
+its themed pages, the mailed link. And a client logging in and seeing their
+project, which is the only test that counts.
+
+None of it is serving anyone yet. But the decision that is easy to get wrong is
+made: it is a filtered view of the one store, not a second copy, and there is
+exactly one place the filtering happens.
