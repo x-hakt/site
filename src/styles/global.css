@@ -12,7 +12,7 @@
 /*
   x-hakt.com design tokens.
   Ported from the XH-7 style guide, which imports bosun-x's dark palette
-  token-for-token from control-room/src/app/globals.css and adds one accent.
+  token-for-token from bosun-x-dashboard/src/app/globals.css and adds one accent.
   There is one look and it is dark (style guide, section 08).
 */
 @theme {
