@@ -1,0 +1,260 @@
+---
+title: Evidence, not vibes
+summary: A side project of mine teaches the same concept four or five times across a course and never once asks the identical question twice. The mission design behind that, the spaced-review engine that decides when you've actually got something, the offline-first sync that never invents your history, and the consent model sitting under class/family reporting. Four systems, one rule running through all of them, never claim more than the evidence in front of you actually supports.
+date: 2026-09-05
+tracks: [infrastructure]
+tech: [nextjs, postgres, typescript]
+draft: true
+---
+
+import Figure from '../../components/Figure.astro';
+import Term from '../../components/Term.astro';
+
+## Ten missions in, same trick twice
+
+Mission four of a course I'm building teaches that RAM holds the copy of what
+you're actively doing and storage holds the copy that survives switching the
+machine off. Mission ten needs to test that same idea again, because that's
+how the reinforcement is supposed to work, but if mission ten just asks "which
+one is temporary, RAM or storage" for the second time, congratulations, you've
+built a memory test for the shape of your own quiz, not a learning tool for
+the concept underneath it. So mission ten runs it through a photo editor that
+crashes mid-edit instead, and the correct answer isn't "click RAM", it's
+"work out that the crash killed the unsaved edit because that copy only ever
+lived in RAM, and the saved version is sitting untouched in storage." Same
+fact, completely different door into it.
+
+That constraint, teach a real skill through repetition without the repetition
+turning into a party trick where people memorise the pattern of the quiz
+instead of the thing it's quizzing, runs under the whole course. Four systems
+do the actual work of holding that up. None of them are clever in isolation.
+Together they're the entire reason the thing doesn't collapse into Trivial
+Pursuit with extra steps.
+
+## Same concept, six disguises
+
+Every activity is one of six interaction types (tap, choose, predict, sort,
+drag, diagnose) and no two activities inside a mission are allowed to be the
+same question wearing a different noun. Mission one on "what is a computer"
+runs input, processing and output through a keyboard-and-monitor example,
+then a calculator doing arithmetic, then a diagnose activity where the
+monitor's switched off and you have to say which stage of the cycle just went
+dark. Three activities, one underlying idea, three completely different
+doors. The curriculum QA report that has to pass clean before anything ships
+explicitly flags "complete answer text repeated in the teaching context or
+the prompt" as a warning, because if the wording gives the answer away you
+haven't tested recall of a single thing, you've tested reading comprehension
+and called it a lesson.
+
+The bit doing the real reinforcement work doesn't live inside one mission
+though, it lives in how a skill gets mapped across the whole course. A skill
+like "reason about processing and memory" isn't just tagged to mission four,
+it's tagged to missions four, five, ten and twenty as well.
+
+<Figure wide caption="One skill, four missions apart across a twenty-mission course. The evidence for it keeps accumulating well after the mission that first introduced it.">
+  <svg viewBox="0 0 580 90" role="img" aria-label="Twenty numbered mission boxes in a row; missions 4, 5, 10 and 20 are highlighted, showing one skill's evidence spread across the whole course rather than clustered at the start.">
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#c9cacd">
+      <rect x="10" y="20" width="24" height="24" rx="4" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="22" y="36" text-anchor="middle">1</text>
+      <rect x="38" y="20" width="24" height="24" rx="4" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="50" y="36" text-anchor="middle">2</text>
+      <rect x="66" y="20" width="24" height="24" rx="4" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="78" y="36" text-anchor="middle">3</text>
+      <rect x="94" y="20" width="24" height="24" rx="4" fill="#0d1512" stroke="#26cb96" /><text x="106" y="36" text-anchor="middle" fill="#26cb96">4</text>
+      <rect x="122" y="20" width="24" height="24" rx="4" fill="#0d1512" stroke="#26cb96" /><text x="134" y="36" text-anchor="middle" fill="#26cb96">5</text>
+      <rect x="150" y="20" width="24" height="24" rx="4" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="162" y="36" text-anchor="middle">6</text>
+      <rect x="178" y="20" width="24" height="24" rx="4" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="190" y="36" text-anchor="middle">7</text>
+      <rect x="206" y="20" width="24" height="24" rx="4" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="218" y="36" text-anchor="middle">8</text>
+      <rect x="234" y="20" width="24" height="24" rx="4" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="246" y="36" text-anchor="middle">9</text>
+      <rect x="262" y="20" width="24" height="24" rx="4" fill="#0d1512" stroke="#26cb96" /><text x="274" y="36" text-anchor="middle" fill="#26cb96">10</text>
+      <rect x="290" y="20" width="24" height="24" rx="4" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="302" y="36" text-anchor="middle">11</text>
+      <rect x="318" y="20" width="24" height="24" rx="4" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="330" y="36" text-anchor="middle">12</text>
+      <rect x="346" y="20" width="24" height="24" rx="4" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="358" y="36" text-anchor="middle">13</text>
+      <rect x="374" y="20" width="24" height="24" rx="4" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="386" y="36" text-anchor="middle">14</text>
+      <rect x="402" y="20" width="24" height="24" rx="4" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="414" y="36" text-anchor="middle">15</text>
+      <rect x="430" y="20" width="24" height="24" rx="4" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="442" y="36" text-anchor="middle">16</text>
+      <rect x="458" y="20" width="24" height="24" rx="4" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="470" y="36" text-anchor="middle">17</text>
+      <rect x="486" y="20" width="24" height="24" rx="4" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="498" y="36" text-anchor="middle">18</text>
+      <rect x="514" y="20" width="24" height="24" rx="4" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="526" y="36" text-anchor="middle">19</text>
+      <rect x="542" y="20" width="24" height="24" rx="4" fill="#0d1512" stroke="#26cb96" /><text x="554" y="36" text-anchor="middle" fill="#26cb96">20</text>
+    </g>
+    <text x="290" y="70" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#5c5e62">"reason about processing and memory", same skill, four separate check-ins</text>
+  </svg>
+</Figure>
+
+Twenty missions in, you're still getting quietly tested on a concept you met
+on day one, in a scenario you've never seen, and the course knows to keep
+doing that because the skill's evidence keeps accumulating from every mission
+it's tagged to, not just the first one you happened to get right.
+
+## Nobody gets an A for one lucky guess
+
+The bit I actually like about this project is the part that decides you've
+"got" something, and it's fussier about that than I expected to build. Every
+completed mission writes a small timestamped event: which skills it touched,
+how many activities, how many were right first try. Nothing gets deleted,
+nothing gets rewritten, it's an append-only ledger of what actually happened
+and when.
+
+<Term k="idempotent">Idempotent</Term> by design too, each event carries a
+random ID, so if the same completion gets sent twice by an over-eager retry it
+still only counts once. Small detail, absolutely the difference between "the
+sync is boring and correct" and "this learner has 4,000 XP from clicking their
+wifi off at the wrong moment."
+
+A skill only reaches the top state, "strong evidence", once every mission
+tagged to it is complete, there've been at least three separate practices
+spanning at least seven days, at least one of those was a proper mixed review
+across missions rather than a mission replay, and the first-attempt accuracy
+across all of it sits at 80% or better. Fall short of that and it's just
+labelled "completion evidence", still real, just not dressed up as more than
+it is.
+
+<Figure caption="The review interval grows with each timestamped practice, drawn to actual scale, which is why the first bar looks like a rounding error next to the last one.">
+  <svg viewBox="0 0 420 160" role="img" aria-label="Bar chart of review intervals by practice count: 1 day, 3 days, 7 days, 14 days, 30 days, growing with each recorded practice.">
+    <g fill="#0d1512" stroke="#26cb96" stroke-opacity="0.6">
+      <rect x="30" y="136" width="50" height="4" />
+      <rect x="110" y="129" width="50" height="11" />
+      <rect x="190" y="114" width="50" height="26" />
+      <rect x="270" y="89" width="50" height="51" />
+      <rect x="350" y="30" width="50" height="110" />
+    </g>
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#c9cacd" text-anchor="middle">
+      <text x="55" y="150">1 practice</text>
+      <text x="135" y="150">2nd</text>
+      <text x="215" y="150">3rd</text>
+      <text x="295" y="150">4th</text>
+      <text x="375" y="150">5th+</text>
+      <text x="55" y="128">1d</text>
+      <text x="135" y="121">3d</text>
+      <text x="215" y="106">7d</text>
+      <text x="295" y="81">14d</text>
+      <text x="375" y="22">30d</text>
+    </g>
+  </svg>
+</Figure>
+
+When a skill's overdue, a <Term k="spaced-review">review</Term> stitches
+together one activity each from up to three of the missions that already fed
+that skill, not a full replay, a proper mixed retrieval across contexts, worth
+its own small XP reward and its own separate evidence event so it never gets
+confused with a mission completion. And when the interval runs out and
+nothing's overdue on the calendar, the label doesn't invent urgency it hasn't
+earned either. If there's no trustworthy timestamp behind an old completion,
+because the record predates any of this existing, it stays as plain
+completion evidence, full stop, no manufactured "you're 47 days overdue"
+guilt trip built on a date that was never real to begin with.
+
+## It forgets nothing, and it doesn't lie about it
+
+Guest progress lives entirely in the browser and that's the actual source of
+truth until you decide otherwise, no account required to play a single
+mission. Make an account and the first authenticated load claims whatever's
+in local storage and merges it against whatever the server already has for
+you, which sounds simple and is exactly the kind of "simple" that ruins your
+week if you get the merge rule wrong.
+
+<Figure caption="A sign-in merge, not a sync. Completed missions union together, XP and streak take whichever side is ahead, evidence events dedupe by their own ID.">
+  <svg viewBox="0 0 360 160" role="img" aria-label="Browser progress and server progress merge on sign-in: completed missions union, XP and streak take the maximum of the two, evidence events dedupe by ID, into one merged record.">
+    <rect x="10" y="20" width="110" height="34" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="65" y="41" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#eaebec">Browser</text>
+
+    <rect x="240" y="20" width="110" height="34" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="295" y="41" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#eaebec">Server</text>
+
+    <path d="M65 54 V 90 H 180" stroke="#26cb96" stroke-width="1.4" fill="none" />
+    <path d="M295 54 V 90 H 180" stroke="#26cb96" stroke-width="1.4" fill="none" />
+
+    <rect x="115" y="90" width="130" height="44" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.6" />
+    <text x="180" y="107" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">union completed</text>
+    <text x="180" y="119" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">max(xp, streak)</text>
+    <text x="180" y="131" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">dedupe events by id</text>
+
+    <path d="M180 134 V 150" stroke="#5c5e62" stroke-width="1.2" stroke-dasharray="3 3" fill="none" />
+    <text x="180" y="158" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#5c5e62">the record you keep playing on</text>
+  </svg>
+</Figure>
+
+Completed missions union together, so nothing you did as a guest gets thrown
+away and nothing gets counted twice. XP and streak take the higher of the two
+sides rather than adding them, because a naive add would let you round-trip
+between two devices and rack up XP for existing. Evidence events merge by
+their own ID for the same idempotency reason as above. The one rule
+underneath all of it: an old record never gets a fabricated history bolted on
+to make the newer features look retroactively populated. A completion from
+before any of this shipped stays exactly what it always was, a completion,
+not a completion with an invented timestamp so the review engine has
+something to chew on. Honest gaps in the data beat a tidier-looking lie every
+time.
+
+## Who gets to see what, and only once they say so
+
+The group and reporting side is the part I was most paranoid about, because
+it's the one place where somebody other than the learner gets to look at
+anything at all. An administrator or educator in a family or class group can
+assign a topic or a unit to specific members. That's it, that's the entire
+reach of the assignment, one topic or one unit, to people already in that
+exact group.
+
+Every target starts `pending`. Nothing is visible, not a completed count, not
+a "started" flag, nothing, until the learner themselves grants it, and they
+can revoke that later whenever they like.
+
+<Figure caption="Pending is the only state that exists until the learner acts. The manager's query is written so it literally cannot see anything else.">
+  <svg viewBox="0 0 460 170" role="img" aria-label="An assignment target starts pending. The learner grants, declines, or later revokes visibility. Only a grant lets the manager's query join progress; anything else surfaces as Private.">
+    <rect x="10" y="60" width="110" height="34" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="65" y="81" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#eaebec">pending</text>
+
+    <path d="M120 77 H 160" stroke="#5c5e62" stroke-width="1.3" fill="none" />
+    <text x="140" y="70" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#5c5e62">learner decides</text>
+
+    <path d="M160 77 L 190 40" stroke="#26cb96" stroke-width="1.4" fill="none" />
+    <rect x="190" y="20" width="100" height="30" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.6" />
+    <text x="240" y="39" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#26cb96">granted</text>
+
+    <path d="M290 35 H 330" stroke="#26cb96" stroke-width="1.4" fill="none" />
+    <rect x="330" y="20" width="120" height="30" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="390" y="39" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#c9cacd">completed / required count</text>
+
+    <path d="M160 77 L 190 114" stroke="#5c5e62" stroke-width="1.3" stroke-dasharray="3 3" fill="none" />
+    <rect x="190" y="104" width="130" height="30" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="255" y="123" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#87898d">declined / revoked</text>
+
+    <path d="M320 119 H 350" stroke="#5c5e62" stroke-width="1.3" stroke-dasharray="3 3" fill="none" />
+    <rect x="350" y="104" width="100" height="30" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="400" y="123" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#87898d">Private</text>
+  </svg>
+</Figure>
+
+The manager's query joins the learner's progress row only where that exact
+assignment's visibility says `granted`. Not "hide the field in the UI if
+they said no", the query itself cannot pull that row any other way. And a
+learner who's kept their answer private is never quietly counted as
+"incomplete" either, sharing and completion are two separate tallies on
+purpose, because conflating "opted out" with "hasn't done it" is exactly the
+kind of sloppy modelling that turns into a false accusation six months later
+when nobody remembers why the number looked bad. Change roles, leave the
+group, get archived, any of that and the visibility grant and the assignment
+targets get deleted with it. Progress itself is untouched, obviously, it's
+theirs. Archived assignments and their targets purge for good after 30 days
+on a private worker that runs daily, whether anyone remembers to ask it to or
+not.
+
+None of this is a finished safeguarding review, and the docs sitting next to
+this code say so in plain language rather than quietly hoping nobody asks.
+It's evidence of least-purpose design holding up under a change of role, a
+departure, an archive, a deletion. That's a real thing to have proven. It is
+not the same thing as having proven the whole system is fit for a classroom
+full of ten-year-olds, and pretending otherwise is exactly the kind of
+overclaim this whole post has been about avoiding.
+
+## The whole point, said once
+
+Every one of these four systems could have taken a shortcut. Ask the same
+question with different numbers and call it reinforcement. Fabricate a review
+date because the UI needs one. Let two devices double-count XP because
+diffing state honestly is more code. Hide a completed count behind a UI toggle
+instead of an actual query boundary and hope nobody pokes at the API
+directly. Every one of those shortcuts would have shipped faster, and every
+one of them would have quietly turned "here's what we can actually show you
+happened" into "here's a number that looks like that, don't check too
+closely." That's the whole rule this project runs on, and it turns out
+holding to it consistently is far more work than the pitch for it ever lets
+on.
