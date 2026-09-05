@@ -270,4 +270,19 @@ export const glossary: Record<string, GlossaryEntry> = {
     short:
       'The fixed bar every project is held to — has a git remote, has a spec, has a current handoff, backups are fresh. Checked automatically rather than trusted.',
   },
+  'skill-map': {
+    term: 'skill map',
+    short:
+      'A view that groups everything you’ve actually practised into a small set of real skills, and shows honest evidence of it rather than a badge claiming mastery after one pass.',
+  },
+  'spaced-review': {
+    term: 'spaced review',
+    short:
+      'Coming back to something you’ve already learned after a gap, timed so it resurfaces right before you’d normally forget it, instead of cramming it once.',
+  },
+  idempotent: {
+    term: 'idempotent',
+    short:
+      'Doing it twice has the same effect as doing it once. A merge or a retry can safely run more than once without duplicating anything, as long as each event carries an ID it can be recognised by.',
+  },
 };
