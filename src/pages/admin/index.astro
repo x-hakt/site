@@ -35,7 +35,7 @@ const result = authed ? await lastResult() : null;
           <p class:list={['result', result.ok ? 'result--ok' : 'result--bad']}>
             {result.ok
               ? `saved ${result.slug} and rebuilt · ${new Date(result.at).toLocaleString()}`
-              : `last save of ${result.slug} failed: ${result.error} · change reverted`}
+              : `last save of ${result.slug} failed: ${result.error}`}
           </p>
         )}
 
