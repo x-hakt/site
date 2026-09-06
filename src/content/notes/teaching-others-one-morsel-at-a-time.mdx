@@ -1,6 +1,6 @@
 ---
-title: Teaching other, one morsel at a time
-summary: "I've been wokring on another project for bite-sized learning with the aiming of teaching 'anyone anything' using small questions, used in various ways to bring meaning and context to knowlege they're imparting. There's a few patterns to teaching this way, like using the same concept four or five times across a course and never ask identical questions. Beyond the broad(side) stroke concept is the app mechanics: The mission design, the spaced-review engine that decides when you've actually got something, the sync that never invents your history, and the consent model sitting under class/family reporting."
+title: Teaching others, one morsel at a time
+summary: "I've been working on another project for bite-sized learning with the aim of teaching 'anyone anything' using small questions, used in various ways to bring meaning and context to knowledge they're imparting. There's a few patterns to teaching this way, like using the same concept four or five times across a course and never ask identical questions. Beyond the broad(side) stroke concept is the app mechanics: The mission design, the spaced-review engine that decides when you've actually got something, the sync that never invents your history, and the consent model sitting under class/family reporting."
 date: 2026-09-05
 tracks: [infrastructure]
 tech: [nextjs, postgres, typescript]
@@ -12,7 +12,7 @@ import Term from '../../components/Term.astro';
 
 ## Rinse, but don't repeat
 
-Mission four of a course I'm building teaches the fundamental differetn between RAM and storage. Mission ten needs to test that same idea again, because that's
+Mission four of a course I'm building teaches the fundamental difference between RAM and storage. Mission ten needs to test that same idea again, because that's
 how the reinforcement is supposed to work, but if mission ten just asks the same questions for the second time, then all I've really built is a memory test. So mission ten re-words the concept through the context of a photo editor that
 crashes mid-edit instead, and the correct answer isn't "click RAM", it's
 "work out that the crash killed the unsaved edit because that copy only ever
@@ -140,23 +140,30 @@ you, which sounds simple and is exactly the kind of "simple" that ruins your
 week if you get the merge rule wrong.
 
 <Figure caption="A sign-in merge, not a sync. Completed missions union together, XP and streak take whichever side is ahead, evidence events dedupe by their own ID.">
-  <svg viewBox="0 0 360 160" role="img" aria-label="Browser progress and server progress merge on sign-in: completed missions union, XP and streak take the maximum of the two, evidence events dedupe by ID, into one merged record.">
-    <rect x="10" y="20" width="110" height="34" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
-    <text x="65" y="41" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#eaebec">Browser</text>
+  <svg viewBox="0 0 360 176" role="img" aria-label="Browser progress and server progress merge on sign-in: completed missions union, XP and streak take the maximum of the two, evidence events dedupe by ID, into one merged record.">
+    <rect x="10" y="16" width="110" height="34" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="65" y="37" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#eaebec">Browser</text>
 
-    <rect x="240" y="20" width="110" height="34" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
-    <text x="295" y="41" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#eaebec">Server</text>
+    <rect x="240" y="16" width="110" height="34" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="295" y="37" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#eaebec">Server</text>
 
-    <path d="M65 54 V 90 H 180" stroke="#26cb96" stroke-width="1.4" fill="none" />
-    <path d="M295 54 V 90 H 180" stroke="#26cb96" stroke-width="1.4" fill="none" />
+    <path d="M65 50 V 72 H 180" stroke="#26cb96" stroke-width="1.4" fill="none" />
+    <path d="M295 50 V 72 H 180" stroke="#26cb96" stroke-width="1.4" fill="none" />
+    <path d="M180 72 V 84" stroke="#26cb96" stroke-width="1.4" fill="none" marker-end="url(#m3)" />
 
-    <rect x="115" y="90" width="130" height="44" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.6" />
-    <text x="180" y="107" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">union completed</text>
-    <text x="180" y="119" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">max(xp, streak)</text>
-    <text x="180" y="131" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">dedupe events by id</text>
+    <rect x="113" y="92" width="134" height="46" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.6" />
+    <text x="180" y="109" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">union completed</text>
+    <text x="180" y="121" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">max(xp, streak)</text>
+    <text x="180" y="133" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">dedupe events by id</text>
 
-    <path d="M180 134 V 150" stroke="#5c5e62" stroke-width="1.2" stroke-dasharray="3 3" fill="none" />
-    <text x="180" y="158" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#5c5e62">the record you keep playing on</text>
+    <path d="M180 138 V 154" stroke="#5c5e62" stroke-width="1.2" stroke-dasharray="3 3" fill="none" />
+    <text x="180" y="167" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#5c5e62">the record you keep playing on</text>
+
+    <defs>
+      <marker id="m3" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M0 0 L8 4 L0 8 z" fill="#26cb96" />
+      </marker>
+    </defs>
   </svg>
 </Figure>
 
@@ -173,7 +180,7 @@ not a completion with an invented timestamp.
 
 The group and reporting side is the part I was most paranoid about, because
 that's where somebody other than the learner gets to look at
-other peoples progress and results. An administrator or educator in a family or class group can
+other people's progress and results. An administrator or educator in a family or class group can
 assign a topic or a unit to specific members.
 
 Every target starts `pending`. Nothing is visible, not a completed count, not
@@ -181,28 +188,33 @@ a "started" flag, nothing, until the learner themselves grants it, and they
 can revoke that later whenever they like.
 
 <Figure caption="Pending is the only state that exists until the learner acts. The manager's query is written so it literally cannot see anything else.">
-  <svg viewBox="0 0 460 170" role="img" aria-label="An assignment target starts pending. The learner grants, declines, or later revokes visibility. Only a grant lets the manager's query join progress; anything else surfaces as Private.">
-    <rect x="10" y="60" width="110" height="34" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
-    <text x="65" y="81" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#eaebec">pending</text>
+  <svg viewBox="0 0 500 176" role="img" aria-label="An assignment target starts pending. The learner grants, declines, or later revokes visibility. Only a grant lets the manager's query join progress; anything else surfaces as Private.">
+    <rect x="10" y="70" width="80" height="32" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="50" y="90" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#eaebec">pending</text>
 
-    <path d="M120 77 H 160" stroke="#5c5e62" stroke-width="1.3" fill="none" />
-    <text x="140" y="70" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#5c5e62">learner decides</text>
+    <path d="M90 86 H 158" stroke="#5c5e62" stroke-width="1.3" fill="none" marker-end="url(#m4)" />
+    <text x="128" y="78" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#5c5e62">learner decides</text>
 
-    <path d="M160 77 L 190 40" stroke="#26cb96" stroke-width="1.4" fill="none" />
-    <rect x="190" y="20" width="100" height="30" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.6" />
-    <text x="240" y="39" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#26cb96">granted</text>
+    <path d="M162 84 L 196 50" stroke="#26cb96" stroke-width="1.4" fill="none" marker-end="url(#m4g)" />
+    <rect x="200" y="34" width="86" height="30" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.6" />
+    <text x="243" y="53" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#26cb96">granted</text>
 
-    <path d="M290 35 H 330" stroke="#26cb96" stroke-width="1.4" fill="none" />
-    <rect x="330" y="20" width="120" height="30" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
-    <text x="390" y="39" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#c9cacd">completed / required count</text>
+    <path d="M286 49 H 322" stroke="#26cb96" stroke-width="1.4" fill="none" marker-end="url(#m4g)" />
+    <rect x="326" y="34" width="150" height="30" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="401" y="53" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#c9cacd">completed / required count</text>
 
-    <path d="M160 77 L 190 114" stroke="#5c5e62" stroke-width="1.3" stroke-dasharray="3 3" fill="none" />
-    <rect x="190" y="104" width="130" height="30" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
-    <text x="255" y="123" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#87898d">declined / revoked</text>
+    <path d="M162 90 L 196 128" stroke="#5c5e62" stroke-width="1.3" stroke-dasharray="3 3" fill="none" marker-end="url(#m4)" />
+    <rect x="200" y="116" width="120" height="30" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="260" y="135" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#87898d">declined / revoked</text>
 
-    <path d="M320 119 H 350" stroke="#5c5e62" stroke-width="1.3" stroke-dasharray="3 3" fill="none" />
-    <rect x="350" y="104" width="100" height="30" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
-    <text x="400" y="123" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#87898d">Private</text>
+    <path d="M320 131 H 356" stroke="#5c5e62" stroke-width="1.3" stroke-dasharray="3 3" fill="none" marker-end="url(#m4)" />
+    <rect x="360" y="116" width="96" height="30" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="408" y="135" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#87898d">Private</text>
+
+    <defs>
+      <marker id="m4" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#5c5e62" /></marker>
+      <marker id="m4g" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#26cb96" /></marker>
+    </defs>
   </svg>
 </Figure>
 

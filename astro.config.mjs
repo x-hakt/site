@@ -17,6 +17,10 @@ export default defineConfig({
   // SameSite=Lax (not sent on cross-site POST), and login.ts / save.ts do their
   // own Origin/Referer-vs-Host check. That is the CSRF story here.
   security: { checkOrigin: false },
+  redirects: {
+    // renamed 2026-09-06 (was briefly titled "Evidence, not vibes")
+    '/notes/evidence-not-vibes': '/notes/teaching-others-one-morsel-at-a-time',
+  },
   integrations: [mdx(), sitemap()],
   vite: {
     plugins: [tailwindcss()],
