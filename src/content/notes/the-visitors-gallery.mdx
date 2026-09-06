@@ -1,6 +1,6 @@
 ---
 title: The visitor's gallery
-summary: "I run my projects out of bosun-x, and not all of them under the same name. One of those names is cgburchell.com, where I've got a client who wanted to see where his work was up to. So he has a login now, to the part of bosun-x that's his: his projects, the tasks I've shared, the ideas he's brought me, a thread to talk in. Same bosun-x I use, filtered down and wearing the cgburchell.com skin. There was no second system to build."
+summary: "I run my projects out of bosun-x, and not all of them under the same name. One of those names is a business site I take client work through, and a client there wanted to see where their projects were up to. So they have a login now, to the part of bosun-x that's theirs, their projects, the tasks I've shared, the ideas they've brought me, a thread to talk in. Same bosun-x I use, filtered down and wearing that site's skin. There was no second system to build."
 date: 2026-09-06
 tracks: [control, infrastructure]
 tech: [nextjs, typescript, docker, yaml]
@@ -13,21 +13,21 @@ import Term from '../../components/Term.astro';
 ## Not one business, one tool
 
 I built [bosun-x](/locker/bosun-x) to keep my own projects straight, and I
-don't run them all under one name. There's cgburchell.com, there's x-hakt,
-there's a couple of others, work done under different faces for different
-reasons. bosun-x holds the lot in one place, and that place is mine. One login,
-and it shows everything: every project, every client, every server, and the
-notes I leave myself when something's gone sideways.
+don't run them all under one name. There's x-hakt, there's a business site I
+take client work through, a couple of others besides, kept apart for their own
+reasons. bosun-x holds the lot in one place. One login, and it shows
+everything: every project, every client, every server, and the notes I leave
+myself when something's gone sideways.
 
-Then Chris. He's a client I do work for through cgburchell.com, and he wanted
-to know where his projects were up to without me mailing him a screenshot every
+Then a client. Someone I take work from through the business site, who wanted
+to know where their projects were up to without me mailing a screenshot every
 Friday. bosun-x already had that answer, kept current, sitting on a page. I
-just couldn't hand him the page, because the same page carries everyone else's
+just couldn't hand them the page, because the same page carries everyone else's
 work too.
 
 [Last time](/notes/two-gates-and-a-fence) I built the part that makes it safe
-to show him a slice of it: one function that does the projecting, two gates a
-project has to pass to land in his slice, and a build rule that fails if any
+to show them a slice of it: one function that does the projecting, two gates a
+project has to pass to land in that slice, and a build rule that fails if any
 other client-facing code reads the store directly. That was the part I was
 nervous about and it went in fine. What was left was the portal itself, which I
 figured was a weekend of CSS. It was closer to two weeks, and hardly any of it
@@ -35,12 +35,12 @@ was CSS.
 
 ## It comes in through the right door
 
-Chris knows me as cgburchell.com. Not as x-hakt, not as a bloke with a shelf of
-old laptops running a homelab. So his portal is cgburchell.com: the same header
-that starts clear and fades to a glass panel as you scroll, the same underline
-sliding under a nav link, the same button, the same footer. Not to make him
-think a studio stood something up for him. Because that's the name the work is
-done under, and the portal should match it.
+The client knows me by the business, not as x-hakt, not as a bloke with a shelf
+of old laptops running a homelab. So the portal is that business's site: the
+same header that starts clear and fades to a glass panel as you scroll, the
+same underline sliding under a nav link, the same button, the same footer. Not
+to make them think a studio stood something up for them. That's the name the
+work is done under, and the portal should match it.
 
 Per portal it's a short block of config. A name, two colours, a heading font, a
 body font, a line for the footer, a link back to the real site. Name a Google
@@ -85,8 +85,8 @@ that once a year someone can nudge a box.
 
 ### three pixels out
 
-Matching a real site is fussier than building one. cgburchell.com uses a plain
-CSS reset. The portal runs Tailwind, whose reset sets a line-height on every
+Matching a real site is fussier than building one. The business site uses a
+plain CSS reset. The portal runs Tailwind, whose reset sets a line-height on every
 element, and that pushed the header nav and the sign-out button a few pixels
 taller than the real site. The footer was worse, every line about three pixels
 too tall, so the whole strip sat wrong next to the real one. Anyone with both
@@ -100,19 +100,19 @@ stacked at 400% zoom, changing a value and reloading.
 
 The portal is bosun-x. The same image, started a second time in portal mode,
 reading the same files. The projection hasn't changed since the note about it:
-Chris sees a project only if it's tagged as his and shared with him by name,
-and every field that comes back is built from an allow-list, not trimmed down
-from the full record.
+the client sees a project only if it's tagged as theirs and shared with them by
+name, and every field that comes back is built from an allow-list, not trimmed
+down from the full record.
 
-What's new is the part he touches. He sees his projects, and inside each one
-the tasks I've shared with him. Sharing a project doesn't share its tasks, so
+What's new is the part they touch. They see their projects, and inside each one
+the tasks I've shared with them. Sharing a project doesn't share its tasks, so
 the one where I've written "the last dev did something odd with the auth flow"
 stays on my side. Above the tasks there's a paragraph I write by hand about
 where the project actually is, in place of the line the portal used to generate
-from the tech stack and the status field. He can reply on any task or idea I've
-shared and it lands back on my board flagged. There's a sign-off button.
-There's a message thread for anything that isn't tied to a project. When he
-comes back after a week, the page opens with what moved while he was gone.
+from the tech stack and the status field. They can reply on any task or idea
+I've shared and it lands back on my board flagged. There's a sign-off button.
+There's a message thread for anything that isn't tied to a project. When they
+come back after a week, the page opens with what moved while they were gone.
 
 <Figure wide plain caption="One client's view of one shared project, on the client's own domain and in its colours: the summary written by hand, only the tasks flagged for that client, and each task's thread with a reply box and a sign-off. The demo data is fictional; the page is the real thing.">
   <img src="/shots/portal-project.webp" alt="The client portal project page for a demo 'recipes-api' project, showing a hand-written summary, two shared tasks, a conversation thread with the client's own reply highlighted, and Post reply and Approve buttons." loading="lazy" width="1600" height="1500" />
@@ -122,10 +122,10 @@ comes back after a week, the page opens with what moved while he was gone.
 
 The notes on a task are one plain-text field, with `--- Me · 2026-09-04 ---`
 header lines between the turns. The dashboard parses those into a conversation.
-The portal, the first time I wired it, didn't, so Chris would have seen the raw
-`--- ... ---` lines sitting between the messages. I'd reused the storage and not
-the reader. A small parser on the portal side sorted it, and his own replies
-come up in the accent colour now, so a thread reads like a conversation.
+The portal, the first time I wired it, didn't, so the client would have seen
+the raw `--- ... ---` lines sitting between the messages. I'd reused the storage
+and not the reader. A small parser on the portal side sorted it, and their own
+replies come up in the accent colour now, so a thread reads like a conversation.
 
 <Figure caption="The same stored field. Left: the portal's first pass, printing the turn headers as text. Right: parsed into turns, with the client's own replies in their accent colour.">
   <svg viewBox="0 0 380 172" role="img" aria-label="On the left, a text block showing literal triple-dash author-and-date header lines mixed in with message text. On the right, two stacked cards: one in the accent colour labelled the client, one plain labelled Me.">
@@ -133,7 +133,7 @@ come up in the accent colour now, so a thread reads like a conversation.
     <rect x="12" y="26" width="164" height="132" rx="6" fill="#160f10" stroke="#e5484d" stroke-opacity="0.4" />
     <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#c9cacd">
       <text x="24" y="44">the tsvector column is in.</text>
-      <text x="24" y="60" fill="#e5a1a3">--- Chris · 2026-09-04 ---</text>
+      <text x="24" y="60" fill="#e5a1a3">--- Client · 2026-09-04 ---</text>
       <text x="24" y="76">can it match on ingredient</text>
       <text x="24" y="88">too, not just the title?</text>
       <text x="24" y="104" fill="#e5a1a3">--- Me · 2026-09-05 ---</text>
@@ -145,7 +145,7 @@ come up in the accent colour now, so a thread reads like a conversation.
 
     <text x="298" y="16" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#26cb96">parsed</text>
     <rect x="214" y="26" width="156" height="60" rx="6" fill="#101216" stroke="#4b6cd6" stroke-opacity="0.7" />
-    <text x="226" y="42" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#8aa0e6">Chris · 4 Sep</text>
+    <text x="226" y="42" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#8aa0e6">Client · 4 Sep</text>
     <text x="226" y="58" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#c9cacd">can it match on ingredient</text>
     <text x="226" y="70" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#c9cacd">too, not just the title?</text>
 
@@ -165,9 +165,9 @@ come up in the accent colour now, so a thread reads like a conversation.
 ## Nothing to keep in sync
 
 I never publish to the portal. No export, no build step, no button that says
-send update. I tick share on a project and from that point Chris is reading the
-same file I've got open. A line I add to the status this afternoon is on his
-page this afternoon, because it's the same line in the same file.
+send update. I tick share on a project and from that point the client is
+reading the same file I've got open. A line I add to the status this afternoon
+is on their page this afternoon, because it's the same line in the same file.
 
 The obvious way to build this is a second store that you feed the safe parts
 into on a schedule. Then someone has to keep the two lined up, and the client's
@@ -251,6 +251,6 @@ under it is a name, an email, and the two ticks that share their first project.
 ## One client, for now
 
 That's the whole of it in use: one portal, one client, which is all I built it
-for. None of it is specific to Chris or to cgburchell.com though. It's bosun-x
+for. None of it is specific to this client or that business though. It's bosun-x
 with a gate and a skin, so anyone else running bosun-x who has a client of
 their own already has it too.
