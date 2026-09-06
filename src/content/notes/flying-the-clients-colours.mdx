@@ -1,0 +1,143 @@
+---
+title: Flying the client's colours
+summary: Agencies run a client portal as a separate product and then keep it in step, by hand, with the tool they actually do the work in. I did it the other way round. The portal is a second face on bosun-x itself, wearing the client's brand, reading the same files I edit. There is no publish step. I tick "share" and the client is reading the file I am working in.
+date: 2026-09-06
+tracks: [control, infrastructure]
+tech: [nextjs, typescript, docker]
+draft: true
+---
+
+import Figure from '../../components/Figure.astro';
+
+## Two systems, kept roughly in step
+
+Every agency I have worked with runs two systems. The one where the work
+happens, which is a board or a repo or a pile of issues. And the one the client
+sees, which is a portal, a shared doc, or a deck at the end of the month.
+Someone keeps them roughly aligned by hand. The client's view is always a few
+days behind the real one, and nobody is quite sure by how much.
+
+I build client projects in [bosun-x](/locker/bosun-x). It already holds the
+honest version: what is done, what is next, what is stuck. [Last
+time](/notes/two-gates-and-a-fence) I wrote about the mechanism that lets one
+client see their slice of that and nothing else. Two gates, one function, a
+build rule that fails if any other code reads the store directly. That part was
+finished. This is what got built on top of it: the portal a client actually
+logs into.
+
+The thing I did not want to build was a product. A separate application with its
+own database, its own board, its own idea of what a task is, that I then feed
+from the real one. That is the two-systems problem with extra steps and a sync
+job to break quietly.
+
+## Wearing their colours
+
+So the portal is not a separate thing. It is bosun-x. The same image, started a
+second time in portal mode, pointed at the same files. What changes is the skin.
+
+An agency gives me a handful of values. A name. An accent colour. A heading font
+and a body font. A line for the footer and a link back to their real site. That
+is the entire theme. `portal.theagency.com` then looks like `theagency.com`:
+their wordmark in the corner, their colour on the buttons, their type on the
+page. The layout is mine. The motion is mine. The structure is mine. The clothes
+are theirs.
+
+It is deliberately not a page builder. Six values, sensible defaults for
+everything else, and a client who signs in sees something that reads as though
+their studio sent it, not as though they have been handed a login to my
+infrastructure. A client is invited by email address, and that address is the
+whole guest list. No shared password, no link that works for whoever it gets
+forwarded to.
+
+## What the client actually sees
+
+- **Their projects.** Not the agency's other clients. Not my own half-built
+  ideas or the infrastructure notes. A project is invisible until I say, twice,
+  that this client may see it.
+- **The tasks I chose to show.** A project being visible does not make its tasks
+  visible. The fault I am chasing, the awkward bug, the note that says *the last
+  developer did something strange here* — those stay on my side unless I
+  deliberately hand one over.
+- **A summary in my words.** Not a blurb generated from the tech stack. A
+  paragraph I write and keep current, in plain language, about where the thing
+  really is.
+- **Threads they can reply into.** A client can answer on a task or an idea, ask
+  a question, and it lands back on my board flagged as needing a look. One click
+  to approve or sign off.
+- **A direct line.** One always-on message thread per client, separate from any
+  project. No ticket, no subject line.
+- **What changed since they last looked.** The portal remembers when each client
+  last visited and opens with the short list of what has moved.
+
+## There is no publish step
+
+This is the part that matters. I never *publish to the portal*. There is no
+export, no build, no push, no "send update" button.
+
+I tick a box on a project that says share this with this client. From that
+moment the client is reading the same file I am editing. I add a line to the
+status this afternoon and they see it this afternoon. I move a task to done and
+it is done in their view too, because it is the same task, in the same file, on
+the same disk.
+
+There is no sync job to fail silently. No second database sitting a week behind.
+No PDF that was accurate on the first of the month. The client's view cannot
+drift from mine, because it *is* mine, with a filter over it and a coat of their
+paint.
+
+<Figure wide caption="One store, which I edit. Each client's portal is a filtered read of it, wearing that agency's brand. The only action is the share tick — there is no export, and nothing to keep in sync.">
+  <svg viewBox="0 0 560 188" role="img" aria-label="On the left, the store I edit: projects, tasks, status and threads. A single 'share' tick feeds two themed portals on the right, one in Acme's colours and one in Northwind's, each showing only that client's projects. No export step sits between them.">
+    <rect x="8" y="66" width="150" height="56" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="83" y="88" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#c9cacd">the store I edit</text>
+    <text x="83" y="102" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">projects · tasks</text>
+    <text x="83" y="113" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">status · threads</text>
+
+    <path d="M158 94 H 214" stroke="#26cb96" stroke-width="1.4" fill="none" marker-end="url(#c)" />
+    <text x="186" y="87" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#26cb96">share ✓</text>
+
+    <rect x="216" y="34" width="150" height="52" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
+    <text x="291" y="55" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">one function</text>
+    <text x="291" y="70" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">both gates · safe list</text>
+
+    <path d="M291 86 V 104 M291 104 H 214 M214 104 V 122 M291 104 H 372 M372 104 V 120" stroke="#5c5e62" stroke-width="1.1" fill="none" />
+
+    <rect x="150" y="122" width="128" height="52" rx="6" fill="#101216" stroke="#4b6cd6" stroke-opacity="0.6" />
+    <text x="214" y="142" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#8aa0e6">portal.acme.com</text>
+    <text x="214" y="156" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">Acme's colours</text>
+    <text x="214" y="167" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">Acme's projects only</text>
+
+    <rect x="372" y="120" width="128" height="52" rx="6" fill="#101216" stroke="#c96f42" stroke-opacity="0.6" />
+    <text x="436" y="140" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#d99a72">portal.northwind.com</text>
+    <text x="436" y="154" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">Northwind's colours</text>
+    <text x="436" y="165" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">Northwind's projects only</text>
+
+    <defs>
+      <marker id="c" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M0 0 L8 4 L0 8 z" fill="#26cb96" />
+      </marker>
+    </defs>
+  </svg>
+</Figure>
+
+## The shape of it on the box
+
+The portal is one more service in a compose file. It reads the same data
+directory as the operator dashboard, it has its own domain, and it has its own
+sign-in, because the way a client gets in should not be the way I get in. My own
+login on that deployment still sees every client's project, for a quick check
+that a client is seeing what I think they are.
+
+Adding an agency is a service block and about five lines of theme. Adding a
+client to that agency is a name, an email address, and the two ticks that share
+their first project. There is no onboarding flow because there is almost nothing
+to onboard.
+
+## What the client thinks happened
+
+A client signs in to a portal in their own colours, with their projects, a
+plain-language note on each, and a line straight to the people building the
+thing. It looks bespoke. It looks like their studio stood up a whole client
+system for them.
+
+Their studio ticked a box and typed a hex code. Both of those are true at once,
+which is the entire idea.
