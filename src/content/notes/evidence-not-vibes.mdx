@@ -1,6 +1,6 @@
 ---
-title: Evidence, not vibes
-summary: A side project of mine teaches the same concept four or five times across a course and never once asks the identical question twice. The mission design behind that, the spaced-review engine that decides when you've actually got something, the offline-first sync that never invents your history, and the consent model sitting under class/family reporting. Four systems, one rule running through all of them, never claim more than the evidence in front of you actually supports.
+title: Teaching other, one morsel at a time
+summary: "I've been wokring on another project for bite-sized learning with the aiming of teaching 'anyone anything' using small questions, used in various ways to bring meaning and context to knowlege they're imparting. There's a few patterns to teaching this way, like using the same concept four or five times across a course and never ask identical questions. Beyond the broad(side) stroke concept is the app mechanics: The mission design, the spaced-review engine that decides when you've actually got something, the sync that never invents your history, and the consent model sitting under class/family reporting."
 date: 2026-09-05
 tracks: [infrastructure]
 tech: [nextjs, postgres, typescript]
@@ -10,26 +10,17 @@ draft: false
 import Figure from '../../components/Figure.astro';
 import Term from '../../components/Term.astro';
 
-## Ten missions in, same trick twice
+## Rinse, but don't repeat
 
-Mission four of a course I'm building teaches that RAM holds the copy of what
-you're actively doing and storage holds the copy that survives switching the
-machine off. Mission ten needs to test that same idea again, because that's
-how the reinforcement is supposed to work, but if mission ten just asks "which
-one is temporary, RAM or storage" for the second time, congratulations, you've
-built a memory test for the shape of your own quiz, not a learning tool for
-the concept underneath it. So mission ten runs it through a photo editor that
+Mission four of a course I'm building teaches the fundamental differetn between RAM and storage. Mission ten needs to test that same idea again, because that's
+how the reinforcement is supposed to work, but if mission ten just asks the same questions for the second time, then all I've really built is a memory test. So mission ten re-words the concept through the context of a photo editor that
 crashes mid-edit instead, and the correct answer isn't "click RAM", it's
 "work out that the crash killed the unsaved edit because that copy only ever
 lived in RAM, and the saved version is sitting untouched in storage." Same
-fact, completely different door into it.
+fact, but requires a higher level of demonstrative knowledge to answer correctly.
 
 That constraint, teach a real skill through repetition without the repetition
-turning into a party trick where people memorise the pattern of the quiz
-instead of the thing it's quizzing, runs under the whole course. Four systems
-do the actual work of holding that up. None of them are clever in isolation.
-Together they're the entire reason the thing doesn't collapse into Trivial
-Pursuit with extra steps.
+turning into a party trick where people memorise the pattern of the quiz, runs under the whole course. Multiple systems do the actual work of holding that up. None of them are clever in isolation, but together they stop the thing from turning into Trivial Pursuit with extra steps.
 
 ## Same concept, six disguises
 
@@ -39,11 +30,11 @@ same question wearing a different noun. Mission one on "what is a computer"
 runs input, processing and output through a keyboard-and-monitor example,
 then a calculator doing arithmetic, then a diagnose activity where the
 monitor's switched off and you have to say which stage of the cycle just went
-dark. Three activities, one underlying idea, three completely different
-doors. The curriculum QA report that has to pass clean before anything ships
+dark. Three activities, one underlying idea, three different ways of understanding. 
+The curriculum QA report that has to pass clean before anything ships
 explicitly flags "complete answer text repeated in the teaching context or
 the prompt" as a warning, because if the wording gives the answer away you
-haven't tested recall of a single thing, you've tested reading comprehension
+haven't tested recall at all, you've tested reading comprehension
 and called it a lesson.
 
 The bit doing the real reinforcement work doesn't live inside one mission
@@ -86,8 +77,8 @@ it's tagged to, not just the first one you happened to get right.
 
 ## Nobody gets an A for one lucky guess
 
-The bit I actually like about this project is the part that decides you've
-"got" something, and it's fussier about that than I expected to build. Every
+Something I really like about this project is the part that decides you've
+"got" something, and it's fussier about that than I originally intended. Every
 completed mission writes a small timestamped event: which skills it touched,
 how many activities, how many were right first try. Nothing gets deleted,
 nothing gets rewritten, it's an append-only ledger of what actually happened
@@ -103,8 +94,7 @@ A skill only reaches the top state, "strong evidence", once every mission
 tagged to it is complete, there've been at least three separate practices
 spanning at least seven days, at least one of those was a proper mixed review
 across missions rather than a mission replay, and the first-attempt accuracy
-across all of it sits at 80% or better. Fall short of that and it's just
-labelled "completion evidence", still real, just not dressed up as more than
+across all of it sits at 80% or better. Fall short of that and the user gets "completion evidence", still real, just not dressed up as more than
 it is.
 
 <Figure caption="The review interval grows with each timestamped practice, drawn to actual scale, which is why the first bar looks like a rounding error next to the last one.">
@@ -133,14 +123,12 @@ it is.
 
 When a skill's overdue, a <Term k="spaced-review">review</Term> stitches
 together one activity each from up to three of the missions that already fed
-that skill, not a full replay, a proper mixed retrieval across contexts, worth
-its own small XP reward and its own separate evidence event so it never gets
-confused with a mission completion. And when the interval runs out and
+that skill, not a full replay, and worth its own small XP reward and its own separate evidence event so it never gets
+confused with a mission completion. When the interval runs out and
 nothing's overdue on the calendar, the label doesn't invent urgency it hasn't
 earned either. If there's no trustworthy timestamp behind an old completion,
 because the record predates any of this existing, it stays as plain
-completion evidence, full stop, no manufactured "you're 47 days overdue"
-guilt trip built on a date that was never real to begin with.
+completion evidence.
 
 ## It forgets nothing, and it doesn't lie about it
 
@@ -176,22 +164,17 @@ Completed missions union together, so nothing you did as a guest gets thrown
 away and nothing gets counted twice. XP and streak take the higher of the two
 sides rather than adding them, because a naive add would let you round-trip
 between two devices and rack up XP for existing. Evidence events merge by
-their own ID for the same idempotency reason as above. The one rule
-underneath all of it: an old record never gets a fabricated history bolted on
+their own ID for the same idempotency reason as above. One rule in place is: an old record never gets a fabricated history bolted on
 to make the newer features look retroactively populated. A completion from
 before any of this shipped stays exactly what it always was, a completion,
-not a completion with an invented timestamp so the review engine has
-something to chew on. Honest gaps in the data beat a tidier-looking lie every
-time.
+not a completion with an invented timestamp.
 
-## Who gets to see what, and only once they say so
+## Building for groups and classes
 
 The group and reporting side is the part I was most paranoid about, because
-it's the one place where somebody other than the learner gets to look at
-anything at all. An administrator or educator in a family or class group can
-assign a topic or a unit to specific members. That's it, that's the entire
-reach of the assignment, one topic or one unit, to people already in that
-exact group.
+that's where somebody other than the learner gets to look at
+other peoples progress and results. An administrator or educator in a family or class group can
+assign a topic or a unit to specific members.
 
 Every target starts `pending`. Nothing is visible, not a completed count, not
 a "started" flag, nothing, until the learner themselves grants it, and they
@@ -223,38 +206,18 @@ can revoke that later whenever they like.
   </svg>
 </Figure>
 
-The manager's query joins the learner's progress row only where that exact
+The manager's query joins the learner's progress row only where the
 assignment's visibility says `granted`. Not "hide the field in the UI if
-they said no", the query itself cannot pull that row any other way. And a
+they said no", the query itself can't pull that row any other way. And a
 learner who's kept their answer private is never quietly counted as
 "incomplete" either, sharing and completion are two separate tallies on
-purpose, because conflating "opted out" with "hasn't done it" is exactly the
-kind of sloppy modelling that turns into a false accusation six months later
-when nobody remembers why the number looked bad. Change roles, leave the
+purpose. Change roles, leave the
 group, get archived, any of that and the visibility grant and the assignment
 targets get deleted with it. Progress itself is untouched, obviously, it's
 theirs. Archived assignments and their targets purge for good after 30 days
-on a private worker that runs daily, whether anyone remembers to ask it to or
-not.
+on a private worker that runs daily.
 
-None of this is a finished safeguarding review, and the docs sitting next to
-this code say so in plain language rather than quietly hoping nobody asks.
-It's evidence of least-purpose design holding up under a change of role, a
-departure, an archive, a deletion. That's a real thing to have proven. It is
-not the same thing as having proven the whole system is fit for a classroom
-full of ten-year-olds, and pretending otherwise is exactly the kind of
-overclaim this whole post has been about avoiding.
-
-## The whole point, said once
-
-Every one of these four systems could have taken a shortcut. Ask the same
-question with different numbers and call it reinforcement. Fabricate a review
-date because the UI needs one. Let two devices double-count XP because
-diffing state honestly is more code. Hide a completed count behind a UI toggle
-instead of an actual query boundary and hope nobody pokes at the API
-directly. Every one of those shortcuts would have shipped faster, and every
-one of them would have quietly turned "here's what we can actually show you
-happened" into "here's a number that looks like that, don't check too
-closely." That's the whole rule this project runs on, and it turns out
-holding to it consistently is far more work than the pitch for it ever lets
-on.
+None of this is a finished safeguarding review, It's evidence of least-purpose design that can hold up under a change of role, a
+departure, an archive, a deletion. It's
+not the same as having proven the whole system is fit for a classroom
+full of ten-year-olds, but we're working towards a more complete app.
