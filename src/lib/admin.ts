@@ -9,6 +9,8 @@ import { createHmac, timingSafeEqual, randomBytes } from 'node:crypto';
 import { readFile, writeFile, readdir, access } from 'node:fs/promises';
 import { constants as FS } from 'node:fs';
 import path from 'node:path';
+// Transitive via astro (it parses frontmatter with this); server-only import.
+import yaml from 'js-yaml';
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID ?? '';
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET ?? '';
@@ -207,11 +209,28 @@ export async function noteExists(slug: string): Promise<boolean> {
   }
 }
 
-/** structural check only — the real gate is `astro build` succeeding after the write */
+/**
+ * Cheap pre-flight on the frontmatter so an obvious mistake is caught at save
+ * time with a readable message, instead of after a 15s build-then-revert. The
+ * real gate is still `astro build` succeeding after the write.
+ */
 export function frontmatterProblem(content: string): string | null {
   const m = content.match(/^---\n([\s\S]*?)\n---\n/);
   if (!m) return 'No frontmatter block (--- ... ---) at the top.';
   const fm = m[1];
+
+  // Actually parse it. The commonest break is an unquoted value containing
+  // ": " (e.g. `summary: the mechanics: the mission design`), which is a YAML
+  // syntax error, not something the key-presence regex below would ever catch.
+  let doc: unknown;
+  try {
+    doc = yaml.load(fm);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message.split('\n')[0] : String(e);
+    return `Frontmatter isn't valid YAML: ${msg}. A value with a colon-space or a leading quote/bracket needs wrapping in "double quotes".`;
+  }
+  if (doc === null || typeof doc !== 'object') return 'Frontmatter parsed to nothing — check the --- fences.';
+
   for (const key of ['title', 'summary', 'date', 'tracks']) {
     if (!new RegExp(`^${key}:\\s*\\S`, 'm').test(fm)) return `Frontmatter is missing "${key}".`;
   }
