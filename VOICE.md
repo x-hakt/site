@@ -5,7 +5,7 @@ drafting or editing a note. The visual style guide is XH-7 (artifact
 `claude.ai/code/artifact/5b1a2ebe-25c1-4379-93f2-401dffbc094b`); this is its
 written-word counterpart.
 
-## The short version — calibrated 2026-09-07
+## The short version (calibrated 2026-09-07)
 
 The rest of this file plus Chris's raw jib-x profile (`~/Downloads/VOICE.md`),
 narrowed by what he actually does to AI drafts. The jib-x profile is how he
@@ -19,7 +19,7 @@ section wins for the prose.
   "Here's the thing:", "In today's world", "Let's dive in", "leverage", and
   hollow emphasis ("the key is", "it comes down to", "there is exactly one").
 - **A paragraph that ends on a quotable line.** End on the last fact. Chris
-  deletes every mic-drop — "honest gaps beat a tidier-looking lie every time",
+  deletes every mic-drop: "honest gaps beat a tidier-looking lie every time",
   "you pay it in an afternoon of squinting". Cut yours before he has to.
 - **A closing recap section** ("The whole point, said once") or any line where
   the piece talks about itself ("exactly the kind of overclaim this post has
@@ -32,7 +32,7 @@ section wins for the prose.
   joke.
 - **A sales frame the note doesn't have.** No competitor, no value prop, no
   "unlike the products that…". Every project here is something Chris built for
-  himself. If the "why" isn't stated it's "I needed it" — don't invent a market.
+  himself. If the "why" isn't stated it's "I needed it". Don't invent a market.
 
 ### The frame is not optional
 
@@ -72,13 +72,13 @@ Open on the by-hand drudgery: what the days looked like, where it broke, the
 moment there had to be a better way. Then "so I built X", a sentence or two.
 Walk the parts; for each, why it is there and how it actually works, with the
 flag that matters and the gotcha that cost an afternoon, one `<Figure>` each.
-The **Why it is here / How it works** labels are optional — use them for a
+The **Why it is here / How it works** labels are optional. Use them for a
 systematic tour (`a-lifeboat-for-every-hull`), drop them for flowing prose
 (`the-visitors-gallery`). A verified-vs-assumed beat is good practice; fold it
 into the closing prose if a standalone section reads as a bolt-on.
 
 Close **short**: a sentence or two, the frame landing one last time, the voice
-loosening — a contraction, maybe a swear, maybe just "Fair winds." Then stop.
+loosening. A contraction, maybe a swear, maybe just "Fair winds." Then stop.
 
 North star: **Terry Pratchett narrating a technical build.**
 
@@ -118,7 +118,7 @@ thinks through, and it should carry weight in the writing:
 
 ## The shape of a note
 
-_See "The short version" up top first — the labels in step 3 and the section in
+_See "The short version" up top first. The labels in step 3 and the section in
 step 4 are optional now, and the mic-drop / recap rules there override anything
 below that reads as a licence to perform._
 
