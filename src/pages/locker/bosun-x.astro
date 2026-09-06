@@ -10,6 +10,7 @@ const nav = [
   { id: 'problem', label: 'the problem' },
   { id: 'how', label: 'how it works' },
   { id: 'dashboard', label: 'the dashboard' },
+  { id: 'portal', label: 'the client portal' },
   { id: 'nocode', label: "if you don't code" },
   { id: 'install', label: 'get it' },
   { id: 'use', label: 'use it' },
@@ -173,8 +174,9 @@ const MONO = "'IBM Plex Mono', ui-monospace, monospace";
         server — the engine that keeps the log honest. The <strong>dashboard</strong> is the web
         application built on the same plain files: every project’s containers read live off the
         Docker socket, standards checked rather than claimed, the spec and handoff rendered and
-        editable, the planning lifecycle, whole servers across a fleet. The CLI is the discipline;
-        the dashboard is where you look at all of it at once.
+        editable, the planning lifecycle, backup jobs watched for a missed run, whole servers
+        across a fleet. The CLI is the discipline; the dashboard is where you look at all of it at
+        once.
       </p>
       <Figure
         plain
@@ -210,6 +212,85 @@ const MONO = "'IBM Plex Mono', ui-monospace, monospace";
         >github.com/x-hakt/bosun-x-dashboard</a>. Same shape: plain files, nothing stored,
         self&#8209;hosted behind your own auth. Clone it, point a <code>docker compose</code> at
         your data folder, done. It uses the CLI above as a dependency.
+      </p>
+    </section>
+
+    <section id="portal" class="s">
+      <h2>the client portal</h2>
+      <p>
+        bosun&#8209;x is built for one pair of eyes — one operator who sees every project, every
+        server, every note. The <strong>client portal</strong> is how someone you’re
+        <em>building for</em> gets a window into their own work without seeing anyone else’s. It’s
+        the same image deployed a second time with <code>BOSUN_MODE=portal</code>, themed as the
+        client’s own brand, serving a per-client projection of the same plain files.
+      </p>
+      <p>
+        Nothing is shared by default. A project — or a planning idea — reaches a client only when it
+        passes <strong>two gates</strong>, and every client-facing page reads through a single
+        function that a lint rule forces it to use.
+      </p>
+
+      <Figure caption="Both gates default closed. What the portal returns is built field-by-field from a whitelist in one function — host, path, repo, handoff logs and backups have no way through, and a build rule fails if any other portal file reads the store directly.">
+        <svg viewBox="0 0 640 210" role="img" aria-label="A project passes gate one if it is tagged portals: acme, then gate two if shared_with lists the client. Only then does the projection function return a whitelisted view to that client's portal. Failing either gate means withheld.">
+          <rect x="12" y="86" width="96" height="34" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+          <text x="60" y="107" text-anchor="middle" font-family={MONO} font-size="10" fill="#eaebec">a project</text>
+
+          <path d="M108 103 H 170" stroke="#5c5e62" stroke-width="1.3" fill="none" marker-end="url(#p)" />
+
+          <rect x="172" y="82" width="128" height="42" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+          <text x="236" y="100" text-anchor="middle" font-family={MONO} font-size="8.5" fill="#c9cacd">gate 1</text>
+          <text x="236" y="114" text-anchor="middle" font-family={MONO} font-size="8" fill="#5c5e62">portals: [acme]</text>
+
+          <path d="M300 103 H 336" stroke="#26cb96" stroke-width="1.5" fill="none" marker-end="url(#pg)" />
+
+          <rect x="338" y="82" width="128" height="42" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+          <text x="402" y="100" text-anchor="middle" font-family={MONO} font-size="8.5" fill="#c9cacd">gate 2</text>
+          <text x="402" y="114" text-anchor="middle" font-family={MONO} font-size="8" fill="#5c5e62">shared_with: [bob]</text>
+
+          <path d="M466 103 H 502" stroke="#26cb96" stroke-width="1.5" fill="none" marker-end="url(#pg)" />
+
+          <rect x="504" y="70" width="124" height="66" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" />
+          <text x="566" y="90" text-anchor="middle" font-family={MONO} font-size="9" fill="#26cb96">projection</text>
+          <text x="566" y="105" text-anchor="middle" font-family={MONO} font-size="7.5" fill="#87898d">whitelist only</text>
+          <text x="566" y="118" text-anchor="middle" font-family={MONO} font-size="7.5" fill="#87898d">→ bob’s portal</text>
+
+          <path d="M236 124 V 160 H 402 V 124" stroke="#e5484d" stroke-width="1.1" stroke-dasharray="3 3" fill="none" />
+          <text x="319" y="176" text-anchor="middle" font-family={MONO} font-size="7.5" fill="#e5484d">fail either → withheld, title and all</text>
+
+          <defs>
+            <marker id="p" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0 0 L8 4 L0 8 z" fill="#5c5e62" />
+            </marker>
+            <marker id="pg" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M0 0 L8 4 L0 8 z" fill="#26cb96" />
+            </marker>
+          </defs>
+        </svg>
+      </Figure>
+
+      <p>
+        Sharing is granular. A shared project shows its status and its tech tags, but
+        <strong>every task stays invisible</strong> — title and all — until you flag it for that
+        client, and a project can default to sharing all of its tasks or none. Links are opt-in one
+        at a time, so a monitoring URL on the same project stays operator-only. A
+        <code>PORTAL.md</code> in the project folder gives the client a summary in your words in
+        place of the generated one.
+      </p>
+      <p>
+        It isn’t read-only. A client can reply into any idea or task thread you’ve shared and post a
+        one-click <strong>approve / sign&#8209;off</strong>; their replies land back on your side
+        flagged — an amber card in the thread, a “new” badge on the board, a tile on the overview.
+        Separately, every client gets one always-on <strong>direct message</strong> thread with you,
+        unread badges both ways. The portal home greets a returning client with what moved
+        <strong>since their last visit</strong>.
+      </p>
+      <p>
+        You drive all of it from <strong>Settings → Client portals</strong>: register a portal and
+        the people in it, then preview the exact projection any one client receives — down to a list
+        of what’s sitting in their portal that you <em>haven’t</em> shared yet. The build story is
+        in <a href="/notes/two-gates-and-a-fence">Two gates and a fence</a>; the setup reference is
+        <a href="https://github.com/x-hakt/bosun-x-dashboard/blob/main/docs/portal.md" rel="noopener"
+        ><code>docs/portal.md</code></a> in the dashboard repo.
       </p>
     </section>
 
