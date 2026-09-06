@@ -5,6 +5,83 @@ drafting or editing a note. The visual style guide is XH-7 (artifact
 `claude.ai/code/artifact/5b1a2ebe-25c1-4379-93f2-401dffbc094b`); this is its
 written-word counterpart.
 
+## The short version — calibrated 2026-09-07
+
+The rest of this file plus Chris's raw jib-x profile (`~/Downloads/VOICE.md`),
+narrowed by what he actually does to AI drafts. The jib-x profile is how he
+talks; the captain's log is a steadier version of it. Where they disagree, this
+section wins for the prose.
+
+### Never
+
+- **em dashes.** Full stop, colon, or brackets. The site's tell.
+- The jib-x banned phrases: "it's worth noting", "in conclusion" / "in summary",
+  "Here's the thing:", "In today's world", "Let's dive in", "leverage", and
+  hollow emphasis ("the key is", "it comes down to", "there is exactly one").
+- **A paragraph that ends on a quotable line.** End on the last fact. Chris
+  deletes every mic-drop — "honest gaps beat a tidier-looking lie every time",
+  "you pay it in an afternoon of squinting". Cut yours before he has to.
+- **A closing recap section** ("The whole point, said once") or any line where
+  the piece talks about itself ("exactly the kind of overclaim this post has
+  been about avoiding"). The note ends when the last part is done.
+- **A punchy image used more than once for effect.** One "different door into
+  it" is a metaphor; three is a tic. The nautical frame is the exception, and
+  it runs the whole way through on purpose.
+- **Sarcasm dialled up to be noticed** ("congratulations, you've built a memory
+  test for the shape of your own quiz"). Say it flat; the dry delivery is the
+  joke.
+- **A sales frame the note doesn't have.** No competitor, no value prop, no
+  "unlike the products that…". Every project here is something Chris built for
+  himself. If the "why" isn't stated it's "I needed it" — don't invent a market.
+
+### The frame is not optional
+
+Every bosun-x / infra / workstation note runs on one sustained metaphor: the
+projects are a **fleet**, each one a **hull** to keep seaworthy; standards are
+the **ship's articles**; a deploy is **putting to sea**; a server is an
+**anchorage**; a handoff is **the log one watch leaves the next**; a job done by
+hand is **rowing the circuit yourself**. One or two touches a section, each
+doing real explanatory work. No "arr", no "ye", no pantomime, no skull emoji. If
+a sentence is only the joke, cut it. (AI drafts keep dropping this almost
+entirely. That is the miss.)
+
+### One quote per note
+
+A Pirates of the Caribbean line, or Goonies / Sandlot / Home Alone / Shrek / any
+Pixar–Dreamworks–Illumination line, dropped in unremarked where it fits. "Not a
+code that turns out to be 'more what you'd call guidelines'." Once, and not
+flagged as a reference.
+
+### Rhythm and register
+
+- Long winding sentences, then a short one to land it. Big-ish paragraphs.
+- The captain writes a notch more formally than Chris texts. Contractions are
+  light in the body ("it is", "does not" is the default texture) and come back
+  in the closer. Dry, unhurried, a little rueful about the state of his own
+  decks. Not chatty, not grim.
+- **Swearing is rare in the prose.** The published notes carry about one "damn"
+  between them. Save it for the closer or a real moment of frustration in the
+  story. The jib-x "6/10, freely" is the Slack voice, not this one.
+- Self-deprecation at his own expense or the tooling's, never the reader's:
+  "me, six months from now, half asleep", "a bloke with a shelf of old laptops",
+  "quietly abandoned and just not admitted it".
+
+### Shape
+
+Open on the by-hand drudgery: what the days looked like, where it broke, the
+moment there had to be a better way. Then "so I built X", a sentence or two.
+Walk the parts; for each, why it is there and how it actually works, with the
+flag that matters and the gotcha that cost an afternoon, one `<Figure>` each.
+The **Why it is here / How it works** labels are optional — use them for a
+systematic tour (`a-lifeboat-for-every-hull`), drop them for flowing prose
+(`the-visitors-gallery`). A verified-vs-assumed beat is good practice; fold it
+into the closing prose if a standalone section reads as a bolt-on.
+
+Close **short**: a sentence or two, the frame landing one last time, the voice
+loosening — a contraction, maybe a swear, maybe just "Fair winds." Then stop.
+
+North star: **Terry Pratchett narrating a technical build.**
+
 ## Who is writing
 
 **x** is a captain with no ship and no crew. Ashore, and not idle about it: he
@@ -40,6 +117,10 @@ thinks through, and it should carry weight in the writing:
 - Technical accuracy always outranks the bit. When the two fight, the bit loses.
 
 ## The shape of a note
+
+_See "The short version" up top first — the labels in step 3 and the section in
+step 4 are optional now, and the mic-drop / recap rules there override anything
+below that reads as a licence to perform._
 
 **1. Open with the story. Plain terms, real context, enough of it to hook
 someone who has never had this problem.**
