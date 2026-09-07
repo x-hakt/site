@@ -15,15 +15,15 @@ import Term from '../../components/Term.astro';
 I built [bosun-x](/locker/bosun-x) to keep my own projects straight, and I
 don't run them all under one name. There's x-hakt, there's a business site I
 take client work through, a couple of others besides, kept apart for their own
-reasons. bosun-x holds the lot in one place. One login, and it shows
-everything: every project, every client, every server, and the notes I leave
-myself when something's gone sideways.
+reasons. bosun-x holds the lot, every hull in the yard, in one place. One
+login, and it shows all of it: every project, every client, every server, and
+the notes I leave myself when something's gone sideways.
 
-Then a client. Someone I take work from through the business site, who wanted
-to know where their projects were up to without me mailing a screenshot every
-Friday. bosun-x already had that answer, kept current, sitting on a page. I
-just couldn't hand them the page, because the same page carries everyone else's
-work too.
+Then a client. Someone I do work for through the business site, who wanted to
+see how their own hull was coming along without me rowing out with a report
+every Friday. bosun-x already had that answer, current, sitting on a page. I
+just couldn't hand them that page, because it has every other hull in the yard
+on it as well, plus the tooling, plus the notes I write when something's a mess.
 
 [Last time](/notes/two-gates-and-a-fence) I built the part that makes it safe
 to show them a slice of it: one function that does the projecting, two gates a
@@ -35,12 +35,12 @@ was CSS.
 
 ## It comes in through the right door
 
-The client knows me by the business, not as x-hakt, not as a bloke with a shelf
-of old laptops running a homelab. So the portal is that business's site: the
-same header that starts clear and fades to a glass panel as you scroll, the
+The client knows me by the business, not as x-hakt and not as a bloke with a
+shelf of old laptops in a spare room. So the portal wears that business's site:
+the same header that starts clear and fades to a glass panel as you scroll, the
 same underline sliding under a nav link, the same button, the same footer. Not
-to make them think a studio stood something up for them. That's the name the
-work is done under, and the portal should match it.
+to fool anyone about who's down on the yard floor. That's the name the work is
+done under, and the gallery should match the yard.
 
 Per portal it's a short block of config. A name, two colours, a heading font, a
 body font, a line for the footer, a link back to the real site. Name a Google
@@ -123,9 +123,11 @@ come back after a week, the page opens with what moved while they were gone.
 The notes on a task are one plain-text field, with `--- Me · 2026-09-04 ---`
 header lines between the turns. The dashboard parses those into a conversation.
 The portal, the first time I wired it, didn't, so the client would have seen
-the raw `--- ... ---` lines sitting between the messages. I'd reused the storage
-and not the reader. A small parser on the portal side sorted it, and their own
-replies come up in the accent colour now, so a thread reads like a conversation.
+the raw `--- ... ---` scaffolding sitting between every message. I'd reused the
+storage and forgotten it needed its own reader. You're killing me, Smalls. A
+small parser on the portal side fixed it, and the client's own replies come up
+in the accent colour now, so a thread reads like a conversation and not a build
+log.
 
 <Figure caption="The same stored field. Left: the portal's first pass, printing the turn headers as text. Right: parsed into turns, with the client's own replies in their accent colour.">
   <svg viewBox="0 0 380 172" role="img" aria-label="On the left, a text block showing literal triple-dash author-and-date header lines mixed in with message text. On the right, two stacked cards: one in the accent colour labelled the client, one plain labelled Me.">
@@ -248,9 +250,9 @@ under it is a name, an email, and the two ticks that share their first project.
   </svg>
 </Figure>
 
-## One client, for now
+## One gallery, one visitor
 
-That's the whole of it in use: one portal, one client, which is all I built it
-for. None of it is specific to this client or that business though. It's bosun-x
-with a gate and a skin, so anyone else running bosun-x who has a client of
-their own already has it too.
+One portal, one client, which is all I built it for. None of it is bolted to
+this client or this business, though. It's bosun-x with a gate on it and a coat
+of the client's paint, so anyone running bosun-x who wants to let a client watch
+their own work has it already. The paint took longer than the gate.
