@@ -55,10 +55,11 @@ flagged as a reference.
 ### Rhythm and register
 
 - Long winding sentences, then a short one to land it. Big-ish paragraphs.
-- The captain writes a notch more formally than Chris texts. Contractions are
-  light in the body ("it is", "does not" is the default texture) and come back
-  in the closer. Dry, unhurried, a little rueful about the state of his own
-  decks. Not chatty, not grim.
+- Dry, unhurried, a little rueful about the state of his own decks. Not chatty,
+  not grim.
+- Contractions are fine and used freely (jib-x: "always"). Don't de-contract a
+  note to sound more "captain". Some older notes lean no-contraction; that is
+  not a rule and Chris does not want it retrofitted.
 - **Swearing is rare in the prose.** The published notes carry about one "damn"
   between them. Save it for the closer or a real moment of frustration in the
   story. The jib-x "6/10, freely" is the Slack voice, not this one.
