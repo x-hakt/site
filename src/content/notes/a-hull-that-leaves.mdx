@@ -1,0 +1,402 @@
+---
+title: A hull that leaves
+summary: My setup for web apps assumes a machine that is always on, holding the running thing. A phone app breaks that assumption completely. The app runs on a phone in someone else's pocket, and there is no berth of mine to keep it at. Here is the local Android dev setup I ended up with instead, walked end to end. What runs on the laptop, what the emulator is for, where the build happens, and how a saved file reaches a running app a second later.
+date: 2026-09-09
+tracks: [workstation, infrastructure]
+tech: [expo, react-native, android, gradle, emulator]
+draft: false
+---
+
+import Figure from '../../components/Figure.astro';
+import Term from '../../components/Term.astro';
+
+I have written up [the home dockyard](/notes/fitting-out-a-home-dockyard/) before:
+a laptop to work on, an always-on old laptop to *run* things on, a copy of every
+project's state somewhere off the box, one private network joining it all. The
+shape of that setup rests on one idea. The thing you built has to live somewhere,
+and that somewhere is a machine you keep running.
+
+Then a project needed to be a phone app, and I spent the first hour looking for
+the machine it lived on. There isn't one. A phone app does not sit in your
+harbour waiting for visitors. You build it, you load it aboard a device, and it
+sails off in someone's pocket and keeps working whether your laptop is open or
+shut or at the bottom of a lake. Every instinct from the web setup pointed the
+wrong way.
+
+So here is the shape I arrived at for building an Android app at home. The
+stack is <Term k="react-native">React Native</Term> with <Term k="expo">Expo</Term>,
+which is the common way in and the one this note assumes. Words with a dotted
+underline have a plain explanation on hover, tap or focus.
+
+## 1 · The app sails without you
+
+The compiled app is the app. Once it is built and installed on a phone, it runs
+there, on that phone's own processor, against that phone's own storage. It works
+on a plane. Nothing of mine has to be reachable for it to open.
+
+That is the whole reframe, and it takes a while to trust. With a web app the
+always-on box *is* the point. Close your laptop and the site stays up, because
+the site was never on your laptop to begin with. With a phone app there is no
+equivalent box, because the app is not running on a box at all. What you keep at
+home is a *workshop*: the place the drawing happens and the hull gets fitted
+out. The hull itself leaves.
+
+<Figure wide caption="The web setup keeps the running thing in your harbour. A phone app gets loaded aboard and sails; what you keep is the yard it was built in.">
+  <svg viewBox="0 0 360 176" role="img" aria-label="On the left, a laptop labelled workshop produces an app file. An arrow marked 'install once' carries it to a phone. The phone then moves away along an arc, still lit and marked 'runs on its own: plane, tunnel, your laptop shut'. A note reads: no berth of yours is kept.">
+    <rect x="14" y="60" width="92" height="34" rx="6" fill="#101216" stroke="rgba(255,255,255,0.2)" />
+    <text x="60" y="74" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">your laptop</text>
+    <text x="60" y="85" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">the workshop</text>
+
+    <path d="M106 77 h 40" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" fill="none" marker-end="url(#hl1-a)" />
+    <text x="126" y="71" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">install once</text>
+
+    <rect x="150" y="52" width="46" height="66" rx="7" fill="#0c0d10" stroke="rgba(255,255,255,0.24)" />
+    <rect x="156" y="60" width="34" height="46" rx="2" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.4" />
+    <text x="173" y="86" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#26cb96">the app</text>
+
+    <path d="M198 82 C 250 70, 286 44, 330 40" stroke="#26cb96" stroke-opacity="0.6" stroke-width="1.3" fill="none" marker-end="url(#hl1-b)" />
+
+    <rect x="308" y="24" width="42" height="60" rx="7" fill="#0c0d10" stroke="#26cb96" stroke-opacity="0.5" />
+    <rect x="313" y="31" width="32" height="42" rx="2" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" />
+    <text x="329" y="55" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#26cb96">running</text>
+    <text x="329" y="98" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">plane · tunnel ·</text>
+    <text x="329" y="107" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">laptop shut</text>
+
+    <text x="60" y="128" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#5c5e62">no berth of yours is kept</text>
+
+    <defs>
+      <marker id="hl1-a" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="rgba(255,255,255,0.35)" /></marker>
+      <marker id="hl1-b" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#26cb96" fill-opacity="0.6" /></marker>
+    </defs>
+  </svg>
+</Figure>
+
+## 2 · The dry dock
+
+You still need somewhere to run the app while you build it, and there are two.
+
+The <Term k="emulator">emulator</Term> is a whole phone running as a window on
+your computer. It boots a real Android system, installs your app, and is enough
+for most of the day. A real phone plugged in over USB with developer mode on is
+the other, and it is the one that matters for anything touching real hardware:
+the camera, the GPS, the motion sensors, the health data. It is also the only
+way to feel what a tester will feel. I keep both to hand and reach for the
+emulator by default. <Term k="adb">adb</Term> is the tool that talks to
+whichever is connected, and `adb devices` is the first thing you run when
+nothing is showing up.
+
+The machine that runs the emulator and does the builds needs a small kit
+installed: a <Term k="jdk">JDK</Term> of the right version, the
+<Term k="android-sdk">Android SDK</Term> command-line tools, and one Android
+system image. The gotcha that costs an afternoon is the emulator's speed. On
+Linux it needs <Term k="kvm">KVM</Term> to borrow the real processor, which
+means the `/dev/kvm` device has to exist and your user has to be in the `kvm`
+group. Miss that and the emulator still starts, it just runs like it is wading
+through treacle, and you will assume you broke something.
+
+<Figure caption="Two places to run it while you build. The bottle for most of the day; the real thing for anything the bottle cannot fake.">
+  <svg viewBox="0 0 344 150" role="img" aria-label="A laptop connects by adb to two targets: an emulator drawn as a phone inside a rounded bottle on the computer, and a separate real phone connected by a USB line. The emulator is labelled 'most work', the real phone 'sensors, camera, and a tester's eyes'.">
+    <rect x="16" y="52" width="86" height="32" rx="6" fill="#101216" stroke="rgba(255,255,255,0.2)" />
+    <text x="59" y="65" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#eaebec">your laptop</text>
+    <text x="59" y="76" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">SDK · JDK</text>
+
+    <path d="M102 62 C 128 62, 132 44, 156 44" stroke="#38bdf8" stroke-opacity="0.5" stroke-width="1.1" stroke-dasharray="3 3" fill="none" />
+    <path d="M102 74 C 132 74, 150 100, 176 100" stroke="#38bdf8" stroke-opacity="0.5" stroke-width="1.1" stroke-dasharray="3 3" fill="none" />
+    <text x="120" y="90" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#38bdf8">adb</text>
+
+    <rect x="156" y="20" width="86" height="48" rx="10" fill="#0b0c0f" stroke="rgba(255,255,255,0.16)" />
+    <rect x="186" y="26" width="26" height="36" rx="4" fill="#0c0d10" stroke="rgba(255,255,255,0.22)" />
+    <rect x="190" y="30" width="18" height="24" rx="1.5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.35" />
+    <text x="199" y="80" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#c9cacd">emulator</text>
+    <text x="199" y="89" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">most work</text>
+
+    <rect x="176" y="86" width="30" height="46" rx="5" fill="#0c0d10" stroke="#26cb96" stroke-opacity="0.45" />
+    <rect x="180" y="92" width="22" height="30" rx="1.5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" />
+    <text x="248" y="104" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#26cb96">a real phone</text>
+    <text x="248" y="114" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">sensors · camera</text>
+    <text x="248" y="123" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">a tester's eyes</text>
+  </svg>
+</Figure>
+
+## 3 · A lifeboat you have to fit out
+
+The easy way to run your JavaScript is <Term k="expo-go">Expo Go</Term>: a free
+app from the store, you point it at your project, your code loads, no build step
+anywhere. It works right up until you need a feature it was not built with.
+
+Expo Go carries a fixed kit of native features. The moment your app needs a
+<Term k="native-module">native module</Term> that is not in that kit, and
+anything reading the phone's own hardware is one, Expo Go simply cannot run it.
+What you do instead is build a <Term k="dev-client">dev client</Term>: the same
+easy live-reloading sandbox, except fitted out with *your* native gear. You
+build it once, install it, and only build it again when the native parts of the
+project change, which is rarely. Day to day it behaves exactly like Expo Go.
+
+<Figure caption="The stock lifeboat has whatever kit it shipped with. The dev client is the same boat with your gear lashed in.">
+  <svg viewBox="0 0 344 152" role="img" aria-label="Two panels. Left, 'Expo Go': a list of native features with three ticked and two crossed out and labelled 'not aboard'. Right, 'dev client': the same list with all five ticked, plus one labelled 'yours'.">
+    <rect x="14" y="20" width="150" height="118" rx="7" fill="#0c0d10" stroke="rgba(255,255,255,0.18)" />
+    <text x="24" y="36" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#c9cacd">Expo Go</text>
+    <text x="24" y="46" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">no build · fixed kit</text>
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5">
+      <text x="26" y="63" fill="#26cb96">✓</text><text x="38" y="63" fill="#c9cacd">notifications</text>
+      <text x="26" y="76" fill="#26cb96">✓</text><text x="38" y="76" fill="#c9cacd">file picker</text>
+      <text x="26" y="89" fill="#26cb96">✓</text><text x="38" y="89" fill="#c9cacd">location</text>
+      <text x="26" y="102" fill="#e5484d">✕</text><text x="38" y="102" fill="#5c5e62">health store</text>
+      <text x="26" y="115" fill="#e5484d">✕</text><text x="38" y="115" fill="#5c5e62">that one library</text>
+    </g>
+    <text x="89" y="130" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#e5484d">not aboard</text>
+
+    <path d="M166 78 h 22" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" fill="none" marker-end="url(#hl3-a)" />
+
+    <rect x="190" y="20" width="150" height="118" rx="7" fill="#0c0d10" stroke="#26cb96" stroke-opacity="0.4" />
+    <text x="200" y="36" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#26cb96">dev client</text>
+    <text x="200" y="46" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">build once · your kit</text>
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5">
+      <text x="202" y="63" fill="#26cb96">✓</text><text x="214" y="63" fill="#c9cacd">notifications</text>
+      <text x="202" y="76" fill="#26cb96">✓</text><text x="214" y="76" fill="#c9cacd">file picker</text>
+      <text x="202" y="89" fill="#26cb96">✓</text><text x="214" y="89" fill="#c9cacd">location</text>
+      <text x="202" y="102" fill="#26cb96">✓</text><text x="214" y="102" fill="#c9cacd">health store</text>
+      <text x="202" y="115" fill="#26cb96">✓</text><text x="214" y="115" fill="#c9cacd">that one library</text>
+    </g>
+    <text x="300" y="130" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#26cb96">yours, lashed in</text>
+
+    <defs>
+      <marker id="hl3-a" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="rgba(255,255,255,0.35)" /></marker>
+    </defs>
+  </svg>
+</Figure>
+
+## 4 · Loading the hold
+
+Building that dev client, and later the real thing you hand to people, is the
+slow job. It packs the JavaScript, the native code and every asset into one
+<Term k="apk">APK</Term>. There are two places it can happen.
+
+On your own machine: <Term k="gradle">Gradle</Term>, invoked through the Expo
+command, a few minutes after the first slow run, and free forever. This needs
+the Android SDK sitting on the machine, which is the one real install cost of
+the whole setup. Or in the cloud, on <Term k="eas">EAS</Term>, whose free tier
+covers about fifteen Android builds a month and needs nothing installed locally
+at all. Fifteen is plenty, because you are not rebuilding often. A build is
+loading the hold for a voyage, not something you do between edits.
+
+The tooling itself is free. Local builds, the emulator, the bundler and the live
+reload cost nothing, and there is no charge for awesomeness; the only line item
+with a price tag is the cloud build service, which you can ignore entirely if
+you have the SDK installed.
+
+<Figure caption="Rarely, and only when the native parts change: the source becomes one installable file, on your machine or on someone else's.">
+  <svg viewBox="0 0 344 148" role="img" aria-label="A 'source' box branches two ways. Up to 'your machine, Gradle', marked 'free, needs the SDK'. Down to 'EAS cloud', marked 'free tier ~15/mo, nothing local'. Both arrows meet at a single 'one APK' box on the right.">
+    <rect x="14" y="60" width="66" height="28" rx="6" fill="#101216" stroke="rgba(255,255,255,0.2)" />
+    <text x="47" y="77" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#eaebec">source</text>
+
+    <path d="M80 68 C 112 68, 118 40, 150 40" stroke="rgba(255,255,255,0.28)" stroke-width="1.2" fill="none" marker-end="url(#hl4-a)" />
+    <rect x="150" y="26" width="118" height="28" rx="5" fill="#101216" stroke="rgba(255,255,255,0.18)" />
+    <text x="160" y="38" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#c9cacd">your machine · Gradle</text>
+    <text x="160" y="48" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">free · needs the SDK</text>
+
+    <path d="M80 80 C 112 80, 118 108, 150 108" stroke="rgba(255,255,255,0.28)" stroke-width="1.2" fill="none" marker-end="url(#hl4-a)" />
+    <rect x="150" y="94" width="118" height="28" rx="5" fill="#101216" stroke="rgba(255,255,255,0.18)" />
+    <text x="160" y="106" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#c9cacd">EAS cloud</text>
+    <text x="160" y="116" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">free tier ~15/mo · nothing local</text>
+
+    <path d="M268 40 C 292 40, 300 66, 300 74" stroke="#26cb96" stroke-opacity="0.5" stroke-width="1.2" fill="none" />
+    <path d="M268 108 C 292 108, 300 82, 300 74" stroke="#26cb96" stroke-opacity="0.5" stroke-width="1.2" fill="none" />
+    <rect x="286" y="60" width="52" height="28" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" />
+    <text x="312" y="77" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#26cb96">one APK</text>
+
+    <defs>
+      <marker id="hl4-a" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="rgba(255,255,255,0.32)" /></marker>
+    </defs>
+  </svg>
+</Figure>
+
+## 5 · The tender run
+
+With the dev client installed, the everyday loop has nothing slow in it. You run
+the Expo command and it starts <Term k="metro">Metro</Term> on your laptop.
+Metro watches your files, and every time you save it repackages the JavaScript
+and hands the fresh bundle to whatever is running the dev client, over the local
+network. The emulator and a real phone on the same wifi can both be attached at
+once, and both update a second or so after the save. The
+<Term k="agent">agent</Term> edits a file, you watch the screen redraw. It is
+the tightest loop in the whole stack, and it never touches Gradle.
+
+<Figure wide caption="The bundler is the launch that ferries fresh supplies out to whatever is floating. A save, then a second, then it is on the screen.">
+  <svg viewBox="0 0 360 150" role="img" aria-label="A laptop box holds three labels: editor, agent, Metro. An arrow marked 'JS bundle on save' runs right, splitting to two targets on the same wifi: an emulator and a real phone, each showing 'reloads in ~1s'.">
+    <rect x="14" y="46" width="104" height="58" rx="7" fill="#101216" stroke="rgba(255,255,255,0.2)" />
+    <text x="66" y="60" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#eaebec">your laptop</text>
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#c9cacd">
+      <text x="66" y="74" text-anchor="middle">editor</text>
+      <text x="66" y="85" text-anchor="middle">agent</text>
+      <text x="66" y="96" text-anchor="middle" fill="#38bdf8">Metro</text>
+    </g>
+
+    <path d="M118 75 C 168 75, 180 52, 214 52" stroke="#38bdf8" stroke-opacity="0.55" stroke-width="1.2" fill="none" marker-end="url(#hl5-a)" />
+    <path d="M118 78 C 168 78, 180 104, 214 104" stroke="#38bdf8" stroke-opacity="0.55" stroke-width="1.2" fill="none" marker-end="url(#hl5-a)" />
+    <text x="165" y="66" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#38bdf8">JS bundle on save</text>
+    <text x="165" y="94" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="5.5" fill="#5c5e62">same wifi</text>
+
+    <rect x="214" y="30" width="70" height="44" rx="8" fill="#0b0c0f" stroke="rgba(255,255,255,0.16)" />
+    <rect x="240" y="35" width="18" height="34" rx="3" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.35" />
+    <text x="223" y="52" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#c9cacd">emulator</text>
+    <text x="223" y="86" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">reloads in ~1s</text>
+
+    <rect x="214" y="90" width="30" height="44" rx="5" fill="#0c0d10" stroke="#26cb96" stroke-opacity="0.45" />
+    <rect x="218" y="95" width="22" height="30" rx="1.5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" />
+    <text x="252" y="112" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#26cb96">a real phone</text>
+    <text x="252" y="122" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">reloads in ~1s</text>
+
+    <defs>
+      <marker id="hl5-a" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#38bdf8" fill-opacity="0.6" /></marker>
+    </defs>
+  </svg>
+</Figure>
+
+## 6 · Resupply at sea
+
+At some point someone who is not you needs the app on their phone. The first
+delivery is a single APK: build it, send a link, they allow installs from that
+source once, and it is on. That is a <Term k="sideload">sideload</Term>, and it
+is fine for one person or a handful.
+
+After that first install, JavaScript-only changes go out
+<Term k="ota-update">over the air</Term>. You publish the new bundle to an
+update service, the app checks for it on launch and swaps it in, and your
+machine is not in that path at all. Twenty small fixes in an afternoon reach the
+tester without twenty reinstalls. When the group grows, the platform's
+<Term k="internal-testing">internal testing track</Term> takes over: a one-time
+developer-account fee on Android, up to a hundred testers, no review wait, real
+auto-updates. Native changes are the exception the whole way through. Those need
+a fresh APK, because you have changed what is in the hold, not just the cargo on
+deck.
+
+<Figure caption="A ship already at sea gets a resupply run, not a return to port. Your machine is not on the line.">
+  <svg viewBox="0 0 344 138" role="img" aria-label="A laptop runs 'publish update'. An arrow goes to an 'update service' cloud box. From there a dashed arrow reaches a tester's phone, labelled 'checks on launch'. A separate small note below reads: native change - new APK instead.">
+    <rect x="14" y="40" width="86" height="30" rx="6" fill="#101216" stroke="rgba(255,255,255,0.2)" />
+    <text x="57" y="52" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#eaebec">your laptop</text>
+    <text x="57" y="63" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">publish update</text>
+
+    <path d="M100 55 h 42" stroke="#26cb96" stroke-opacity="0.5" stroke-width="1.2" fill="none" marker-end="url(#hl6-a)" />
+    <rect x="144" y="40" width="92" height="30" rx="14" fill="#0b1417" stroke="#38bdf8" stroke-opacity="0.4" />
+    <text x="190" y="52" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#38bdf8">update service</text>
+    <text x="190" y="62" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="5.5" fill="#87898d">holds the bundle</text>
+
+    <path d="M236 55 C 268 55, 280 58, 292 66" stroke="#26cb96" stroke-opacity="0.45" stroke-width="1.1" stroke-dasharray="3 3" fill="none" marker-end="url(#hl6-a)" />
+    <rect x="292" y="40" width="30" height="46" rx="5" fill="#0c0d10" stroke="#26cb96" stroke-opacity="0.45" />
+    <rect x="296" y="46" width="22" height="30" rx="1.5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" />
+    <text x="307" y="98" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">checks on launch</text>
+
+    <text x="172" y="112" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#dfa11a">native change → a new APK instead</text>
+
+    <defs>
+      <marker id="hl6-a" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#26cb96" fill-opacity="0.55" /></marker>
+    </defs>
+  </svg>
+</Figure>
+
+## 7 · The chart room does not change
+
+Everything above is new. The layer over the top is not. [bosun-x](/notes/the-chart-room/)
+still holds the project's spec, its task list and the <Term k="handoff">handoff</Term>
+note that lets the next session start without re-deriving a month of decisions,
+and it does not care in the slightest that this hull is a phone app instead of a
+web service. A dozen agent sessions on a mobile project scatter exactly like a
+dozen on anything else, and the fix is the same folder of plain files.
+
+The one honest difference is the *running* half. bosun-x's dashboard reads live
+container state to tell you what is up right now, and a phone app has no
+container on an always-on box to read. So that panel is quiet for this project.
+The spec, the tasks and the handoff carry the weight instead, which is where the
+real value was anyway.
+
+<Figure wide caption="Same folder of Markdown and YAML, same dashboard. The 'what is running' column just has nothing to say about a hull that is out at sea.">
+  <svg viewBox="0 0 344 130" role="img" aria-label="A bosun-x panel lists project rows. A web app row shows spec ok, tasks ok, handoff fresh, running 'up'. A phone-app row shows spec ok, tasks ok, handoff fresh, running 'on a phone, not applicable', greyed.">
+    <rect x="16" y="14" width="312" height="102" rx="7" fill="#0c0d10" stroke="rgba(255,255,255,0.2)" />
+    <text x="28" y="30" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">bosun-x</text>
+
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#5c5e62">
+      <text x="150" y="30">spec</text><text x="196" y="30">tasks</text><text x="244" y="30">handoff</text><text x="292" y="30">running</text>
+    </g>
+
+    <line x1="24" y1="38" x2="320" y2="38" stroke="rgba(255,255,255,0.08)" />
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5">
+      <text x="28" y="54" fill="#c9cacd">a web app</text>
+      <text x="150" y="54" fill="#26cb96">ok</text><text x="196" y="54" fill="#26cb96">ok</text><text x="244" y="54" fill="#26cb96">fresh</text><text x="292" y="54" fill="#26cb96">up</text>
+
+      <text x="28" y="74" fill="#c9cacd">the phone app</text>
+      <text x="150" y="74" fill="#26cb96">ok</text><text x="196" y="74" fill="#26cb96">ok</text><text x="244" y="74" fill="#26cb96">fresh</text><text x="292" y="74" fill="#5c5e62">on a phone</text>
+
+      <text x="28" y="94" fill="#c9cacd">an old tool</text>
+      <text x="150" y="94" fill="#dfa11a">thin</text><text x="196" y="94" fill="#26cb96">ok</text><text x="244" y="94" fill="#dfa11a">stale</text><text x="292" y="94" fill="#26cb96">up</text>
+    </g>
+    <text x="172" y="110" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="5.5" fill="#5c5e62">one folder of Markdown + YAML · the agent reads and writes it</text>
+  </svg>
+</Figure>
+
+## 8 · The whole yard
+
+Put it together and it is one workshop and a set of lines running out of it. Your
+laptop holds the editor, the agent, the bundler and the SDK. The dry dock is an
+emulator and, when it matters, a real phone. A build turns the source into one
+APK, on your machine or in the cloud, and it happens rarely. The bundler carries
+every edit out to whatever is running, in about a second. Testers get one APK
+and then a stream of over-the-air updates. bosun-x sits across the top holding
+the spec and the log, same as for anything else. And the app, once it is built,
+runs on a phone and needs nothing of yours to be switched on.
+
+<Figure wide caption="The finished yard for a phone app: a workshop, two places to run it, a build line that is used rarely, a resupply line that is used often, and the chart room over the top.">
+  <svg viewBox="0 0 344 214" role="img" aria-label="Stacked layout. Top: a bosun-x bar spanning the width. Below it, a laptop box on the left labelled editor, agent, Metro, SDK. To its right, a dry dock box holding an emulator and a real phone. A build path box shows source going to one APK via your machine or EAS, marked 'rarely'. A resupply arrow from the laptop to the phone is marked 'often - OTA'. At the bottom, a detached phone marked 'the app runs here - no box of yours stays on'.">
+    <rect x="12" y="10" width="320" height="20" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.45" />
+    <text x="172" y="23" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#26cb96">bosun-x · the chart room · spec, tasks, handoff</text>
+
+    <rect x="12" y="42" width="104" height="66" rx="7" fill="#101216" stroke="rgba(255,255,255,0.2)" />
+    <text x="64" y="56" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#eaebec">your laptop</text>
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#c9cacd">
+      <text x="64" y="69" text-anchor="middle">editor · agent</text>
+      <text x="64" y="80" text-anchor="middle" fill="#38bdf8">Metro</text>
+      <text x="64" y="91" text-anchor="middle">Android SDK · JDK</text>
+    </g>
+
+    <rect x="132" y="42" width="120" height="66" rx="7" fill="#0c0d10" stroke="rgba(255,255,255,0.16)" />
+    <text x="192" y="56" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">the dry dock</text>
+    <rect x="142" y="64" width="52" height="34" rx="5" fill="#101216" stroke="rgba(255,255,255,0.2)" />
+    <text x="168" y="84" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#c9cacd">emulator</text>
+    <rect x="202" y="64" width="40" height="34" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.4" />
+    <text x="222" y="84" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#26cb96">a phone</text>
+
+    <rect x="268" y="42" width="64" height="66" rx="7" fill="#101216" stroke="rgba(255,255,255,0.16)" />
+    <text x="300" y="56" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">build line</text>
+    <text x="300" y="70" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#c9cacd">source</text>
+    <text x="300" y="80" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#5c5e62">↓ machine / EAS</text>
+    <text x="300" y="90" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#26cb96">one APK</text>
+    <text x="300" y="102" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="5.5" fill="#dfa11a">rarely</text>
+
+    <path d="M116 92 C 150 118, 150 118, 168 104" stroke="#38bdf8" stroke-opacity="0.4" stroke-width="1.1" fill="none" />
+    <text x="120" y="120" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="5.5" fill="#38bdf8">bundle · every save</text>
+
+    <path d="M64 108 C 64 150, 150 150, 214 168 C 236 174, 250 176, 262 178" stroke="#26cb96" stroke-opacity="0.4" stroke-width="1.1" fill="none" marker-end="url(#hl8-a)" />
+    <text x="120" y="152" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#26cb96">often · over-the-air updates</text>
+
+    <rect x="256" y="158" width="34" height="46" rx="5" fill="#0c0d10" stroke="#26cb96" stroke-opacity="0.5" />
+    <rect x="260" y="164" width="26" height="30" rx="1.5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" />
+    <text x="248" y="176" text-anchor="end" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#26cb96">the app runs here</text>
+    <text x="248" y="186" text-anchor="end" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">no box of yours</text>
+    <text x="248" y="195" text-anchor="end" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">stays on</text>
+
+    <defs>
+      <marker id="hl8-a" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="#26cb96" fill-opacity="0.55" /></marker>
+    </defs>
+  </svg>
+</Figure>
+
+You do not stand all of this up on day one. A laptop, an agent, the SDK and an
+emulator gets you moving. You add a real phone the first time the emulator lies
+to you about how something feels. You reach for the cloud build the day the SDK
+install gets under your skin, and the tester track when a link and a sideload
+stop scaling. Every piece earns its place the same way it does in the web
+dockyard, by the specific ache it takes away.
+
+What took me longest was none of the setup. It was dropping the web habit of
+asking where the thing runs, and getting comfortable with the answer being a
+phone I will never see, somewhere, doing fine without me.
