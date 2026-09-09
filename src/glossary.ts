@@ -285,4 +285,89 @@ export const glossary: Record<string, GlossaryEntry> = {
     short:
       'Doing it twice has the same effect as doing it once. A merge or a retry can safely run more than once without duplicating anything, as long as each event carries an ID it can be recognised by.',
   },
+  'react-native': {
+    term: 'React Native',
+    short:
+      'A framework for building phone apps in React (the same JavaScript most web apps use), where the buttons and lists are real native controls rather than a web page in a wrapper. One codebase runs on Android and iOS.',
+  },
+  expo: {
+    term: 'Expo',
+    short:
+      'A toolkit around React Native that handles the fiddly native build setup for you: a command-line tool, a bundle of common device features, and optional cloud services for builds and updates. Free to use; the cloud services have a free tier.',
+  },
+  metro: {
+    term: 'Metro',
+    short:
+      'The bundler that runs on your machine while you work. It watches your JavaScript files, packages them up, and serves that bundle to the app running on an emulator or phone, so a save shows up in the app a second later.',
+  },
+  'expo-go': {
+    term: 'Expo Go',
+    short:
+      'A free app from the store that runs your JavaScript without you building anything. It only carries the native features Expo ships with it, so the first time you need one it does not have, you have to build your own version instead.',
+  },
+  'dev-client': {
+    term: 'dev client',
+    short:
+      'A build of the app that includes your native dependencies plus the machinery to load JavaScript live from Metro. You build it once (again only when the native parts change) and then develop against it the same easy way as Expo Go.',
+  },
+  'native-module': {
+    term: 'native module',
+    short:
+      'A piece of an app written in the phone platform’s own language (Kotlin/Java on Android, Swift on iOS) because it touches hardware or an OS feature JavaScript cannot reach directly, like the camera, sensors or the health store.',
+  },
+  emulator: {
+    term: 'emulator',
+    short:
+      'A full phone, running as a window on your computer. It boots a real Android system, installs and runs your app, and is enough for most day-to-day work. A physical phone is still better for anything using real sensors.',
+  },
+  adb: {
+    term: 'adb',
+    short:
+      'Android Debug Bridge. The command-line tool that talks to a phone or emulator: list attached devices, install an app, read the logs. `adb devices` is the first thing you run when something is not connecting.',
+  },
+  'android-sdk': {
+    term: 'Android SDK',
+    short:
+      'The Android build tools and platform files. You install a small set of it on whichever machine compiles the app: the platform tools, one Android version, and an emulator image.',
+  },
+  jdk: {
+    term: 'JDK',
+    short:
+      'Java Development Kit. Android’s build system runs on Java, so the machine that builds the app needs a specific JDK version installed even though you never write any Java yourself.',
+  },
+  gradle: {
+    term: 'Gradle',
+    short:
+      'Android’s build system. It takes the source and produces the installable app file. Slow the first run, cached after that; you invoke it through the Expo command rather than directly.',
+  },
+  kvm: {
+    term: 'KVM',
+    short:
+      'The Linux feature that lets the emulator use the real processor instead of pretending to be one in software. Without it the emulator is unusably slow. You need the `/dev/kvm` device and your user in the `kvm` group.',
+  },
+  apk: {
+    term: 'APK',
+    short:
+      'The installable Android app file. Building one packs the JavaScript, the native code and the assets into a single file a phone can install directly.',
+  },
+  eas: {
+    term: 'EAS',
+    short:
+      'Expo Application Services: Expo’s hosted build, update and store-submission service. A free tier covers a small number of cloud builds a month and enough over-the-air updates for a test group. Optional; you can build entirely on your own machine.',
+  },
+  'ota-update': {
+    term: 'over-the-air update',
+    short:
+      'Shipping a JavaScript-only change to an already-installed app without a new install. You publish the bundle to an update service; the app checks for it on launch and swaps it in. Changes to the native parts still need a fresh install.',
+  },
+  sideload: {
+    term: 'sideload',
+    short:
+      'Installing an app straight from a file rather than through a store. On Android you send someone the app file or a link, they allow installs from that source once, and it installs.',
+  },
+  'internal-testing': {
+    term: 'internal testing track',
+    short:
+      'A store feature for handing pre-release builds to a small named list of testers with no review delay and proper auto-updates. On Android it costs a one-time developer-account fee, not a yearly one.',
+  },
 };
