@@ -174,9 +174,9 @@ const MONO = "'IBM Plex Mono', ui-monospace, monospace";
         server — the engine that keeps the log honest. The <strong>dashboard</strong> is the web
         application built on the same plain files: every project’s containers read live off the
         Docker socket, standards checked rather than claimed, the spec and handoff rendered and
-        editable, the planning lifecycle, backup jobs watched for a missed run, whole servers
-        across a fleet. The CLI is the discipline; the dashboard is where you look at all of it at
-        once.
+        editable, the planning lifecycle, backup jobs watched for a missed run with a guided
+        restore and a weekly restore-test for each store, whole servers across a fleet. The CLI is
+        the discipline; the dashboard is where you look at all of it at once.
       </p>
       <Figure
         plain
@@ -349,7 +349,7 @@ cd bosun-x && npm install && npm link</code></pre>
       <table class="cfg">
         <tbody>
           <tr><td><code>$BOSUN_DATA</code></td><td>where the projects live (default: the current directory)</td></tr>
-          <tr><td><code>$BOSUN_TZ</code></td><td>timezone for timestamps (default: the system zone). Or <code>timezone</code> in <code>bosun.config.json</code>.</td></tr>
+          <tr><td><code>$BOSUN_TZ</code></td><td>timezone for timestamps (default: the system zone). Or <code>timezone</code> in <code>config.yml</code> in the data folder.</td></tr>
           <tr><td><code>$BOSUN_STALE_MINUTES</code></td><td>when an open handoff is flagged stale (default: 30)</td></tr>
         </tbody>
       </table>
