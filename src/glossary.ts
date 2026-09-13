@@ -370,4 +370,24 @@ export const glossary: Record<string, GlossaryEntry> = {
     short:
       'A store feature for handing pre-release builds to a small named list of testers with no review delay and proper auto-updates. On Android it costs a one-time developer-account fee, not a yearly one.',
   },
+  ghcr: {
+    term: 'GHCR',
+    short:
+      'GitHub Container Registry — GitHub’s own place to publish container images, next to the code they came from. Push a tagged release and a workflow can build and land one there automatically.',
+  },
+  podman: {
+    term: 'Podman',
+    short:
+      'A drop-in alternative to Docker: same commands, same image format, but no long-running background daemon holding it together. Most things built for Docker run on it unmodified.',
+  },
+  svg: {
+    term: 'SVG',
+    short:
+      'Scalable Vector Graphics — an image described as shapes and text in a small text file rather than a grid of pixels. Stays sharp at any size, and a program can build one on the fly the same way it builds a web page.',
+  },
+  ssrf: {
+    term: 'SSRF',
+    short:
+      'Server-side request forgery — tricking a server into fetching a URL on your behalf, possibly reaching something internal it was never meant to touch. The usual fix is the one here: only ever fetch from an allowed list of hosts.',
+  },
 };
