@@ -1,0 +1,136 @@
+---
+title: Seaworthy enough to launch
+summary: "The restore system finally got the part that matters: a button that reaches into a live database or folder and puts a named backup back, with the undo taken automatically before it touches anything. Once that stopped being a hope and started being a mechanism, the project itself was steady enough for the other thing that had been sitting on the list: a real version number, and a container someone other than me can pull."
+date: 2026-09-12
+tracks: [infrastructure, control]
+tech: [docker, postgres, ssh, ghcr, podman]
+draft: false
+---
+
+import Figure from '../../components/Figure.astro';
+import Term from '../../components/Term.astro';
+
+## Restoring, not just proving you could
+
+An earlier note built the weekly restore test: every backup, once a week, put
+back into a scratch <Term k="container">container</Term> nobody else can see,
+counted, and thrown away. That answered "is the copy any good", which was the
+right first question. It left the harder one alone: if a project's actual,
+serving database needed to come back right now, could I press one thing and
+trust what happened, or would I be improvising `pg_restore` flags from memory
+with something on fire.
+
+This week that stopped being a hope. `fleet-restore.sh` is wired to a button on
+each project's Backups page, and it does the restore for real, into the store
+that is actually live.
+
+## Four ways to put something back, one rule that never changes
+
+The script dispatches on what it is restoring. A <Term k="postgres">Postgres</Term>
+database in a container gets its schema reset and the archive
+`pg_restore`'d back in. One reached over <Term k="ssh">SSH</Term> gets the same
+treatment on the far end of a tunnel. A bind-mounted folder gets untarred over
+itself by a throwaway root container, ownership preserved. A named
+<Term k="docker">Docker</Term> volume gets the same, against the volume
+instead of a path.
+
+Redis gets none of that. It rewrites its own append-only file on shutdown, so
+a live swap underneath it just gets overwritten by the thing it was supposed
+to replace, no error, no restore. I could have built something clever around
+that. Instead the pane shows redis as manual and prints the three commands
+that actually work. You're killing me, smalls, but at least it says so instead
+of pretending.
+
+What every mode shares is the one rule I was not willing to bend on: before it
+touches anything, it takes a snapshot of what was there first. Not optional,
+not a flag you can skip in a hurry. If that snapshot fails to write, the
+restore refuses to start.
+
+<Figure wide caption="Every mode takes a snapshot of the live store before it changes anything. That snapshot is the undo, not a separate feature.">
+  <svg viewBox="0 0 360 168" role="img" aria-label="A restore request first writes a pre-restore snapshot of the live store, then overwrites the live store with the picked archive. The snapshot sits to one side as the undo path.">
+    <rect x="12" y="70" width="96" height="30" rx="6" fill="#101216" stroke="rgba(255,255,255,0.18)" />
+    <text x="60" y="89" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#eaebec">the live store</text>
+
+    <path d="M108 78 C 132 78, 132 40, 156 40" stroke="#dca63c" stroke-width="1.3" fill="none" />
+    <rect x="156" y="26" width="140" height="30" rx="6" fill="#141008" stroke="#dca63c" stroke-opacity="0.55" />
+    <text x="226" y="41" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#dca63c">pre-restore snapshot</text>
+    <text x="226" y="52" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">always taken first</text>
+
+    <path d="M108 88 C 132 88, 132 118, 156 118" stroke="#26cb96" stroke-width="1.3" fill="none" />
+    <rect x="156" y="104" width="140" height="30" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
+    <text x="226" y="119" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">the picked archive</text>
+    <text x="226" y="130" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">restored in, live</text>
+
+    <path d="M296 118 H 330" stroke="#26cb96" stroke-width="1.4" fill="none" />
+    <text x="333" y="122" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#c9cacd">now live</text>
+
+    <path d="M226 56 V 96" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-dasharray="2 3" fill="none" />
+    <path d="M226 26 C 200 10, 90 10, 60 70" stroke="#5cb3e6" stroke-width="1.1" stroke-dasharray="3 3" fill="none" />
+    <text x="120" y="14" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#5cb3e6">undo: restore this instead</text>
+  </svg>
+</Figure>
+
+## Seeing a restore before you need one
+
+Two smaller pieces make the button worth having rather than worth dreading.
+The pane lists every archive it can see for a store, not just the newest, so a
+bad backup taken an hour ago doesn't strand you: pick the one from yesterday
+instead. And a check now flags any project whose weekly restore test has gone
+quiet past its schedule, the same way a missing spec or a missing git remote
+does. A backup you have not proven you can restore is a claim, not a fact, and
+it was too easy for that claim to go stale without anyone noticing.
+
+The other change is smaller and meaner: a scheduled backup or restore test
+that silently stops running now says so, loudly, instead of the dashboard
+just quietly having nothing to show. Silence was the failure mode that
+actually happened before, more than once.
+
+## The other overdue thing
+
+Once the part that scared me was done, the project itself was in good enough
+shape to do the thing I'd been putting off for a different reason entirely:
+give it a real release.
+
+`git tag v0.1.0 && git push --tags` now triggers a build that publishes
+`ghcr.io/x-hakt/bosun-x-dashboard` under three tags at once: the exact
+version, the minor line, and `latest`. That is <Term k="ghcr">GHCR</Term>
+doing the boring, correct thing a container registry is for. Anyone who wants
+this dashboard for their own fleet can now pull an image instead of cloning a
+private working repo and hoping the parts that were specific to my setup got
+left out.
+
+<Figure caption="A pushed tag is the whole release process now. The workflow does the rest.">
+  <svg viewBox="0 0 356 128" role="img" aria-label="git tag v0.1.0 and git push --tags trigger a workflow that builds and publishes ghcr.io/x-hakt/bosun-x-dashboard under three tags: the exact version, the minor line, and latest.">
+    <rect x="8" y="48" width="128" height="32" rx="6" fill="#101216" stroke="rgba(255,255,255,0.18)" />
+    <text x="72" y="65" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#eaebec">git tag v0.1.0</text>
+    <text x="72" y="76" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">git push --tags</text>
+
+    <path d="M136 64 H 174" stroke="#26cb96" stroke-width="1.3" fill="none" />
+    <rect x="174" y="52" width="70" height="24" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
+    <text x="209" y="68" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#26cb96">build</text>
+
+    <path d="M244 64 H 274" stroke="#5cb3e6" stroke-width="1.3" fill="none" />
+    <rect x="274" y="18" width="76" height="94" rx="6" fill="none" stroke="#5cb3e6" stroke-opacity="0.5" stroke-dasharray="4 3" />
+    <text x="312" y="12" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">ghcr.io</text>
+    <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#5cb3e6">
+      <text x="284" y="36">:v0.1.0</text>
+      <text x="284" y="58">:0.1</text>
+      <text x="284" y="80">:latest</text>
+    </g>
+  </svg>
+</Figure>
+
+The rest of the release is honest housekeeping rather than new work. It
+honours <Term k="podman">Podman</Term> now, which turned out to need nothing
+clever since Podman was built to answer to the same commands. The half-built
+systemd unit stayed half-built and got closed rather than finished: I have no
+project that actually needs a non-Docker way to run this yet, and shipping a
+path nobody has tested is worse than not shipping it. And a request to add a
+public share link per project, so a hull could be shown off without a login,
+got a plain no for now. Not every door is worth building just because someone
+could walk through it.
+
+None of that changes what shipped. A restore that reaches into the live store
+and takes its own undo first, and a project real enough that pulling a
+container is now a genuine option instead of a joke about my folder
+structure.

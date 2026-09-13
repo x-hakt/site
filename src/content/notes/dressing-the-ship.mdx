@@ -1,0 +1,146 @@
+---
+title: Dressing the ship
+summary: "One of the businesses I build for wanted a way to turn a finished piece of art into a proper announcement image without opening a separate design tool every time: cropped for a square post and a tall story shape from the same source, a title that wraps itself, a badge or a border when the moment calls for one. Here is the layer model, the one numbers-only config that drives every differently-shaped canvas, and the couple of things that cost an evening apiece."
+date: 2026-09-13
+tracks: [infrastructure]
+tech: [nextjs, typescript, svg]
+draft: false
+---
+
+import Figure from '../../components/Figure.astro';
+import Term from '../../components/Term.astro';
+
+## An image, made twice, badly, by hand
+
+The business posts a piece of art with most things it publishes, and the art
+has to go out again, reframed, as a square post and a tall story shape, with a
+title laid over it and the business's own mark in a corner. Someone had been
+doing that by hand, in a separate design tool, every time, and it looked like
+it: slightly different crops, a title that clipped on the taller shape because
+nobody had checked, a mark that drifted corner to corner across a month of
+posts. Not a big job, but a fiddly one, and fiddly-by-hand jobs are exactly
+where consistency goes to die.
+
+So I built it into their own admin instead: upload the art once, arrange it
+once, generate every shape it needs from that one arrangement.
+
+## One arrangement, cut to whatever shape the harbour wants
+
+**Why it is here.** A square post and a tall story are wildly different
+canvases. A title sitting a fifth of the way down a square image sits
+somewhere else entirely on a canvas nearly twice as tall. Building the layout
+twice, once per shape, is how the drift started in the first place.
+
+**How it works.** Every layer, a title, a border, a background wash, a corner
+mark, stores its position and size as a percentage, never a pixel. Nought is
+one edge, a hundred is the other, on both axes. Generating a size just resolves
+those percentages against that size's own width and height. The exact same
+arrangement, one title fifteen percent from the bottom with the same wrap
+width, comes out correctly placed whether the canvas is square or three times
+taller than it is wide, because it was never described in pixels to begin
+with.
+
+<Figure wide caption="One layer config, stored entirely as percentages. Each requested size resolves those percentages against its own width and height, so a square post and a tall story shape come from the same arrangement.">
+  <svg viewBox="0 0 360 176" role="img" aria-label="A layer config with percentage-based positions feeds two very differently shaped canvases, a square and a tall story shape, and the title, border and mark land in the same relative place on both.">
+    <rect x="8" y="66" width="118" height="44" rx="6" fill="#101216" stroke="rgba(255,255,255,0.18)" />
+    <text x="67" y="84" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">the layer config</text>
+    <text x="67" y="96" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">positions in % only</text>
+
+    <path d="M126 78 C 150 78, 150 44, 174 44" stroke="#26cb96" stroke-width="1.3" fill="none" />
+    <path d="M126 98 C 150 98, 150 128, 174 128" stroke="#26cb96" stroke-width="1.3" fill="none" />
+
+    <rect x="174" y="16" width="86" height="56" rx="4" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
+    <rect x="184" y="52" width="66" height="4" rx="1" fill="#26cb96" fill-opacity="0.7" />
+    <text x="217" y="10" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">square</text>
+
+    <rect x="184" y="98" width="56" height="70" rx="4" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
+    <rect x="190" y="152" width="44" height="4" rx="1" fill="#26cb96" fill-opacity="0.7" />
+    <text x="212" y="92" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">tall story</text>
+
+    <text x="300" y="56" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#5cb3e6">same title,</text>
+    <text x="300" y="66" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#5cb3e6">same relative spot</text>
+    <text x="300" y="150" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#5cb3e6">same rule,</text>
+    <text x="300" y="160" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#5cb3e6">different canvas</text>
+  </svg>
+</Figure>
+
+## The crop stopped guessing
+
+The art itself used to go through an automatic crop that guessed where the
+interesting part of the image was and cut the rest away. It guessed wrong
+often enough to be worth removing entirely. The uploaded photo is now its own
+layer with a scale and a pan, so whoever is arranging the card drags it into
+place and sees exactly what will be cut, rather than trusting an algorithm's
+idea of what mattered. There is also a second mode that never crops at all: it
+shrinks the whole photo to fit inside the canvas and pads whatever is left
+over in a chosen colour, for the art that only works uncropped.
+
+## Everything above the photo is one generated image
+
+**Why it is here.** A border, a background wash, a little pill-shaped badge, a
+title with an optional plaque behind it, the business's own mark: seven kinds
+of layer, in principle a mess to render seven different ways.
+
+**How it works.** Everything except the photo and the mark is drawn into one
+<Term k="svg">SVG</Term>, back to front, and composited over the cropped
+photo as a single image. An SVG is just shapes and text described in a small
+text file, so the server can build one on the fly the same way it builds a web
+page, and it comes out sharp at any size because nothing in it was ever a
+grid of pixels. A border becomes a stroked rectangle, a wash becomes a
+gradient rectangle, a title becomes wrapped text. The badge fill and the
+title's optional background plaque share one function for the actual outline:
+a pill, a rounded box, a square, a hexagon, or a slanted parallelogram that
+reads like a ribbon. Four shapes, one bit of path math, used in two places.
+
+The business's own mark is composited separately, above the generated SVG,
+because it has to be fetched as an actual image file rather than drawn as
+shapes. It is only ever fetched from that business's own domains, checked
+against an allowed list before the fetch happens at all. Anything else is the
+textbook definition of <Term k="ssrf">SSRF</Term>: hand a server someone
+else's URL and let it fetch things on your behalf. A generator that takes
+"here is an image address, go get it" as an input has to say no to most of the
+internet by default.
+
+<Figure wide caption="The photo becomes the base canvas by crop or letterbox. Everything else is one generated SVG, drawn back to front, composited on top. The mark is fetched separately, only from an allowed list of hosts, and composited last.">
+  <svg viewBox="0 0 360 152" role="img" aria-label="The uploaded photo is cropped or letterboxed into the base canvas. A generated SVG overlay carrying the border, wash, badge and title is composited on top. A separately fetched mark image, from an allowed host only, is composited last.">
+    <rect x="8" y="60" width="70" height="32" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="43" y="80" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#c9cacd">the photo</text>
+
+    <path d="M78 76 H 108" stroke="#5c5e62" stroke-width="1.2" fill="none" />
+    <rect x="108" y="60" width="80" height="32" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="148" y="76" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#c9cacd">base canvas</text><text x="148" y="87" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">crop or letterbox</text>
+
+    <path d="M188 76 H 218" stroke="#26cb96" stroke-width="1.3" fill="none" />
+    <rect x="218" y="52" width="88" height="48" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" /><text x="262" y="70" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#26cb96">generated SVG</text><text x="262" y="82" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">border · wash · badge · title</text><text x="262" y="93" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">drawn back to front</text>
+
+    <path d="M306 76 H 332" stroke="#dca63c" stroke-width="1.3" fill="none" />
+    <rect x="8" y="10" width="118" height="26" rx="5" fill="#141008" stroke="#dca63c" stroke-opacity="0.55" /><text x="67" y="27" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#dca63c">the mark, fetched separately</text>
+    <path d="M126 23 C 200 23, 250 40, 262 52" stroke="#dca63c" stroke-width="1.1" stroke-dasharray="3 3" fill="none" />
+    <text x="150" y="16" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">allowed hosts only</text>
+
+    <text x="336" y="80" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">→</text>
+  </svg>
+</Figure>
+
+## The evening that went to word wrap
+
+The one gotcha that actually cost time was text. There is no font on the
+server that can tell you exactly how wide a string of letters will render, so
+wrapping a title into lines means estimating, not measuring. The first version
+guessed badly enough that long titles either clipped or ran off the edge. The
+fix that held was a plain per-character width estimate, generous rather than
+exact, with an ellipsis dropped onto whatever line finally didn't fit. The
+part I hadn't expected: a leading space someone typed on purpose, to nudge a
+title clear of a slanted shape's angled edge, kept getting silently trimmed by
+the ordinary rules for tidying up whitespace. That one manual nudge is now the
+single exception, preserved through the wrap instead of cleaned away with
+everything else.
+
+## Findable after the fact
+
+The last piece was small and mattered more than it looked: a generated card
+now saves against the piece of content it belongs to, so six months from now
+it turns up next to the thing it was made for instead of living only as a
+download somewhere on a laptop.
+
+Layers, it turns out, are the whole trick, whether you're building an image or
+an ogre. Stack the right ones in the right order and the shape underneath
+barely matters.
