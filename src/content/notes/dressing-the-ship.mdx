@@ -41,7 +41,7 @@ taller than it is wide, because it was never described in pixels to begin
 with.
 
 <Figure wide caption="One layer config, stored entirely as percentages. Each requested size resolves those percentages against its own width and height, so a square post and a tall story shape come from the same arrangement.">
-  <svg viewBox="0 0 360 176" role="img" aria-label="A layer config with percentage-based positions feeds two very differently shaped canvases, a square and a tall story shape, and the title, border and mark land in the same relative place on both.">
+  <svg viewBox="0 0 392 176" role="img" aria-label="A layer config with percentage-based positions feeds two very differently shaped canvases, a square and a tall story shape, and the title, border and mark land in the same relative place on both.">
     <rect x="8" y="66" width="118" height="44" rx="6" fill="#101216" stroke="rgba(255,255,255,0.18)" />
     <text x="67" y="84" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">the layer config</text>
     <text x="67" y="96" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">positions in % only</text>
@@ -102,21 +102,21 @@ else's URL and let it fetch things on your behalf. A generator that takes
 internet by default.
 
 <Figure wide caption="The photo becomes the base canvas by crop or letterbox. Everything else is one generated SVG, drawn back to front, composited on top. The mark is fetched separately, only from an allowed list of hosts, and composited last.">
-  <svg viewBox="0 0 360 152" role="img" aria-label="The uploaded photo is cropped or letterboxed into the base canvas. A generated SVG overlay carrying the border, wash, badge and title is composited on top. A separately fetched mark image, from an allowed host only, is composited last.">
+  <svg viewBox="0 0 392 152" role="img" aria-label="The uploaded photo is cropped or letterboxed into the base canvas. A generated SVG overlay carrying the border, wash, badge and title is composited on top. A separately fetched mark image, from an allowed host only, is composited last.">
     <rect x="8" y="60" width="70" height="32" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="43" y="80" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#c9cacd">the photo</text>
 
     <path d="M78 76 H 108" stroke="#5c5e62" stroke-width="1.2" fill="none" />
     <rect x="108" y="60" width="80" height="32" rx="5" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="148" y="76" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#c9cacd">base canvas</text><text x="148" y="87" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">crop or letterbox</text>
 
     <path d="M188 76 H 218" stroke="#26cb96" stroke-width="1.3" fill="none" />
-    <rect x="218" y="52" width="88" height="48" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" /><text x="262" y="70" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#26cb96">generated SVG</text><text x="262" y="82" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">border · wash · badge · title</text><text x="262" y="93" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">drawn back to front</text>
+    <rect x="218" y="52" width="116" height="48" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" /><text x="276" y="70" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#26cb96">generated SVG</text><text x="276" y="82" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">border · wash · badge · title</text><text x="276" y="93" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">drawn back to front</text>
 
-    <path d="M306 76 H 332" stroke="#dca63c" stroke-width="1.3" fill="none" />
-    <rect x="8" y="10" width="118" height="26" rx="5" fill="#141008" stroke="#dca63c" stroke-opacity="0.55" /><text x="67" y="27" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#dca63c">the mark, fetched separately</text>
-    <path d="M126 23 C 200 23, 250 40, 262 52" stroke="#dca63c" stroke-width="1.1" stroke-dasharray="3 3" fill="none" />
+    <path d="M334 76 H 360" stroke="#dca63c" stroke-width="1.3" fill="none" />
+    <rect x="8" y="10" width="124" height="26" rx="5" fill="#141008" stroke="#dca63c" stroke-opacity="0.55" /><text x="70" y="27" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#dca63c">the mark, fetched separately</text>
+    <path d="M132 23 C 200 23, 255 40, 276 52" stroke="#dca63c" stroke-width="1.1" stroke-dasharray="3 3" fill="none" />
     <text x="150" y="16" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">allowed hosts only</text>
 
-    <text x="336" y="80" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">→</text>
+    <text x="364" y="80" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">→</text>
   </svg>
 </Figure>
 
