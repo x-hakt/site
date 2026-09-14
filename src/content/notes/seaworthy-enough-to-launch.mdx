@@ -37,13 +37,11 @@ instead of a path.
 Redis gets none of that. It rewrites its own append-only file on shutdown, so
 a live swap underneath it just gets overwritten by the thing it was supposed
 to replace, no error, no restore. I could have built something clever around
-that. Instead the pane shows redis as manual and prints the three commands
-that actually work. You're killing me, smalls, but at least it says so instead
-of pretending.
+that, but instead the pane shows redis as manual and prints the three commands
+that actually work.
 
-What every mode shares is the one rule I was not willing to bend on: before it
-touches anything, it takes a snapshot of what was there first. Not optional,
-not a flag you can skip in a hurry. If that snapshot fails to write, the
+Each mode shares one rule I was not willing to bend on: before it
+touches anything, it takes a snapshot of what was there first. This isn't optional or something you can skip in a hurry. If that snapshot fails to write, the
 restore refuses to start.
 
 <Figure wide caption="Every mode takes a snapshot of the live store before it changes anything. That snapshot is the undo, not a separate feature.">
@@ -72,13 +70,11 @@ restore refuses to start.
 
 ## Seeing a restore before you need one
 
-Two smaller pieces make the button worth having rather than worth dreading.
 The pane lists every archive it can see for a store, not just the newest, so a
 bad backup taken an hour ago doesn't strand you: pick the one from yesterday
 instead. And a check now flags any project whose weekly restore test has gone
 quiet past its schedule, the same way a missing spec or a missing git remote
-does. A backup you have not proven you can restore is a claim, not a fact, and
-it was too easy for that claim to go stale without anyone noticing.
+does. 
 
 The other change is smaller and meaner: a scheduled backup or restore test
 that silently stops running now says so, loudly, instead of the dashboard
@@ -89,7 +85,7 @@ actually happened before, more than once.
 
 Once the part that scared me was done, the project itself was in good enough
 shape to do the thing I'd been putting off for a different reason entirely:
-give it a real release.
+give it a real release! The reason was actually because NPM's 2fa system shit the bed HARD and their support took over a week (beyond account validation timeout..) to get back to me.
 
 `git tag v0.1.0 && git push --tags` now triggers a build that publishes
 `ghcr.io/x-hakt/bosun-x-dashboard` under three tags at once: the exact
@@ -125,7 +121,7 @@ honours <Term k="podman">Podman</Term> now, which turned out to need nothing
 clever since Podman was built to answer to the same commands. The half-built
 systemd unit stayed half-built and got closed rather than finished: I have no
 project that actually needs a non-Docker way to run this yet, and shipping a
-path nobody has tested is worse than not shipping it. And a request to add a
+path nobody has tested seems like a silly idea. And a request to add a
 public share link per project, so a hull could be shown off without a login,
 got a plain no for now. Not every door is worth building just because someone
 could walk through it.
