@@ -1,6 +1,6 @@
 ---
 title: Dressing the ship
-summary: "One of the businesses I build for wanted a way to turn a finished piece of art into a proper announcement image without opening a separate design tool every time: cropped for a square post and a tall story shape from the same source, a title that wraps itself, a badge or a border when the moment calls for one. Here is the layer model, the one numbers-only config that drives every differently-shaped canvas, and the couple of things that cost an evening apiece."
+summary: "One of the businesses I build for wanted a way to quickly generate glossy social media images without opening a separate design tool every time: the right size and shape for IG or FB with all their very particular bells and whistles. You know, the exact thing graphic artist use templates in Photoshop for. That's the thing though... once your style and branding is locked in, most of the time you're only making minor tweaks and changing the source image - so what if they could have those templates ready to go in their CMS where the content copy is done, and social media image become 'swap image, update title, go.'?"
 date: 2026-09-13
 tracks: [infrastructure]
 tech: [nextjs, typescript, svg]
@@ -66,7 +66,7 @@ with.
 
 ## The crop stopped guessing
 
-The art itself used to go through an automatic crop that guessed where the
+I got a little 'too automated' at the start. The art itself used to go through an automatic crop that guessed where the
 interesting part of the image was and cut the rest away. It guessed wrong
 often enough to be worth removing entirely. The uploaded photo is now its own
 layer with a scale and a pan, so whoever is arranging the card drags it into
@@ -128,19 +128,17 @@ wrapping a title into lines means estimating, not measuring. The first version
 guessed badly enough that long titles either clipped or ran off the edge. The
 fix that held was a plain per-character width estimate, generous rather than
 exact, with an ellipsis dropped onto whatever line finally didn't fit. The
-part I hadn't expected: a leading space someone typed on purpose, to nudge a
+part I hadn't expected was that a leading space someone typed on purpose, to nudge a
 title clear of a slanted shape's angled edge, kept getting silently trimmed by
-the ordinary rules for tidying up whitespace. That one manual nudge is now the
-single exception, preserved through the wrap instead of cleaned away with
+the ordinary rules for tidying up whitespace. That manual nudge is now captured and preserved through the wrap instead of cleaned away with
 everything else.
 
 ## Findable after the fact
 
-The last piece was small and mattered more than it looked: a generated card
+The last piece was small and a nice quality of life for them as their site grows: a generated card
 now saves against the piece of content it belongs to, so six months from now
-it turns up next to the thing it was made for instead of living only as a
+they have a nice galery of social media art used, and each one can be found against the article it was made for instead of living only as a
 download somewhere on a laptop.
 
-Layers, it turns out, are the whole trick, whether you're building an image or
-an ogre. Stack the right ones in the right order and the shape underneath
-barely matters.
+Layers, as always, are amazing. Whether you're building an image or
+an onion, or an ogre. Stack the right ones in the right order and the results can be amazing.
