@@ -20,7 +20,7 @@ if (!entry) {
 }
 const domId = `gl-${k}-${Math.random().toString(36).slice(2, 8)}`;
 ---
-<span class="term-wrap"><button type="button" class="term" aria-describedby={domId} aria-expanded="false"><slot>{entry.term}</slot></button><span role="tooltip" id={domId} class="term__pop" hidden><span class="term__pop-head">{entry.term}</span><span class="term__pop-body">{entry.short}</span></span></span><style>
+<span class="term-wrap"><button type="button" class="term" aria-describedby={domId} aria-expanded="false"><slot>{entry.term}</slot></button><span role="tooltip" id={domId} class="term__pop" hidden><span class="term__pop-head">{entry.term}</span><span class="term__pop-body">{entry.short}</span></span></span><style is:global>
   .term-wrap {
     position: relative;
     display: inline;

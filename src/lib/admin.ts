@@ -1,26 +1,17 @@
 /*
   XH-6 — the /admin editor's server-only helpers: Google OAuth sign-in, a
-  stateless signed session cookie, and the note file I/O.
+  stateless signed session cookie, and the new-note template.
 
   Only ever imported from `prerender = false` routes under src/pages/admin/.
   Nothing here runs at build time.
 */
 import { createHmac, timingSafeEqual, randomBytes } from 'node:crypto';
-import { readFile, writeFile, readdir, access } from 'node:fs/promises';
-import { constants as FS } from 'node:fs';
-import path from 'node:path';
-// Transitive via astro (it parses frontmatter with this); server-only import.
-import yaml from 'js-yaml';
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID ?? '';
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET ?? '';
 const SESSION_SECRET = process.env.ADMIN_SESSION_SECRET ?? '';
 const ALLOWED_EMAIL = (process.env.ADMIN_ALLOWED_EMAIL ?? 'topher.burchell@gmail.com').toLowerCase();
 const SITE_URL = (process.env.SITE_URL ?? 'https://x-hakt.com').replace(/\/$/, '');
-const CONTENT_DIR = process.env.CONTENT_DIR
-  ? path.resolve(process.env.CONTENT_DIR)
-  : path.resolve(process.cwd(), 'src/content/notes');
-
 /** the editor is live only when Google OAuth and the session secret are set */
 export function adminEnabled(): boolean {
   return CLIENT_ID.length > 0 && CLIENT_SECRET.length > 0 && SESSION_SECRET.length > 0;
@@ -151,98 +142,6 @@ export function sameOrigin(request: Request): boolean {
   }
 }
 
-// ---- note file I/O ------------------------------------------------------
-
-const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
-export function validSlug(slug: string): boolean {
-  return SLUG_RE.test(slug) && slug.length <= 80;
-}
-
-function notePath(slug: string): string {
-  const p = path.resolve(CONTENT_DIR, `${slug}.mdx`);
-  // never escape the content dir
-  if (path.dirname(p) !== CONTENT_DIR) throw new Error('bad slug');
-  return p;
-}
-
-export interface NoteFile {
-  slug: string;
-  title: string;
-  date: string;
-  tracks: string;
-  draft: boolean;
-}
-
-const FM_TITLE = /^title:\s*(.+)$/m;
-const FM_DATE = /^date:\s*(.+)$/m;
-const FM_TRACKS = /^tracks:\s*(.+)$/m;
-const FM_DRAFT = /^draft:\s*true\s*$/m;
-
-export async function listNotes(): Promise<NoteFile[]> {
-  const files = (await readdir(CONTENT_DIR)).filter((f) => f.endsWith('.mdx') || f.endsWith('.md'));
-  const out: NoteFile[] = [];
-  for (const f of files) {
-    const raw = await readFile(path.join(CONTENT_DIR, f), 'utf8');
-    const fm = raw.match(/^---\n([\s\S]*?)\n---/)?.[1] ?? '';
-    out.push({
-      slug: f.replace(/\.mdx?$/, ''),
-      title: (fm.match(FM_TITLE)?.[1] ?? f).replace(/^["']|["']$/g, '').trim(),
-      date: (fm.match(FM_DATE)?.[1] ?? '').trim(),
-      tracks: (fm.match(FM_TRACKS)?.[1] ?? '').replace(/[[\]"']/g, '').trim(),
-      draft: FM_DRAFT.test(fm),
-    });
-  }
-  return out.sort((a, b) => b.date.localeCompare(a.date));
-}
-
-export async function readNote(slug: string): Promise<string> {
-  return readFile(notePath(slug), 'utf8');
-}
-
-export async function noteExists(slug: string): Promise<boolean> {
-  try {
-    await access(notePath(slug), FS.F_OK);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * Cheap pre-flight on the frontmatter so an obvious mistake is caught at save
- * time with a readable message, instead of after a 15s build-then-revert. The
- * real gate is still `astro build` succeeding after the write.
- */
-export function frontmatterProblem(content: string): string | null {
-  const m = content.match(/^---\n([\s\S]*?)\n---\n/);
-  if (!m) return 'No frontmatter block (--- ... ---) at the top.';
-  const fm = m[1];
-
-  // Actually parse it. The commonest break is an unquoted value containing
-  // ": " (e.g. `summary: the mechanics: the mission design`), which is a YAML
-  // syntax error, not something the key-presence regex below would ever catch.
-  let doc: unknown;
-  try {
-    doc = yaml.load(fm);
-  } catch (e) {
-    const msg = e instanceof Error ? e.message.split('\n')[0] : String(e);
-    return `Frontmatter isn't valid YAML: ${msg}. A value with a colon-space or a leading quote/bracket needs wrapping in "double quotes".`;
-  }
-  if (doc === null || typeof doc !== 'object') return 'Frontmatter parsed to nothing — check the --- fences.';
-
-  for (const key of ['title', 'summary', 'date', 'tracks']) {
-    if (!new RegExp(`^${key}:\\s*\\S`, 'm').test(fm)) return `Frontmatter is missing "${key}".`;
-  }
-  const date = fm.match(FM_DATE)?.[1]?.trim() ?? '';
-  if (!/^\d{4}-\d{2}-\d{2}/.test(date.replace(/^["']|["']$/g, ''))) return `"date" must look like 2026-08-30 (got ${date || 'nothing'}).`;
-  return null;
-}
-
-export async function writeNote(slug: string, content: string): Promise<void> {
-  await writeFile(notePath(slug), content.replace(/\r\n/g, '\n'), 'utf8');
-}
-
 export function newNoteTemplate(slug: string): string {
   const today = new Date().toISOString().slice(0, 10);
   const title = slug.replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase());
@@ -274,49 +173,4 @@ Opening sentence.
 
 ...
 `;
-}
-
-// ---- rebuild handshake with server.mjs ---------------------------------
-//
-// save.ts writes rebuild.request then exits the Astro server with code 75.
-// server.mjs (the supervisor) rebuilds, commits + pushes on success or
-// restores `prev` on failure, writes rebuild.result, and respawns.
-
-export const STATE_DIR = process.env.ADMIN_STATE_DIR
-  ? path.resolve(process.env.ADMIN_STATE_DIR)
-  : path.resolve(process.cwd(), '.admin-state');
-
-export interface RebuildRequest {
-  slug: string;
-  isNew: boolean;
-  prev: string | null;
-  commitMsg: string;
-  at: string;
-}
-
-export interface RebuildResult {
-  ok: boolean;
-  slug: string;
-  error?: string;
-  at: string;
-}
-
-export async function requestRebuild(req: RebuildRequest): Promise<void> {
-  await writeFile(path.join(STATE_DIR, 'rebuild.request'), JSON.stringify(req), 'utf8').catch(async () => {
-    // state dir may not exist yet in dev
-    const { mkdir } = await import('node:fs/promises');
-    await mkdir(STATE_DIR, { recursive: true });
-    await writeFile(path.join(STATE_DIR, 'rebuild.request'), JSON.stringify(req), 'utf8');
-  });
-}
-
-export async function lastResult(): Promise<RebuildResult | null> {
-  try {
-    const r: RebuildResult = JSON.parse(await readFile(path.join(STATE_DIR, 'rebuild.result'), 'utf8'));
-    // only surface a recent result — an old one is just noise on the next visit
-    if (Date.now() - Date.parse(r.at) > 6 * 60 * 60 * 1000) return null;
-    return r;
-  } catch {
-    return null;
-  }
 }

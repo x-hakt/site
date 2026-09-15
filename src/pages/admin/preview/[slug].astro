@@ -1,0 +1,20 @@
+---
+export const prerender = false;
+import NotePage from '../../../components/NotePage.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { COOKIE, adminEnabled, sessionValid } from '../../../lib/admin';
+import { validSlug, readWorkingSource, parseNote } from '../../../lib/notes';
+import { renderNote } from '../../../lib/render-note';
+if (!adminEnabled()) return new Response('Not found', { status: 404 });
+if (!sessionValid(Astro.cookies.get(COOKIE)?.value)) return Astro.redirect('/admin?e=session');
+const slug = Astro.params.slug ?? '';
+if (!validSlug(slug)) return new Response('Bad slug', { status: 400 });
+const raw = await readWorkingSource(slug);
+if (!raw) return new Response('Not found', { status: 404 });
+let note, html = '', error = '';
+try { note = parseNote(slug, raw); html = await renderNote(note); }
+catch (e) { error = e instanceof Error ? e.message : 'Unable to render this draft.'; Astro.response.status = 422; }
+---
+{note && !error ? <NotePage note={note} html={html} preview /> : (
+  <BaseLayout title="Draft needs repair"><h1>Preview unavailable</h1><pre style="white-space:pre-wrap">{error}</pre><a href={`/admin/edit/${slug}`}>← return to the editor</a></BaseLayout>
+)}

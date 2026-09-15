@@ -1,32 +1,23 @@
 ---
 // Page 1 of the note list lives at "/" (see src/pages/index.astro); this route
-// only ever generates page 2 and beyond, so the two never collide.
-import { getCollection } from 'astro:content';
+// serves page 2 and beyond from the current published notes.
+import { publishedNotes } from '../../lib/notes';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import NoteList from '../../components/NoteList.astro';
 import Pagination from '../../components/Pagination.astro';
 import { site } from '../../site';
 import { NOTES_PAGE_SIZE } from '../../lib/pagination';
 
-export async function getStaticPaths() {
-  const notes = (await getCollection('notes', ({ data }) => import.meta.env.PROD ? !data.draft : true))
-    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-  const totalPages = Math.max(1, Math.ceil(notes.length / NOTES_PAGE_SIZE));
+export const prerender = false;
+const all = await publishedNotes();
+const totalPages = Math.max(1, Math.ceil(all.length / NOTES_PAGE_SIZE));
+const value = Astro.params.page ?? '';
+if (!/^[1-9][0-9]*$/.test(value)) return new Response('Not found', { status: 404 });
+const currentPage = Number(value);
+if (currentPage === 1) return Astro.redirect('/');
+if (currentPage > totalPages) return new Response('Not found', { status: 404 });
+const notes = all.slice((currentPage - 1) * NOTES_PAGE_SIZE, currentPage * NOTES_PAGE_SIZE);
 
-  return Array.from({ length: Math.max(0, totalPages - 1) }, (_, i) => {
-    const page = i + 2;
-    return {
-      params: { page: String(page) },
-      props: {
-        notes: notes.slice((page - 1) * NOTES_PAGE_SIZE, page * NOTES_PAGE_SIZE),
-        currentPage: page,
-        totalPages,
-      },
-    };
-  });
-}
-
-const { notes, currentPage, totalPages } = Astro.props;
 ---
 
 <BaseLayout

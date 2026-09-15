@@ -1,0 +1,163 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Figure from '../components/Figure.astro';
+import { site } from '../site';
+import { trackSlug } from '../tracks';
+
+import type { Note } from '../lib/notes';
+interface Props { note: Note; html: string; preview?: boolean }
+const { note, html, preview = false } = Astro.props;
+
+const dateFmt = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
+const techSlug = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+// trailing slash to match the canonical Astro emits (directory build format)
+const url = new URL(`/notes/${note.id}/`, site.url).href;
+const published = note.data.date.toISOString();
+const modified = (note.data.updated ?? note.data.date).toISOString();
+const keywords = [...note.data.tracks, ...note.data.tech];
+
+const blogPosting = {
+  '@type': 'BlogPosting',
+  '@id': `${url}#article`,
+  headline: note.data.title,
+  description: note.data.summary,
+  datePublished: published,
+  dateModified: modified,
+  author: { '@id': `${site.url}/#person` },
+  publisher: { '@id': `${site.url}/#person` },
+  isPartOf: { '@id': `${site.url}/#website` },
+  mainEntityOfPage: url,
+  url,
+  image: new URL(note.data.hero?.src ?? site.ogImage, site.url).href,
+  articleSection: note.data.tracks[0],
+  keywords: keywords.join(', '),
+  inLanguage: 'en',
+};
+const breadcrumb = {
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: site.name, item: site.url },
+    { '@type': 'ListItem', position: 2, name: note.data.title, item: url },
+  ],
+};
+---
+
+<BaseLayout
+  title={note.data.title}
+  description={note.data.summary}
+  current="notes"
+  type="article"
+  ogImage={note.data.hero?.src ?? undefined}
+  ogImageAlt={note.data.hero?.alt ?? `${note.data.title} — ${site.name}`}
+  publishedTime={published}
+  modifiedTime={modified}
+  tags={keywords}
+  section={note.data.tracks[0]}
+  jsonLd={[blogPosting, breadcrumb]}
+>
+  {preview && <aside class="preview-bar"><strong>Draft preview — only visible while signed in</strong><br /><a href={`/admin/edit/${note.id}`}>← edit this draft</a> · <a href="/admin">all drafts</a></aside>}
+  <article>
+    <header class="note-head">
+      <h1>{note.data.title}</h1>
+      <p class="note-head__summary">{note.data.summary}</p>
+      <p class="note-head__meta">
+        <time datetime={note.data.date.toISOString()}>{dateFmt.format(note.data.date)}</time>
+        {note.data.tracks.map((track) => (
+          <>
+            <span aria-hidden="true"> / </span>
+            <a href={`/map#track-${trackSlug(track)}`}>{track}</a>
+          </>
+        ))}
+        {
+          note.data.updated && (
+            <>
+              <span aria-hidden="true"> / </span>updated {dateFmt.format(note.data.updated)}
+            </>
+          )
+        }
+      </p>
+      {
+        note.data.tech.length > 0 && (
+          <p class="note-head__cargo">
+            {note.data.tech.map((tag) => (
+              <a href={`/tech/${techSlug(tag)}`}>{tag}</a>
+            ))}
+          </p>
+        )
+      }
+    </header>
+
+    {
+      note.data.hero && (
+        <Figure wide>
+          <img src={note.data.hero.src} alt={note.data.hero.alt} />
+        </Figure>
+      )
+    }
+
+    <div class="prose">
+      <Fragment set:html={html} />
+    </div>
+
+    <p class="signoff" aria-label={`signed, ${site.byline}`}>{site.signoff}</p>
+
+    <footer class="note-foot">
+      <a href="/">&#8592; all notes</a>
+    </footer>
+  </article>
+</BaseLayout>
+
+<style>
+  .preview-bar { border: 1px solid var(--color-amber); padding: 12px; margin-bottom: 2rem; font-family: var(--font-mono); font-size: 12px; }
+  .note-head { margin-bottom: 2rem; }
+  .note-head h1 {
+    font-size: clamp(1.5rem, 4vw, 1.8125rem);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin: 0 0 0.5rem;
+  }
+  .note-head__summary {
+    max-width: 60ch;
+    color: var(--color-fg-soft);
+    font-size: 1.06rem;
+    margin: 0 0 0.9rem;
+  }
+  .note-head__meta {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-faint);
+    margin: 0;
+  }
+  .note-head__meta a { color: var(--color-dim); }
+  .note-head__meta a:hover { color: var(--color-fg-soft); }
+  .note-head__cargo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin: 0.7rem 0 0;
+  }
+  .note-head__cargo a {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-fg-soft);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px 9px;
+  }
+  .note-head__cargo a:hover { border-color: var(--color-green); color: var(--color-green); text-decoration: none; }
+  .signoff {
+    margin: 3.5rem 0 0;
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    color: var(--color-fg-soft);
+    letter-spacing: 0.02em;
+  }
+  .note-foot {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+</style>

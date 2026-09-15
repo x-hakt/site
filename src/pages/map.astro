@@ -1,5 +1,6 @@
 ---
-import { getCollection } from 'astro:content';
+export const prerender = false;
+import { publishedNotes } from '../lib/notes';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { trackMeta, trackSort, trackSlug } from '../tracks';
 
@@ -9,7 +10,7 @@ import { trackMeta, trackSort, trackSlug } from '../tracks';
   spyglass is progressive enhancement over /search.json. A note with more than
   one track is listed under each.
 */
-const notes = (await getCollection('notes', ({ data }) => import.meta.env.PROD ? !data.draft : true)).sort(
+const notes = (await publishedNotes()).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
 );
 

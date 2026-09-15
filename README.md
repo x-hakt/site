@@ -1,139 +1,140 @@
 # x-hakt.com
 
-*a landlocked captain's log* — x-hakt.com rebuilt as a long-form technical blog.
-One person (`x`) writing down how a small mesh of servers is actually wired, one
-diagram carrying each idea. Every entry signs off `-x`.
+*a landlocked captain's log* — Astro + MDX, with plain files and a private editor.
+Live at https://x-hakt.com. Voice and writing conventions: [VOICE.md](VOICE.md).
 
-Live on x-hakt.com since the XH-8 cutover (2026-08-29). The retired terminal
-portfolio lives on in the separate `X_HAKT` repo (its `escape/` module,
-escape.x-hakt.com, still ships from there) and is **not** touched from here.
+## Content workflow (XH-25)
 
-- **Voice / persona**: `VOICE.md` (XH-3).
-- **Visual style guide**: XH-7 artifact `claude.ai/code/artifact/5b1a2ebe-25c1-4379-93f2-401dffbc094b`.
-- **Taxonomy** (XH-12): `sea` (named region) / `waters` (sub-areas) / `cargo`
-  (loose tags) in note frontmatter; `src/seas.ts` is the sea registry; `/map`
-  is the browse-all page with the client-side "spyglass" search over
-  `/search.json`.
+1. Sign in at **/admin** with the existing allowed Google account.
+2. Create a note or choose one from **Drafts** or **Published**.
+3. **Save draft** keeps a private working copy. **Preview saved draft** opens it
+   using the same layout, diagrams, glossary and typography as the public note.
+4. Move between any drafts, edit, save and preview as often as needed.
+5. **Publish** validates both frontmatter and rendered MDX, then makes the note
+   live immediately. No site build, holding page, container restart or redeploy.
 
-## Stack
+Saving an edit to an already published note leaves its live version intact.
+Publish is the explicit action that replaces it. Draft and public status are set
+by the button used, even if the textarea contains a different `draft:` value.
 
-- **Astro 5** + **MDX** — prose with inline components (diagrams, callouts).
-- **Tailwind v4** via `@tailwindcss/vite` — the Control-Room-adjacent base look.
-- **Static output.** The `@astrojs/node` adapter is wired so the `/admin` editor
-  (XH-6) can opt individual routes into SSR later with `export const prerender = false`.
-- Self-hosted **IBM Plex Mono / Sans** via `@fontsource`.
-- Design tokens ported from the XH-7 style guide
-  (`claude.ai/code/artifact/5b1a2ebe-25c1-4379-93f2-401dffbc094b`).
+The editor keeps unsaved text in this browser, reports save/preview errors, and
+rejects stale saves from another tab instead of silently overwriting newer work.
+An unfinished MDX body can be saved; a rendering error blocks publication.
+Frontmatter must match the schema to save.
 
-## Layout
+### Writing from an agent or text editor
 
+- **New note:** create `src/content/drafts/<slug>.mdx` with `draft: true`.
+  It appears in /admin immediately, even after the server has started.
+- **Revision to a live note:** copy it into `src/content/drafts/<slug>.mdx`,
+  keep `draft: true`, and edit that copy. Leave the published file alone.
+- Existing `draft: true` files in `src/content/notes/` are also discovered
+  and reviewable. Private draft copies take precedence in the editor.
+- **Do not set `draft: false` or overwrite a published note as part of writing
+  a draft.** Leave publication to the editor unless explicitly asked to publish.
+- Keep sources in Git. Drafts are private on the website, but are committed to
+  the same Git remote as the site; they are not secret storage.
+
+Draft files are under `src/content/drafts/`; published files are under
+`src/content/notes/`. On publication the server atomically replaces the public
+file and removes its private working copy. `CONTENT_DIR` and `DRAFT_DIR` can
+override these locations (by default drafts are a sibling of CONTENT_DIR).
+
+Public routes, pagination, map, tags, RSS, search and sitemaps read published
+files at request time. Drafts are excluded in development as well as production.
+Admin responses require the existing session for content access, are private /
+no-store, and carry noindex headers. Invalid draft previews show an error without
+changing public content.
+
+### MDX
+
+The runtime compiler uses Astro's JSX renderer, GFM, smart punctuation, heading
+IDs and the existing Shiki theme. The supported component imports are:
+
+```mdx
+import Figure from '../../components/Figure.astro';
+import Term from '../../components/Term.astro';
 ```
-src/
-  site.ts                 site metadata, nav, byline, feed config
-  seas.ts                 the sea registry (blurb + order per named region)
-  content.config.ts       the "notes" collection schema (sea/waters/cargo)
-  content/notes/*.mdx     one file per note
-  styles/global.css       design tokens + base + .prose
-  layouts/BaseLayout.astro
-  components/
-    Masthead.astro
-    Figure.astro           the framed home for a diagram (XH-5 fills in the house style)
-  pages/
-    index.astro           notes index
-    map.astro              browse-all + the spyglass search (XH-12)
-    about.astro
-    404.astro             the cartographic treatment (style guide s.07)
-    notes/[...slug].astro
-    cargo/[tag].astro      notes carrying one cargo tag
-    admin/                 the SSR editor (XH-6): index, login, callback, save, logout
-    rss.xml.ts
-    search.json.ts         the spyglass index, built once
-server.mjs                the supervisor: runs the Astro node server + the rebuild loop
-src/lib/admin.ts          admin auth (Google OAuth + session cookie) and note file I/O
-VOICE.md                  the persona + writing rules (XH-3)
-public/                    generated logo assets (npm run logo) — see below
-```
 
-## Develop
+Other imports/exports give an explicit preview error. MDX expressions are code:
+only trusted authors should have editor or repository write access.
+Rendered HTML is cached by content hash (up to 64 revisions); edits invalidate
+it automatically. No service restart is required for content changes.
+
+### Git synchronization
+
+Each admin save/publish commits only the affected content paths and pushes to
+`origin HEAD`. It does not commit unrelated staged changes. A failed Git sync
+is shown in the editor; the content remains saved on the server. Retry the
+push before relying on the remote backup. `CONTENT_GIT=off` disables Git
+operations for isolated tests.
+
+## Develop and verify
 
 ```bash
-npm install
-npm run dev        # http://localhost:4321
-npm run build      # -> dist/
-npm run preview
-npm run check      # astro check (types)
+npm ci
+npm run dev
+npm run check
+npm run build
+npm test
 ```
+
+`npm test` starts the built server on loopback with temporary copies of the
+notes, a temporary Git repository/remote, and test-only credentials. It tests every existing note, multiple drafts,
+private preview, explicit publication, all public indexes, private revisions,
+stale/concurrent writes, uninterrupted public reads, CSRF, broken MDX and Git failures. It never changes production content.
+Set `TEST_PORT` if the default 44326 is occupied.
+
+Important files:
+
+- `src/lib/notes.ts`: runtime file storage, revisions, draft/public state.
+- `src/lib/render-note.ts`: MDX compilation and rendered-content cache.
+- `src/lib/note-schema.ts`: shared metadata validation.
+- `src/components/NotePage.astro`: shared public/preview article.
+- `src/pages/admin/`: Google login, list, editor, preview, save/publish.
+- `src/lib/admin.ts`: existing Google OAuth/session helpers.
+- `src/content.config.ts`: empty loader prevents build-time draft compilation.
+- `server.mjs`: starts the built Astro server; no content rebuild loop.
+
+## Authentication
+
+Admin is 404 until `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` and
+`ADMIN_SESSION_SECRET` are set. The allowed Google email is
+`ADMIN_ALLOWED_EMAIL`; sessions use the existing signed, Secure, HttpOnly cookie.
+The Google callback is `https://x-hakt.com/admin/callback`. Production uses
+the existing OAuth client and environment in the parent compose stack.
+
+## Deploy code changes on Caspar
+
+The live repo is `~/unified-services/x-hakt-site`. Work in an isolated checkout;
+run checks and tests before integrating into its main branch.
+
+```bash
+cd ~/unified-services/x-hakt-site
+npm ci
+npm run check
+npm run build
+npm test
+cd ..
+docker compose -f docker-compose.x-hakt-site.yml up -d --build --renew-anon-volumes
+```
+
+Code deployments still build/restart the service. Normal content saves and
+publication do neither. The anonymous node_modules volume must be refreshed
+when dependencies change; `--renew-anon-volumes` handles that without touching
+the source/content bind mount. The source-of-truth compose copy is
+`deploy/docker-compose.x-hakt-site.yml`.
+
+The container uses the existing write deploy key mounted from
+`~/unified-services/x-hakt-site-deploy-key`. Content and drafts are in the
+bind-mounted Git checkout. Back up the checkout/content before a cutover.
+Rollback a code deployment by restoring the preceding Git revision and built
+output, and recreating this service with its previous image. Preserve drafts.
+
+The retired terminal portfolio is the separate `X_HAKT` repo, including the
+still-live escape service. It is unrelated to this application's deploy.
 
 ## Logo assets
 
-Source art is in `design/` (`emblem-src.png`, `mark-src.png`). Regenerate the
-public assets with:
-
-```bash
-npm run logo
-```
-
-`scripts/process-logo.mjs` hardens the alpha channel (the raw art has faint
-semi-transparent speckle), flattens the mark to the `#8b949e` token colour, and
-writes `public/{emblem,mark,og-default,favicon-16/32/48,apple-touch-icon}.png`.
-
-## The /admin editor (XH-6)
-
-`/admin` is a live SSR route. It is **404 until `GOOGLE_CLIENT_ID`,
-`GOOGLE_CLIENT_SECRET` and `ADMIN_SESSION_SECRET` are all set**.
-
-- **Google sign-in.** `/admin/login` bounces to Google with a state cookie;
-  `/admin/callback` exchanges the code server-side, checks `email_verified` and
-  `email === ADMIN_ALLOWED_EMAIL`, then issues a stateless HMAC session cookie
-  (`SameSite=Lax`, 7 days). One Google OAuth client, shared with Control Room
-  (`GOOGLE_OAUTH_*` in `~/unified-services/.env`).
-- list / create / edit notes as raw MDX in a textarea.
-- **save** writes the `.mdx`, then `server.mjs` (the supervisor that owns the
-  process) runs `astro build`. Build OK: it commits the notes dir and pushes,
-  then respawns. Build fails: it restores the previous content (or deletes a new
-  file) and respawns. A note that does not build never reaches the live site. A
-  503 holding page covers the ~10s rebuild gap.
-
-To turn it on:
-
-1. Create one Google OAuth 2.0 **Web application** client (Cloud Console →
-   Credentials). Authorized redirect URIs:
-   - `https://x-hakt.com/admin/callback`
-   - `https://control.x-hakt.com/api/auth/callback/google`
-2. Put the client id/secret in `~/unified-services/.env` as
-   `GOOGLE_OAUTH_CLIENT_ID` / `GOOGLE_OAUTH_CLIENT_SECRET`.
-   `XHAKT_ADMIN_SESSION_SECRET` and `CONTROL_ROOM_AUTH_SECRET` are already set.
-3. `docker compose -f docker-compose.x-hakt-site.yml up -d` (and the same for
-   `docker-compose.control-room.yml`).
-
-The container pushes with a dedicated deploy key
-(`~/unified-services/x-hakt-site-deploy-key`, public half on the GitHub repo's
-Deploy keys with write access). Without it, saves still build and show live;
-they just are not pushed to git until the key is in place.
-
-## Still open
-
-- **Diagram house style** (XH-5): `Figure.astro` is the wrapper contract only.
-  The 404, and the diagram in `a-key-with-one-job`, already show the intended
-  register; XH-5 writes it down.
-- **16px favicon**: the full wheel-and-skull mark scaled down. A purpose-drawn
-  glyph, and an SVG trace of the mark, would read cleaner.
-- Per-`sea` pages (`/seas/<slug>`). For now `/map#sea-<slug>` anchors cover it.
-- `/admin` v1 has no MDX preview and no media library (inline SVG only, by design).
-
-## Deploy
-
-Runs as the Astro node server via the `server.mjs` supervisor (`Dockerfile` is
-node + git + ssh; the repo is bind-mounted at `/app` in production, node_modules
-is the image's via an anonymous volume). Its own compose project, never touches
-the shared phase4 stack:
-
-```bash
-cd ~/unified-services
-docker compose -f docker-compose.x-hakt-site.yml up -d --build   # -> https://x-hakt.com
-```
-
-Traefik router priority 200 sits above the retired `hugo-x-hakt`'s 100.
-`deploy/docker-compose.x-hakt-site.yml` in this repo is the source-of-truth copy.
-After a dependency change, refresh the node_modules volume:
-`docker compose -f docker-compose.x-hakt-site.yml down && docker volume rm unified-services_... && up -d --build`.
+Source art is in `design/`. `npm run logo` regenerates the raster assets in
+`public/` using `scripts/process-logo.mjs`.

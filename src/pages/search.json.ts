@@ -1,13 +1,14 @@
+export const prerender = false;
 import type { APIRoute } from 'astro';
-import { getCollection } from 'astro:content';
+import { publishedNotes } from '../lib/notes';
 
 /*
-  The spyglass index (XH-12). One flat JSON array, built at build time, fetched
+  The spyglass index (XH-12). One flat JSON array of current published notes, fetched
   once by /map and filtered client-side. Small site, so the whole body text
   ships stripped of MDX punctuation; revisit if the payload gets past ~100 KB.
 */
 export const GET: APIRoute = async () => {
-  const notes = (await getCollection('notes', ({ data }) => !data.draft)).sort(
+  const notes = (await publishedNotes()).sort(
     (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
   );
 
