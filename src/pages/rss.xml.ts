@@ -1,10 +1,11 @@
+export const prerender = false;
 import rss from '@astrojs/rss';
-import { getCollection } from 'astro:content';
+import { publishedNotes } from '../lib/notes';
 import type { APIContext } from 'astro';
 import { site } from '../site';
 
 export async function GET(context: APIContext) {
-  const notes = (await getCollection('notes', ({ data }) => !data.draft)).sort(
+  const notes = (await publishedNotes()).sort(
     (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
   );
 

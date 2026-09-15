@@ -1,13 +1,10 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
-import sitemap from '@astrojs/sitemap';
 import node from '@astrojs/node';
 import tailwindcss from '@tailwindcss/vite';
 
-// XH-4: public pages are prerendered static; the Node adapter is here so that
-// individual routes (the /admin editor, XH-6) can opt into SSR later with
-// `export const prerender = false`. Nothing is server-rendered yet.
+// Public content and admin routes opt into SSR; fixed pages remain static.
 export default defineConfig({
   site: 'https://x-hakt.com',
   output: 'static',
@@ -21,8 +18,9 @@ export default defineConfig({
     // renamed 2026-09-06 (was briefly titled "Evidence, not vibes")
     '/notes/evidence-not-vibes': '/notes/teaching-others-one-morsel-at-a-time',
   },
-  integrations: [mdx(), sitemap()],
+  integrations: [mdx()],
   vite: {
+    ssr: { external: ['astro/container', 'astro/jsx-runtime', '@astrojs/mdx/server.js'] },
     plugins: [tailwindcss()],
   },
   markdown: {

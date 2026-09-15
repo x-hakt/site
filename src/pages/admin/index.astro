@@ -2,7 +2,8 @@
 export const prerender = false;
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { COOKIE, adminEnabled, sessionValid, listNotes, lastResult } from '../../lib/admin';
+import { COOKIE, adminEnabled, sessionValid } from '../../lib/admin';
+import { editorNotes } from '../../lib/notes';
 
 if (!adminEnabled()) return new Response('Not found', { status: 404 });
 
@@ -14,8 +15,8 @@ const errText =
   err === 'exchange' ? 'Google sign-in failed. Try again.' :
   err === 'session' ? 'Session expired. Sign in again.' : null;
 
-const notes = authed ? await listNotes() : [];
-const result = authed ? await lastResult() : null;
+const notes = authed ? await editorNotes() : [];
+
 ---
 
 <BaseLayout title="admin" description="Editor.">
@@ -31,14 +32,6 @@ const result = authed ? await lastResult() : null;
 
     {authed && (
       <>
-        {result && (
-          <p class:list={['result', result.ok ? 'result--ok' : 'result--bad']}>
-            {result.ok
-              ? `saved ${result.slug} and rebuilt · ${new Date(result.at).toLocaleString()}`
-              : `last save of ${result.slug} failed: ${result.error}`}
-          </p>
-        )}
-
         <form id="new-note" class="new">
           <label>
             <span>new note slug</span>
@@ -47,17 +40,27 @@ const result = authed ? await lastResult() : null;
           <button type="submit">create</button>
         </form>
 
-        <ul class="notes" role="list">
-          {notes.map((n) => (
-            <li>
-              <a href={`/admin/edit/${n.slug}`}>
-                <span class="notes__title">{n.title}{n.draft && <span class="notes__draft">draft</span>}</span>
-                <span class="notes__meta">{n.date} · {n.tracks} · {n.slug}</span>
-              </a>
-            </li>
-          ))}
-          {notes.length === 0 && <li class="notes__empty">No notes yet.</li>}
-        </ul>
+        {[
+          { title: 'Drafts', items: notes.filter(n => n.draft) },
+          { title: 'Published', items: notes.filter(n => !n.draft) },
+        ].map(group => (
+          <section>
+            <h2>{group.title} <small>({group.items.length})</small></h2>
+            <ul class="notes" role="list">
+              {group.items.sort((a,b) => b.date.localeCompare(a.date)).map(n => (
+                <li>
+                  <a href={`/admin/edit/${n.slug}`}>
+                    <span class="notes__title">{n.title}{n.draft && <span class="notes__draft">{n.live ? 'private revision' : 'draft'}</span>}</span>
+                    <span class="notes__meta">{n.date} · {n.slug}{n.problem && ` · ${n.problem}`}</span>
+                  </a>
+                  {n.draft && <a href={`/admin/preview/${n.slug}`}>preview draft ↗</a>}
+                  {n.live && <a href={`/notes/${n.slug}`}>view live note ↗</a>}
+                </li>
+              ))}
+              {group.items.length === 0 && <li class="notes__empty">No {group.title.toLowerCase()} yet.</li>}
+            </ul>
+          </section>
+        ))}
 
         <form method="post" action="/admin/logout" class="out">
           <button type="submit">sign out</button>

@@ -6,11 +6,9 @@ import {
   COOKIE,
   adminEnabled,
   sessionValid,
-  validSlug,
-  noteExists,
-  readNote,
   newNoteTemplate,
 } from '../../../lib/admin';
+import { validSlug, readWorkingSource, revision } from '../../../lib/notes';
 
 if (!adminEnabled()) return new Response('Not found', { status: 404 });
 if (!sessionValid(Astro.cookies.get(COOKIE)?.value)) return Astro.redirect('/admin?e=session');
@@ -19,12 +17,13 @@ const slug = Astro.params.slug ?? '';
 if (!validSlug(slug)) return new Response('Bad slug', { status: 400 });
 
 const wantNew = Astro.url.searchParams.get('new') === '1';
-const exists = await noteExists(slug);
+const raw = await readWorkingSource(slug);
+const exists = raw !== null;
 
 let content: string;
 let isNew: boolean;
 if (exists) {
-  content = await readNote(slug);
+  content = raw!;
   isNew = false;
 } else if (wantNew) {
   content = newNoteTemplate(slug);
@@ -46,25 +45,27 @@ if (exists) {
 
     <form method="post" action="/admin/save" class="editor__form">
       <input type="hidden" name="slug" value={slug} />
-      <input type="hidden" name="isNew" value={isNew ? '1' : '0'} />
+      <input type="hidden" name="revision" value={revision(raw)} />
       <textarea name="content" spellcheck="false" aria-label={`MDX source for ${slug}`}>{content}</textarea>
       <div class="editor__bar">
-        <button type="submit">save &amp; publish</button>
-        <span class="editor__hint">save runs the build; a broken note is reverted, not shipped. ~15s. Your text is also kept in this browser until a save lands.</span>
-        <a class="editor__view" href={`/notes/${slug}`} target="_blank" rel="noopener">view note &#8599;</a>
+        <button type="submit" name="action" value="draft">Save draft</button>
+        <button type="submit" name="action" value="publish">Publish</button>
+        <span class="editor__hint">Save a private draft, preview it, then publish when ready. Your text is also kept in this browser.</span>
+        <a class="editor__view" href={`/admin/preview/${slug}`} target="_blank" rel="noopener">preview saved draft &#8599;</a>
       </div>
+      <p id="save-status" role="status" aria-live="polite"></p>
     </form>
   </section>
 </BaseLayout>
 
-<script define:vars={{ slug }}>
+<script is:inline define:vars={{ slug }}>
   // Keep the textarea's content in localStorage so a failed save (or a stray
   // navigation, or a browser crash) never loses the draft. Cleared only when the
   // server content matches — i.e. a save actually landed — or on "discard".
   const KEY = `xh-admin-draft:${slug}`;
   const ta = document.querySelector('textarea[name="content"]');
   const bar = document.getElementById('draft-bar');
-  const serverContent = ta.value;
+  let serverContent = ta.value;
 
   let stored = null;
   try { stored = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch { /* ignore */ }
@@ -89,6 +90,40 @@ if (exists) {
   }
 
   let t;
+  const form = ta.closest('form');
+  const status = document.getElementById('save-status');
+  const keepLocal = () => {
+    try { localStorage.setItem(KEY, JSON.stringify({ content: ta.value, at: Date.now() })); } catch {}
+  };
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    clearTimeout(t);
+    keepLocal();
+    const data = new FormData(form);
+    data.set('action', event.submitter?.value || 'draft');
+    form.querySelectorAll('button[type="submit"]').forEach(b => b.disabled = true);
+    status.textContent = data.get('action') === 'publish' ? 'Publishing…' : 'Saving draft…';
+    try {
+      const response = await fetch(form.getAttribute('action'), { method: 'POST', body: data });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Save failed.');
+      form.elements.revision.value = result.revision;
+      // Do not lose typing that happened while the request was in flight.
+      if (ta.value === data.get('content')) {
+        ta.value = result.content;
+        serverContent = result.content;
+        localStorage.removeItem(KEY);
+        bar.hidden = true;
+      } else { serverContent = result.content; keepLocal(); }
+      status.textContent = result.message + (result.warning ? ' ' + result.warning : '');
+      history.replaceState(null, '', '/admin/edit/' + slug);
+    } catch (error) { status.textContent = error.message; }
+    finally { form.querySelectorAll('button[type="submit"]').forEach(b => b.disabled = false); }
+  });
+  window.addEventListener('beforeunload', event => {
+    if (ta.value !== serverContent) { keepLocal(); event.preventDefault(); }
+  });
+
   ta.addEventListener('input', () => {
     clearTimeout(t);
     t = setTimeout(() => {

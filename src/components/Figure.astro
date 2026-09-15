@@ -29,7 +29,7 @@ const { caption, wide = false, plain = false } = Astro.props;
   {caption && <figcaption class="figure__cap">{caption}</figcaption>}
 </figure>
 
-<style>
+<style is:global>
   .figure { margin-block: 2rem; }
   .figure.is-wide {
     /* pull out to the wide column even inside a reading-width article */

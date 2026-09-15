@@ -1,8 +1,8 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import type { Note } from '../lib/notes';
 
 interface Props {
-  notes: CollectionEntry<'notes'>[];
+  notes: Note[];
 }
 
 const { notes } = Astro.props;

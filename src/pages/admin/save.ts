@@ -1,77 +1,41 @@
 export const prerender = false;
-
 import type { APIRoute } from 'astro';
-import {
-  COOKIE,
-  adminEnabled,
-  sessionValid,
-  validSlug,
-  noteExists,
-  readNote,
-  writeNote,
-  frontmatterProblem,
-  requestRebuild,
-  sameOrigin,
-} from '../../lib/admin';
+import { COOKIE, adminEnabled, sessionValid, sameOrigin } from '../../lib/admin';
+import { validSlug, readWorkingSource, revision, parseNote, withStatus, saveDraft, publishNote, serialize } from '../../lib/notes';
+import { renderNote } from '../../lib/render-note';
+import { syncContent } from '../../lib/content-git';
 
-/*
-  Write the note, hand a rebuild.request to the supervisor, then exit the Astro
-  server with code 75. server.mjs runs `astro build`: on success it commits +
-  pushes and respawns; on failure it restores the previous content (or deletes a
-  new file) and respawns. The live site never serves a note that failed to build.
-*/
-
-function holdingPage(msg: string, ok: boolean): Response {
-  return new Response(
-    `<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="14;url=/admin">
-     <title>${ok ? 'saving' : 'not saved'}</title>
-     <style>body{background:#07080a;color:#c9cacd;font:14px/1.6 ui-monospace,monospace;display:grid;place-content:center;min-height:100vh;text-align:center;padding:2rem}
-     a{color:#38bdf8}.b{color:${ok ? '#26cb96' : '#e5484d'}}</style>
-     <p class="b">${msg}</p>
-     <p>Returning to <a href="/admin">the chart room</a>.</p>`,
-    { status: ok ? 202 : 422, headers: { 'content-type': 'text/html; charset=utf-8' } },
-  );
-}
-
+const reply = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
+  status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'private, no-store' },
+});
 export const POST: APIRoute = async ({ request, cookies }) => {
-  if (!adminEnabled()) return new Response('Not found', { status: 404 });
-  if (!sameOrigin(request)) return new Response('cross-site request', { status: 403 });
-  if (!sessionValid(cookies.get(COOKIE)?.value)) {
-    return new Response(null, { status: 303, headers: { location: '/admin?e=session' } });
-  }
-
+  if (!adminEnabled()) return reply({ error: 'Not found' }, 404);
+  if (!sameOrigin(request)) return reply({ error: 'Cross-site request' }, 403);
+  if (!sessionValid(cookies.get(COOKIE)?.value)) return reply({ error: 'Session expired. Sign in again in another tab, then retry; your text is kept here.' }, 401);
   const form = await request.formData();
   const slug = String(form.get('slug') ?? '');
-  // Browsers submit <textarea> values with CRLF line endings; normalise to LF
-  // before any of the content checks so the frontmatter regex still matches.
-  const content = String(form.get('content') ?? '').replace(/\r\n/g, '\n');
-  const declaredNew = form.get('isNew') === '1';
-
-  if (!validSlug(slug)) return holdingPage('Bad slug. Lower-case letters, digits and single hyphens only.', false);
-
-  const problem = frontmatterProblem(content);
-  if (problem) return holdingPage(problem, false);
-
-  const existed = await noteExists(slug);
-  if (declaredNew && existed) return holdingPage(`A note "${slug}" already exists.`, false);
-
-  const prev = existed ? await readNote(slug) : null;
-  if (prev !== null && prev === content) {
-    return holdingPage('No changes to save.', false);
-  }
-
-  await writeNote(slug, content);
-  await requestRebuild({
-    slug,
-    isNew: !existed,
-    prev,
-    commitMsg: `admin: ${existed ? 'edit' : 'add'} ${slug}`,
-    at: new Date().toISOString(),
+  const action = String(form.get('action') ?? '');
+  const raw = String(form.get('content') ?? '').replace(/\r\n/g, '\n');
+  if (!validSlug(slug) || !['draft', 'publish'].includes(action)) return reply({ error: 'Invalid note or action.' }, 400);
+  if (raw.length > 1000000) return reply({ error: 'Note exceeds the 1 MB limit.' }, 413);
+  return serialize(async () => {
+    const current = await readWorkingSource(slug);
+    if (String(form.get('revision') ?? '') !== revision(current)) {
+      return reply({ error: 'This note changed since you opened it. Your text is still here. Open the latest version in another tab and reconcile the changes before saving.' }, 409);
+    }
+    try {
+      const content = withStatus(raw, action === 'draft');
+      // Publication validates actual rendering, including component errors.
+      // Drafts may contain unfinished MDX; preserve it and show preview errors.
+      if (action === 'publish') await renderNote(parseNote(slug, content));
+      const paths = action === 'draft' ? [await saveDraft(slug, content)] : await publishNote(slug, content);
+      const warning = await syncContent(paths, `admin: ${action === 'draft' ? 'draft' : 'publish'} ${slug}`);
+      return reply({ ok: true, content, revision: revision(content), warning,
+        message: action === 'draft' ? 'Draft saved. Ready to preview.' : 'Published. The public note is live.',
+        preview: `/admin/preview/${slug}`, url: `/notes/${slug}` });
+    } catch (e) {
+      return reply({ error: e instanceof Error ? e.message : 'Could not save this note.' }, 422);
+    }
   });
-
-  // give the response time to reach the client, then drop out for the rebuild
-  setTimeout(() => process.exit(75), 600);
-  return holdingPage(`Saved ${slug}. Rebuilding the site, about fifteen seconds.`, true);
 };
-
 export const GET: APIRoute = () => new Response(null, { status: 303, headers: { location: '/admin' } });
