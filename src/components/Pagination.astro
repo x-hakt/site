@@ -1,0 +1,46 @@
+---
+import { notePageUrl } from '../lib/pagination';
+
+interface Props {
+  currentPage: number;
+  totalPages: number;
+}
+
+const { currentPage, totalPages } = Astro.props;
+const prevUrl = currentPage > 1 ? notePageUrl(currentPage - 1) : null;
+const nextUrl = currentPage < totalPages ? notePageUrl(currentPage + 1) : null;
+---
+
+{
+  totalPages > 1 && (
+    <nav class="pager" aria-label="notes pagination">
+      {prevUrl ? (
+        <a href={prevUrl} rel="prev">&larr; newer</a>
+      ) : (
+        <span class="pager__disabled">&larr; newer</span>
+      )}
+      <span class="pager__status">page {currentPage} of {totalPages}</span>
+      {nextUrl ? (
+        <a href={nextUrl} rel="next">older &rarr;</a>
+      ) : (
+        <span class="pager__disabled">older &rarr;</span>
+      )}
+    </nav>
+  )
+}
+
+<style>
+  .pager {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-top: 24px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .pager a { color: var(--color-dim); }
+  .pager a:hover { color: var(--color-green); }
+  .pager__disabled { color: var(--color-faint); opacity: 0.5; }
+  .pager__status { color: var(--color-faint); }
+</style>

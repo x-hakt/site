@@ -1,0 +1,79 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  notes: CollectionEntry<'notes'>[];
+}
+
+const { notes } = Astro.props;
+const dateFmt = new Intl.DateTimeFormat('en-CA', { dateStyle: 'medium' });
+---
+
+<ul class="notes" role="list">
+  {
+    notes.map((note) => (
+      <li class="note">
+        <a href={`/notes/${note.id}`} class="note__link">
+          <span class="note__date">
+            <time datetime={note.data.date.toISOString()}>{dateFmt.format(note.data.date)}</time>
+          </span>
+          <span class="note__body">
+            <span class="note__title">{note.data.title}</span>
+            <span class="note__summary">{note.data.summary}</span>
+            <span class="note__topics">
+              {[...note.data.tracks, ...note.data.tech].join(' · ')}
+            </span>
+          </span>
+        </a>
+      </li>
+    ))
+  }
+  {notes.length === 0 && <li class="note note--empty">no notes yet. the ink is still wet.</li>}
+</ul>
+
+<style>
+  .notes { list-style: none; margin: 0; padding: 0; }
+  .note { border-bottom: 1px solid var(--border); }
+  .note__link {
+    display: grid;
+    grid-template-columns: 128px 1fr;
+    gap: 24px;
+    padding: 22px 0;
+    color: inherit;
+  }
+  .note__link:hover { text-decoration: none; }
+  .note__link:hover .note__title { color: var(--color-green); }
+
+  .note__date {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-faint);
+    padding-top: 3px;
+  }
+  .note__body { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+  .note__title {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--color-fg);
+    letter-spacing: -0.01em;
+  }
+  .note__summary { color: var(--color-dim); font-size: 14.5px; max-width: 62ch; }
+  .note__topics {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-faint);
+    margin-top: 2px;
+  }
+
+  .note--empty {
+    padding: 22px 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--color-faint);
+  }
+
+  @media (max-width: 640px) {
+    .note__link { grid-template-columns: 1fr; gap: 6px; }
+  }
+</style>
