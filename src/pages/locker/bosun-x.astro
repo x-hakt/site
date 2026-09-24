@@ -179,7 +179,7 @@ const MONO = "'IBM Plex Mono', ui-monospace, monospace";
         the discipline; the dashboard is where you look at all of it at once.
       </p>
       <p>
-        It’s fully responsive too — the sidebar folds behind a hamburger into an off-canvas drawer
+        It’s fully responsive too: the sidebar folds behind a hamburger into an off-canvas drawer
         on a phone-width screen instead of a permanent desktop-only rail, so jotting a new idea
         down or checking a task doesn’t have to wait until you’re back at a desk.
       </p>
@@ -210,6 +210,48 @@ const MONO = "'IBM Plex Mono', ui-monospace, monospace";
           loading="lazy"
           width="1600"
           height="1030"
+        />
+      </Figure>
+      <p>
+        Before a project moves house, weigh it. The <strong>Servers</strong> page draws every
+        machine’s RAM, CPU and disk as bars the size of the whole box, cut up by project, with a
+        dashed line at 80%. A sampler reads each server every five minutes and keeps two weeks, so
+        once a day of history exists the bars show a busy moment (p95) instead of whatever happened
+        to be true when you looked, and a small arrow flags a peak that runs well above it. Disk is
+        measured once a day: each project’s images, volumes and data folders, with the images and
+        volumes nothing uses marked as reclaimable. It reads sizes, names and paths only. Container
+        environments, where the passwords live, are never read.
+      </p>
+      <Figure
+        plain
+        caption="Two servers, split by project. RAM leads because it runs out first; hover any segment for now, p95 and peak. (Click to enlarge. Demo data, not a real fleet.)"
+      >
+        <img
+          src="/shots/bosun-capacity.webp"
+          alt="Capacity cards for two demo servers, each with RAM, CPU and disk bars split into coloured project segments, a dashed 80% line, and a legend of projects with their p95 usage and peaks."
+          loading="lazy"
+          width="1600"
+          height="761"
+        />
+      </Figure>
+      <p>
+        Then ask the question outright. The <strong>move simulator</strong> takes a running project
+        and a target server and redraws both as they would be after the move: the newcomer hatched
+        on the target, the room it frees on the source, and a verdict of fits, tight or doesn’t
+        fit. It also names the chores that make a move more than a restart somewhere else: a
+        database to dump and restore, volumes and data folders to copy, routing to repoint. It
+        changes nothing. Measure twice, cut once.
+      </p>
+      <Figure
+        plain
+        caption="The simulator turning a move down. RAM would have coped; the photo library would not have fitted on the disk. (Click to enlarge. Demo data.)"
+      >
+        <img
+          src="/shots/bosun-move-simulator.webp"
+          alt="The move simulator with a demo photo project moving to a small cloud server: a red verdict saying it would be 60 GB over the disk, before-and-after bars for both servers with the moving project hatched, and a list of migration warnings."
+          loading="lazy"
+          width="1600"
+          height="807"
         />
       </Figure>
       <p>
