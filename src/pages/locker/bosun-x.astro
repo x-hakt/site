@@ -53,15 +53,17 @@ const MONO = "'IBM Plex Mono', ui-monospace, monospace";
       <span class="s__kind">a tool you install — not one that runs here</span>
       <h1>bosun&#8209;x</h1>
       <p class="lede">
-        Cross-agent handoff and task tracking for a set of projects you build with AI. The bosun is
-        the hand who keeps the ship and crew in working order; bosun&#8209;x does that for your
-        projects — a record of what’s actually done, a clean starting point for the next session, and
-        a task board that can’t drift.
+        One page for everything your AI agents are working on. The bosun is the hand who keeps the
+        ship and crew in working order; bosun&#8209;x does that for a set of projects you build with
+        AI: every task board, every handoff between agents, every server and backup, on a dashboard
+        you host yourself, and a record underneath that the next session can pick straight up.
       </p>
-      <p class="sub">A command-line tool and an <abbr title="Model Context Protocol">MCP</abbr> server over the same plain files. MIT.</p>
+      <p class="sub">A self-hosted dashboard, plus a command-line tool and an <abbr title="Model Context Protocol">MCP</abbr> server your agents use, all over the same plain files. MIT, on npm.</p>
+      <pre class="code"><code>npx bosun-x-dashboard --demo      # try it on sample data: localhost:3010</code></pre>
       <div class="btns">
-        <a class="btn" href={repo} rel="noopener">CLI + MCP <span aria-hidden="true">↗</span></a>
+        <a class="btn" href="#install">get it <span aria-hidden="true">↓</span></a>
         <a class="btn btn--ghost" href="https://github.com/x-hakt/bosun-x-dashboard" rel="noopener">the dashboard <span aria-hidden="true">↗</span></a>
+        <a class="btn btn--ghost" href={repo} rel="noopener">CLI + MCP <span aria-hidden="true">↗</span></a>
       </div>
     </section>
 
@@ -374,6 +376,11 @@ const MONO = "'IBM Plex Mono', ui-monospace, monospace";
         because the last session wrote that down in a form the next one can read. You can also ask
         “what’s the state of everything?” and get a straight list across all your projects.
       </p>
+      <p>
+        When you want to see it all, ask the assistant to start the dashboard
+        (<code>bosun dashboard</code>) and open the address it prints: every project, what was done
+        last and what’s next, on one page.
+      </p>
       <p class="aside">
         It’s a folder of plain text files in your project. Nothing is uploaded anywhere, nothing runs
         in the background, and you can open any of it in a normal text editor if you ever want to
@@ -383,13 +390,22 @@ const MONO = "'IBM Plex Mono', ui-monospace, monospace";
 
     <section id="install" class="s">
       <h2>get it</h2>
-      <p>Node 20 or newer. Once it’s published to npm:</p>
-      <pre class="code"><code>npm i -g bosun-x          # or run it ad-hoc with: npx bosun-x &lt;command&gt;</code></pre>
-      <p>Until then, from source:</p>
-      <pre class="code"><code>git clone https://github.com/x-hakt/bosun-x
-cd bosun-x && npm install && npm link</code></pre>
+      <p>Node 20 or newer. Look before you leap: this runs the dashboard on sample data and keeps nothing.</p>
+      <pre class="code"><code>npx bosun-x-dashboard --demo --open</code></pre>
+      <p>Then for real: install both halves, make a data folder, and open the dashboard over it.</p>
+      <pre class="code"><code>npm i -g bosun-x bosun-x-dashboard
+mkdir ~/bosun-data && cd ~/bosun-data
+bosun setup                 # timezone, who can sign in, where your projects live
+bosun dashboard --open      # localhost:3010</code></pre>
       <p>
-        Run <code>bosun</code> from the directory that holds your project data, or point
+        It listens on this machine only, with no sign-in, until you configure one. Adding projects,
+        wiring your agents, reading other servers, sign-in and running it as a service are all in the
+        <a href="https://github.com/x-hakt/bosun-x-dashboard/blob/main/docs/getting-started.md" rel="noopener">getting started guide</a>.
+        Prefer containers? The same dashboard ships as an image,
+        <code>ghcr.io/x-hakt/bosun-x-dashboard</code>.
+      </p>
+      <p>
+        Run <code>bosun</code> from the folder that holds your project data, or point
         <code>$BOSUN_DATA</code> at it. Projects live in <code>&lt;data&gt;/projects/&lt;slug&gt;/</code>.
       </p>
       <h3>configure</h3>
