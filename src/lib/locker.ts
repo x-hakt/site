@@ -36,7 +36,7 @@ export const tools: Tool[] = [
     kind: 'package',
     tech: ['nodejs', 'mcp', 'cli'],
     status: 'live',
-    updated: '2026-09-19',
+    updated: '2026-09-25',
   },
 ];
 
