@@ -30,9 +30,9 @@ export const tools: Tool[] = [
   {
     slug: 'bosun-x',
     name: 'bosun-x',
-    tagline: 'cross-agent handoff and task tracking for projects worked by AI agents.',
+    tagline: 'one page for everything your AI agents are working on.',
     blurb:
-      'The bosun keeps the ship and crew in working order. bosun-x does that for a set of projects you build with Claude, Codex, or a mix: a record of what’s actually done, a clean starting point for the next session, and a task board that can’t drift. A CLI and an MCP server over plain files. MIT, on npm and GitHub.',
+      'The bosun keeps the ship and crew in working order. bosun-x does that for a set of projects you build with Claude, Codex, or a mix: a self-hosted dashboard for every task board, handoff, server and backup, and a CLI and MCP server your agents use to keep it true. A record of what’s actually done, a clean start for the next session. Plain files, MIT, on npm and GitHub.',
     kind: 'package',
     tech: ['nodejs', 'mcp', 'cli'],
     status: 'live',
