@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="the crew" description="A public glimpse of the agents working across the x-hakt fleet." current="crew" wide>
+  <section class="crew-page">
+    <p class="eyebrow">the watch</p>
+    <h1>the crew</h1>
+    <p class="intro">A few signals from the work underway on my own hulls. The figures come from bosun-x; project and task details stay in the private log.</p>
+    <div class="frame-wrap">
+      <iframe src="https://bosun-x.x-hakt.com/crew/embed" title="Public bosun-x crew activity" loading="lazy" referrerpolicy="no-referrer"></iframe>
+    </div>
+    <p class="below">If the watch does not load, <a href="https://bosun-x.x-hakt.com/crew/embed">open the public crew view</a> directly. A quiet deck can mean nobody is at work or that no approved signal has reached Bosun lately.</p>
+  </section>
+</BaseLayout>
+
+<style>
+  .crew-page { max-width: 1080px; margin: 3rem auto 5rem; }
+  .eyebrow { color: var(--color-accent, #26cb96); font: 12px var(--font-mono); letter-spacing: .12em; text-transform: uppercase; }
+  h1 { font-size: clamp(2.3rem, 5vw, 4rem); margin: .25rem 0 1rem; }
+  .intro { max-width: 680px; color: var(--color-fg-soft); font-size: 1.1rem; line-height: 1.65; }
+  .frame-wrap { margin-top: 2rem; border: 1px solid var(--border); border-radius: 18px; overflow: hidden; background: #071a2a; }
+  iframe { display: block; width: 100%; height: 455px; border: 0; }
+  .below { margin-top: 1rem; color: var(--color-dim); font-size: .9rem; line-height: 1.6; }
+  .below a { color: var(--color-fg); text-decoration: underline; }
+  @media (max-width: 620px) { .crew-page { margin-top: 2rem; } iframe { height: 545px; } }
+</style>

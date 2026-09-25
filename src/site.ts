@@ -20,6 +20,7 @@ export const site = {
   nav: [
     { label: 'map', href: '/map' },
     { label: 'locker', href: '/locker' },
+    { label: 'crew', href: '/crew' },
     { label: 'about', href: '/about' },
     { label: 'feed', href: '/rss.xml' },
   ],
