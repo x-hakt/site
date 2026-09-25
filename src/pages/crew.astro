@@ -6,13 +6,23 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   <section class="crew-page">
     <p class="eyebrow">the watch</p>
     <h1>the crew</h1>
-    <p class="intro">A few signals from the work underway on my own hulls. The figures come from bosun-x: approved projects show their queued work even when no agent is active. Project and task details stay in the private log.</p>
+    <p class="intro">The fleet at work, live. Each sailor is an agent session on one of my hulls. They go aboard when there's work, wait on the quay when a turn is done, and wave from the quay when I'm needed. The dockhands are real too: a crate goes aboard for each commit and a cart goes to the warehouse after each backup. Projects I haven't opened up sail as private voyages, and the ship's log keeps the last day of it, aliases only.</p>
     <div class="frame-wrap">
       <iframe src="https://bosun-x.x-hakt.com/crew/embed" title="Public bosun-x crew activity" loading="lazy" referrerpolicy="no-referrer"></iframe>
     </div>
-    <p class="below">If the watch does not load, <a href="https://bosun-x.x-hakt.com/crew/embed">open the public crew view</a> directly. A quiet deck can mean nobody is at work or that no approved signal has reached Bosun lately.</p>
+    <p class="below">If the watch does not load, <a href="https://bosun-x.x-hakt.com/crew/embed">open the public crew view</a> directly. A quiet harbour means nobody is aboard, or no signal has reached bosun-x in the last few hours.</p>
   </section>
 </BaseLayout>
+
+<script>
+  // The embed reports its content height (it grows with the day's ship's log).
+  const frame = document.querySelector<HTMLIFrameElement>('.crew-page iframe');
+  window.addEventListener('message', (event) => {
+    if (event.origin !== 'https://bosun-x.x-hakt.com' || !frame || event.source !== frame.contentWindow) return;
+    const height = Number(event.data?.height);
+    if (event.data?.type === 'bosun-embed-height' && Number.isFinite(height) && height > 300 && height < 8000) frame.style.height = `${height}px`;
+  });
+</script>
 
 <style>
   .crew-page { max-width: 1080px; margin: 3rem auto 5rem; }
@@ -20,8 +30,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   h1 { font-size: clamp(2.3rem, 5vw, 4rem); margin: .25rem 0 1rem; }
   .intro { max-width: 680px; color: var(--color-fg-soft); font-size: 1.1rem; line-height: 1.65; }
   .frame-wrap { margin-top: 2rem; border: 1px solid var(--border); border-radius: 18px; overflow: hidden; background: #071a2a; }
-  iframe { display: block; width: 100%; height: 535px; border: 0; }
+  iframe { display: block; width: 100%; height: 1400px; border: 0; }
   .below { margin-top: 1rem; color: var(--color-dim); font-size: .9rem; line-height: 1.6; }
   .below a { color: var(--color-fg); text-decoration: underline; }
-  @media (max-width: 620px) { .crew-page { margin-top: 2rem; } iframe { height: 620px; } }
+  @media (max-width: 620px) { .crew-page { margin-top: 2rem; } iframe { height: 1900px; } }
 </style>
