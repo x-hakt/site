@@ -6,7 +6,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   <section class="crew-page">
     <p class="eyebrow">the watch</p>
     <h1>the crew</h1>
-    <p class="intro">The fleet at work, live. Each sailor is an agent session on one of my hulls. They go aboard when there's work, wait on the quay when a turn is done, and wave from the quay when I'm needed. The dockhands are real too: a crate goes aboard for each commit and a cart goes to the warehouse after each backup. Projects I haven't opened up sail as private voyages, and the ship's log keeps the last day of it, aliases only.</p>
+    <p class="intro">The fleet at work, live. Each pirate is an agent session on one of my hulls, under a made-up name. They go aboard when there's work, have an ale at The Plastered Bastard when a turn is done, and wave from the quay when I'm needed. The dockhands are real too: a crate goes down the hatch for each commit and a cart goes to the whorehouse after each backup. Every hull is in port, the quiet ones out on their moorings, and the ship's log keeps the last day of it.</p>
+    <div class="frame-controls" aria-label="View size">
+      <button type="button" class="frame-button" data-action="wide" aria-pressed="false">Full width</button>
+      <button type="button" class="frame-button" data-action="fullscreen" hidden>Full screen</button>
+    </div>
     <div class="frame-wrap">
       <iframe src="https://bosun-x.x-hakt.com/crew/embed" title="Public bosun-x crew activity" loading="lazy" referrerpolicy="no-referrer"></iframe>
     </div>
@@ -15,13 +19,63 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 </BaseLayout>
 
 <script>
-  // The embed reports its content height (it grows with the day's ship's log).
+  const page = document.querySelector<HTMLElement>('.crew-page');
+  const wrap = document.querySelector<HTMLElement>('.crew-page .frame-wrap');
   const frame = document.querySelector<HTMLIFrameElement>('.crew-page iframe');
+  const wideButton = document.querySelector<HTMLButtonElement>('[data-action="wide"]');
+  const fullButton = document.querySelector<HTMLButtonElement>('[data-action="fullscreen"]');
+  let contentHeight = 0;
+
+  // The embed reports its content height (it grows with the day's ship's log). In full
+  // screen the frame fills the screen and scrolls inside instead.
+  const fit = () => {
+    if (!frame || document.fullscreenElement === wrap) return;
+    if (contentHeight) frame.style.height = `${contentHeight}px`;
+  };
   window.addEventListener('message', (event) => {
     if (event.origin !== 'https://bosun-x.x-hakt.com' || !frame || event.source !== frame.contentWindow) return;
     const height = Number(event.data?.height);
-    if (event.data?.type === 'bosun-embed-height' && Number.isFinite(height) && height > 300 && height < 8000) frame.style.height = `${height}px`;
+    if (event.data?.type === 'bosun-embed-height' && Number.isFinite(height) && height > 300 && height < 8000) {
+      contentHeight = height;
+      fit();
+    }
   });
+
+  // Full width: the frame breaks out of the reading column to the window's edges. Both the
+  // window width (so a desktop scrollbar doesn't cause sideways scrolling) and the column's
+  // actual left edge (the layout isn't exactly centred) are measured. Remembered per browser.
+  const measure = () => {
+    const root = document.documentElement;
+    root.style.setProperty('--crew-page-w', `${root.clientWidth}px`);
+    if (page) root.style.setProperty('--crew-page-left', `${page.getBoundingClientRect().left + window.scrollX}px`);
+  };
+  const setWide = (on: boolean) => {
+    page?.classList.toggle('is-wide', on);
+    wideButton?.setAttribute('aria-pressed', String(on));
+    if (wideButton) wideButton.textContent = on ? 'Fit to page' : 'Full width';
+    try { localStorage.setItem('crew-wide', on ? '1' : '0'); } catch { /* storage may be blocked */ }
+  };
+  measure();
+  window.addEventListener('resize', measure);
+  let saved = false;
+  try { saved = localStorage.getItem('crew-wide') === '1'; } catch { /* storage may be blocked */ }
+  setWide(saved);
+  wideButton?.addEventListener('click', () => setWide(!page?.classList.contains('is-wide')));
+
+  // Full screen: the whole screen for the port; Esc (or the button) comes back.
+  if (fullButton && wrap && document.fullscreenEnabled) {
+    fullButton.hidden = false;
+    fullButton.addEventListener('click', () => {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else wrap.requestFullscreen().catch(() => {});
+    });
+    document.addEventListener('fullscreenchange', () => {
+      const on = document.fullscreenElement === wrap;
+      fullButton.textContent = on ? 'Exit full screen' : 'Full screen';
+      if (frame) frame.style.height = on ? '100%' : '';
+      fit();
+    });
+  }
 </script>
 
 <style>
@@ -29,7 +83,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .eyebrow { color: var(--color-accent, #26cb96); font: 12px var(--font-mono); letter-spacing: .12em; text-transform: uppercase; }
   h1 { font-size: clamp(2.3rem, 5vw, 4rem); margin: .25rem 0 1rem; }
   .intro { max-width: 680px; color: var(--color-fg-soft); font-size: 1.1rem; line-height: 1.65; }
-  .frame-wrap { margin-top: 2rem; border: 1px solid var(--border); border-radius: 18px; overflow: hidden; background: #071a2a; }
+  .frame-controls { display: flex; justify-content: flex-end; gap: .5rem; margin-top: 2rem; }
+  .frame-button { border: 1px solid var(--border); border-radius: 999px; background: transparent; color: var(--color-fg); padding: .35rem .9rem; font: 12px var(--font-mono); cursor: pointer; }
+  .frame-button:hover, .frame-button:focus-visible { border-color: var(--color-accent, #26cb96); }
+  .frame-button[aria-pressed="true"] { background: var(--color-accent, #26cb96); border-color: var(--color-accent, #26cb96); color: #071a2a; }
+  .frame-wrap { margin-top: .75rem; border: 1px solid var(--border); border-radius: 18px; overflow: hidden; background: #071a2a; }
+  .crew-page.is-wide .frame-wrap { width: var(--crew-page-w, 100vw); margin-left: calc(-1 * var(--crew-page-left, 0px)); border-radius: 0; border-left: 0; border-right: 0; }
+  .frame-wrap:fullscreen { width: 100vw; height: 100vh; margin: 0; border: 0; border-radius: 0; }
   iframe { display: block; width: 100%; height: 1400px; border: 0; }
   .below { margin-top: 1rem; color: var(--color-dim); font-size: .9rem; line-height: 1.6; }
   .below a { color: var(--color-fg); text-decoration: underline; }
