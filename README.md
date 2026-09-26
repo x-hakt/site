@@ -46,6 +46,31 @@ Admin responses require the existing session for content access, are private /
 no-store, and carry noindex headers. Invalid draft previews show an error without
 changing public content.
 
+### Planner bridge (PLN-12)
+
+The content planner (Postiz at planner.x-hakt.com) connects to x-hakt as a **WordPress**
+channel. `src/pages/wp-json/wp/v2/` answers the calls its connector makes:
+
+| Call | Answer |
+| --- | --- |
+| `GET users/me` | connection check |
+| `GET types` | one post type, `notes` |
+| `GET categories` | the four tracks (ids 1 to 4) |
+| `GET tags` | the `tech` values already used on notes (stable numeric ids) |
+| `POST media` | a hero image (raw body, PNG/JPEG/WebP/GIF, 10 MB max), stored in `src/content/media/<yyyy-mm>/`, served at `/media/...` |
+| `POST notes` | a note: `status: publish` makes it live after the same render check /admin does; any other status saves a draft for /admin |
+
+The HTML from the planner's editor becomes MDX (headings start at `##`, `{ } < >` escaped),
+the first paragraph becomes the summary, the date is today in Sydney, categories become
+`tracks` (default `infrastructure`), tags become `tech`, the featured image becomes `hero`.
+Writes go through the same save queue and Git sync as /admin.
+
+Create-only: no edit or delete routes, and a slug that's taken gets `-2`, `-3`. The bridge
+is 404 unless `WP_BRIDGE_USER` and `WP_BRIDGE_PASSWORD` are set; it uses HTTP Basic auth
+with those (constant-time compare) and throttles 10 failed logins per address per 15
+minutes. In Postiz: Add Channel > WordPress, domain `https://x-hakt.com`, that user and
+password. Tests: `test/wp-bridge.mjs` (part of `npm test`).
+
 ### MDX
 
 The runtime compiler uses Astro's JSX renderer, GFM, smart punctuation, heading

@@ -35,6 +35,9 @@ services:
       - GOOGLE_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID:-}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_OAUTH_CLIENT_SECRET:-}
       - ADMIN_SESSION_SECRET=${XHAKT_ADMIN_SESSION_SECRET:-}
+      # PLN-12 planner bridge (/wp-json/wp/v2/...): 404 until both are set.
+      - WP_BRIDGE_USER=${XHAKT_WP_BRIDGE_USER:-}
+      - WP_BRIDGE_PASSWORD=${XHAKT_WP_BRIDGE_PASSWORD:-}
       - GIT_AUTHOR_NAME=x
       - GIT_AUTHOR_EMAIL=x@x-hakt.com
       - GIT_COMMITTER_NAME=x
