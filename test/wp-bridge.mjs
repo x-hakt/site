@@ -127,6 +127,21 @@ try {
   assert.match(richPage, /youtube-nocookie\.com\/embed\/abc123/);
   assert.match(richPage, /<table>/);
 
+  // glossary hovers: known key, new key with its own definition, new key without one
+  r = await post('/notes', { title: 'Bridge test: terms', status: 'publish', content:
+    '<p>Over <span data-term="ssh">SSH</span>, with a <span data-term="lifeboat-drill" data-term-def="Restoring a backup somewhere harmless to prove it really opens.">lifeboat drill</span> and a <span data-term="no-such-word">mystery</span>.</p>' });
+  assert.equal(r.status, 201, logs);
+  const termRaw = await readFile(path.join(notes, 'bridge-test-terms.mdx'), 'utf8');
+  assert.match(termRaw, /import Term from '\.\.\/\.\.\/components\/Term\.astro';/);
+  assert.match(termRaw, /<Term k="ssh">SSH<\/Term>/);
+  assert.match(termRaw, /<Term k="lifeboat-drill" def="Restoring a backup somewhere harmless to prove it really opens\.">lifeboat drill<\/Term>/);
+  // a key already in the glossary never carries an inline definition (the glossary wins)
+  assert.doesNotMatch(termRaw, /<Term k="ssh" def=/);
+  assert.match(termRaw, /and a mystery\./, 'unknown key without a definition stays plain text');
+  const termPage = await (await fetch(base + '/notes/bridge-test-terms/')).text();
+  assert.match(termPage, /class="term"[^>]*>SSH</);
+  assert.match(termPage, /Restoring a backup somewhere harmless/);
+
   // PLN-25: the site preview renders a draft with the real page and writes nothing
   const before = (await readdir(path.join(root, 'drafts'))).length;
   r = await post('/preview', { title: 'Preview: a bell', content: rich });

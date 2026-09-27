@@ -23,6 +23,7 @@ import path from 'node:path';
 import { fromHtml } from 'hast-util-from-html';
 import { toHtml } from 'hast-util-to-html';
 import { CONTENT_DIR, DRAFT_DIR, validSlug } from './notes';
+import { glossary } from '../glossary';
 
 type Node = { type: string; tagName?: string; value?: string; properties?: Record<string, unknown>; children?: Node[] };
 
@@ -131,6 +132,7 @@ function inline(nodes: Node[] = []): string {
         return /^(https?:|mailto:|\/|#)/.test(href) ? `[${t}](${href.replace(/\)/g, '%29')})` : t;
       }
       case 'img': return image(n);
+      case 'span': return term(n) ?? inner();
       default: return inner();
     }
   }).join('');
@@ -210,6 +212,22 @@ const BLOCK = new Set(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'blo
 // ---- PLN-25: rich content (figures with SVG diagrams, images, YouTube, tables) ------------
 
 let usesFigure = false;
+let usesTerm = false;
+
+/** <span data-term="ssh" [data-term-def="..."]>SSH</span> -> <Term k="ssh">SSH</Term>. A key that
+ *  isn't in the glossary needs its own definition; without one it stays plain text, so a new
+ *  word can never break the page. */
+function term(n: Node): string | null {
+  const key = String(n.properties?.dataTerm ?? '').trim().toLowerCase();
+  if (!key) return null;
+  if (!/^[a-z0-9-]{1,40}$/.test(key)) return inline(n.children);
+  const def = String(n.properties?.dataTermDef ?? '').replace(/\s+/g, ' ').trim().slice(0, 400);
+  if (!glossary[key] && !def) return inline(n.children);
+  usesTerm = true;
+  const text = inline(n.children).trim();
+  const defAttr = !glossary[key] && def ? ` def="${attr(def)}"` : '';
+  return `<Term k="${key}"${defAttr}>${text}</Term>`;
+}
 const ACTIVE = /^(on|style$|xmlns:xlink$)/i;
 
 /** A hast subtree as JSX-safe markup: no scripts or foreign content, no inline styles or event
@@ -266,9 +284,14 @@ function table(n: Node): string {
 
 export function htmlToMdx(html: string): string {
   usesFigure = false;
+  usesTerm = false;
   const tree = fromHtml(html, { fragment: true }) as unknown as Node;
   const body = blocks(tree.children).join('\n\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
-  return (usesFigure ? "import Figure from '../../components/Figure.astro';\n\n" : '') + body;
+  const imports = [
+    usesFigure ? "import Figure from '../../components/Figure.astro';" : '',
+    usesTerm ? "import Term from '../../components/Term.astro';" : '',
+  ].filter(Boolean).join('\n');
+  return (imports ? imports + '\n\n' : '') + body;
 }
 
 /** the first paragraph's plain text, for the summary (Postiz sends no excerpt) */

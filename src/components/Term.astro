@@ -12,11 +12,13 @@ import { glossary } from '../glossary';
 
 interface Props {
   k: string;
+  /** a definition for a term not (yet) in src/glossary.ts; the glossary wins when both exist */
+  def?: string;
 }
-const { k } = Astro.props;
-const entry = glossary[k];
+const { k, def } = Astro.props;
+const entry = glossary[k] ?? (def ? { term: k, short: def } : undefined);
 if (!entry) {
-  throw new Error(`<Term k="${k}"> — no glossary entry. Add it to src/glossary.ts.`);
+  throw new Error(`<Term k="${k}"> — no glossary entry. Add it to src/glossary.ts or pass def.`);
 }
 const domId = `gl-${k}-${Math.random().toString(36).slice(2, 8)}`;
 ---
