@@ -16,9 +16,12 @@
   time, with failed attempts throttled per address.
 */
 import { createHash, timingSafeEqual } from 'node:crypto';
-import { readFile, readdir, stat } from 'node:fs/promises';
+import { readFile, readdir, stat, access } from 'node:fs/promises';
+import { randomBytes } from 'node:crypto';
+import yaml from 'js-yaml';
 import path from 'node:path';
 import { fromHtml } from 'hast-util-from-html';
+import { toHtml } from 'hast-util-to-html';
 import { CONTENT_DIR, DRAFT_DIR, validSlug } from './notes';
 
 type Node = { type: string; tagName?: string; value?: string; properties?: Record<string, unknown>; children?: Node[] };
@@ -171,11 +174,17 @@ function blocks(nodes: Node[] = [], depth = 0): string[] {
       out.push(fence + lang + '\n' + code + '\n' + fence);
     } else if (tag === 'hr') {
       out.push('---');
-    } else if (tag === 'figure' || tag === 'div' || tag === 'section' || tag === 'article') {
+    } else if (tag === 'figure') {
+      out.push(figure(n));
+    } else if (tag === 'svg') {
+      out.push(figureOf(jsx(n), ''));
+    } else if (tag === 'iframe') {
+      const e = embed(n);
+      if (e) out.push(e);
+    } else if (tag === 'div' || tag === 'section' || tag === 'article') {
       out.push(...blocks(n.children, depth));
     } else if (tag === 'table') {
-      const t = textOf(n).replace(/\s+/g, ' ').trim();
-      if (t) out.push(escapeText(t));
+      out.push(table(n));
     }
   }
   flush();
@@ -196,11 +205,70 @@ function list(n: Node, depth: number): string {
   }).join('\n');
 }
 
-const BLOCK = new Set(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'blockquote', 'pre', 'hr', 'figure', 'div', 'section', 'article', 'table']);
+const BLOCK = new Set(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'blockquote', 'pre', 'hr', 'figure', 'div', 'section', 'article', 'table', 'svg', 'iframe']);
+
+// ---- PLN-25: rich content (figures with SVG diagrams, images, YouTube, tables) ------------
+
+let usesFigure = false;
+const ACTIVE = /^(on|style$|xmlns:xlink$)/i;
+
+/** A hast subtree as JSX-safe markup: no scripts or foreign content, no inline styles or event
+ *  handlers, braces escaped (MDX reads { } as code), void elements self-closed. */
+function jsx(n: Node): string {
+  const clean = (x: Node): Node | null => {
+    if (x.type === 'element') {
+      if (['script', 'style', 'foreignObject', 'iframe', 'object', 'embed'].includes(x.tagName!)) return null;
+      const props = Object.fromEntries(Object.entries(x.properties ?? {}).filter(([k]) => !ACTIVE.test(k)));
+      return { ...x, properties: props, children: (x.children ?? []).map(clean).filter(Boolean) as Node[] };
+    }
+    if (x.type === 'text') return { ...x, value: String(x.value ?? '') };
+    return null;
+  };
+  const tree = clean(n);
+  if (!tree) return '';
+  const html = toHtml(tree as any, { closeSelfClosing: true, closeEmptyElements: true, allowDangerousCharacters: false });
+  return html.replace(/[{}]/g, (c) => (c === '{' ? '&#123;' : '&#125;'));
+}
+
+const attr = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/[{}]/g, '');
+
+function figureOf(inner: string, caption: string): string {
+  usesFigure = true;
+  return `<Figure${caption ? ` caption="${attr(caption)}"` : ''}>\n${inner}\n</Figure>`;
+}
+
+function figure(n: Node): string {
+  const kids = (n.children ?? []).filter((c) => c.type === 'element');
+  const cap = kids.find((c) => c.tagName === 'figcaption');
+  const caption = cap ? textOf(cap).replace(/\s+/g, ' ').trim() : '';
+  const body = kids.filter((c) => c !== cap).map((c) => (c.tagName === 'img' ? jsx({ ...c, properties: { src: c.properties?.src, alt: c.properties?.alt ?? '' } }) : jsx(c))).join('\n');
+  return body ? figureOf(body, caption) : caption ? escapeText(caption) : '';
+}
+
+const YOUTUBE = /^https:\/\/(www\.)?(youtube\.com|youtube-nocookie\.com)\/embed\/[\w-]+/i;
+function embed(n: Node): string {
+  const src = String(n.properties?.src ?? '');
+  if (!YOUTUBE.test(src)) return '';
+  return `<iframe src="${attr(src)}" width="640" height="360" title="YouTube video" loading="lazy" allowfullscreen style={{maxWidth: '100%', border: 0}}></iframe>`;
+}
+
+function table(n: Node): string {
+  const rows: Node[] = [];
+  const walk = (x: Node) => { for (const c of x.children ?? []) { if (c.type === 'element' && c.tagName === 'tr') rows.push(c); else if (c.type === 'element') walk(c); } };
+  walk(n);
+  if (!rows.length) return '';
+  const cells = (r: Node) => (r.children ?? []).filter((c) => c.type === 'element' && (c.tagName === 'td' || c.tagName === 'th')).map((c) => inline(c.children).trim().replace(/\|/g, '\\|') || ' ');
+  const [head, ...body] = rows;
+  const h = cells(head);
+  const line = (xs: string[]) => `| ${[...xs, ...Array(Math.max(0, h.length - xs.length)).fill(' ')].slice(0, h.length).join(' | ')} |`;
+  return [line(h), `| ${h.map(() => '---').join(' | ')} |`, ...body.map((r) => line(cells(r)))].join('\n');
+}
 
 export function htmlToMdx(html: string): string {
+  usesFigure = false;
   const tree = fromHtml(html, { fragment: true }) as unknown as Node;
-  return blocks(tree.children).join('\n\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
+  const body = blocks(tree.children).join('\n\n').replace(/\n{3,}/g, '\n\n').trim() + '\n';
+  return (usesFigure ? "import Figure from '../../components/Figure.astro';\n\n" : '') + body;
 }
 
 /** the first paragraph's plain text, for the summary (Postiz sends no excerpt) */
@@ -245,3 +313,67 @@ export const MAX_MEDIA_BYTES = 10 * 1024 * 1024;
 export const validMediaId = (id: string) => /^\d{4}-\d{2}\/[a-f0-9]{8}-[a-z0-9-]{1,60}\.(png|jpg|webp|gif)$/.test(id);
 export const mediaUrl = (id: string) => `/media/${id}`;
 export const siteUrl = (p: string) => SITE_URL + p;
+
+
+// ---- PLN-25: one note builder for creating AND previewing -----------------------------------
+
+export class BridgeInputError extends Error {
+  constructor(public status: number, public code: string, message: string) { super(message); }
+}
+
+const sydneyDate = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Australia/Sydney' }).format(new Date());
+
+/** Turn a WordPress-shaped post body into the note's MDX source. Throws BridgeInputError. */
+export async function buildNote(body: any): Promise<{ raw: string; title: string; publish: boolean; wantedSlug: string }> {
+  const title = typeof body?.title === 'string' ? body.title.trim() : String(body?.title?.raw ?? '').trim();
+  const html = typeof body?.content === 'string' ? body.content : String(body?.content?.raw ?? '');
+  if (title.length < 2) throw new BridgeInputError(400, 'rest_missing_title', 'A note needs a title.');
+  if (!html.trim()) throw new BridgeInputError(400, 'rest_missing_content', 'A note needs content.');
+  if (html.length > 1_000_000) throw new BridgeInputError(413, 'rest_too_large', 'Note exceeds the 1 MB limit.');
+  const publish = body.status === 'publish';
+
+  const trackIds = Array.isArray(body.categories) ? body.categories.map(Number) : [];
+  const tracks = trackIds.map((id: number) => TRACKS[id - 1]).filter(Boolean);
+  const known = new Map((await tags()).map((t) => [t.id, t.name]));
+  const tech = (Array.isArray(body.tags) ? body.tags.map(Number) : []).map((id: number) => known.get(id)).filter(Boolean);
+
+  let hero: { src: string; alt: string } | undefined;
+  if (body.featured_media) {
+    const id = String(body.featured_media);
+    if (!validMediaId(id)) throw new BridgeInputError(400, 'rest_invalid_featured_media', 'Unknown featured image.');
+    try { await access(path.join(MEDIA_DIR, id)); } catch { throw new BridgeInputError(400, 'rest_invalid_featured_media', 'Unknown featured image.'); }
+    hero = { src: mediaUrl(id), alt: title };
+  }
+
+  const frontmatter = {
+    title,
+    summary: firstParagraph(html) || title,
+    date: sydneyDate(),
+    // the schema needs at least one track; the operator can change it in /admin
+    tracks: tracks.length ? [...new Set(tracks)] : ['infrastructure'],
+    tech: [...new Set(tech)],
+    ...(hero ? { hero } : {}),
+    draft: !publish,
+  };
+  const raw = '---\n' + yaml.dump(frontmatter, { lineWidth: -1 }) + '---\n\n' + htmlToMdx(html);
+  const wantedSlug = typeof body.slug === 'string' && body.slug ? body.slug : slugify(title);
+  return { raw, title, publish, wantedSlug };
+}
+
+// Short-lived previews: POST /wp-json/wp/v2/preview stores the built note under an unguessable
+// token; /bridge-preview/<token> renders it with the real note page. Memory only, 30 minutes.
+const PREVIEW_TTL_MS = 30 * 60_000;
+const previews = new Map<string, { raw: string; at: number }>();
+export function storePreview(raw: string): string {
+  const now = Date.now();
+  for (const [k, v] of previews) if (now - v.at > PREVIEW_TTL_MS) previews.delete(k);
+  while (previews.size >= 100) previews.delete(previews.keys().next().value!);
+  const token = randomBytes(24).toString('base64url');
+  previews.set(token, { raw, at: now });
+  return token;
+}
+export function readPreview(token: string): string | null {
+  const p = previews.get(token);
+  if (!p || Date.now() - p.at > PREVIEW_TTL_MS) return null;
+  return p.raw;
+}

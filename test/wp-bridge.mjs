@@ -102,6 +102,49 @@ try {
   assert.match(await page.text(), /Out of the harbour\./);
   assert.match(await readFile(path.join(notes, 'bridge-test-a-draft-2.mdx'), 'utf8'), /tracks:\n  - infrastructure/, 'default track when none sent');
 
+  // PLN-25: rich long-form content survives and renders
+  const rich = '<p>Why the <em>fleet</em> needed a bell, and <code>{x}</code> &lt;now&gt;.</p>' +
+    '<ol><li>first</li><li>second</li></ol>' +
+    '<div data-html-block=""><figure><svg viewBox="0 0 100 40" role="img" aria-label="Two boxes" style="color:red" onload="x()"><rect x="1" y="1" width="40" height="30" fill="#26cb96"></rect><text x="5" y="20">{a} b</text><script>alert(1)</script></svg><figcaption>Two boxes, "one" line</figcaption></figure></div>' +
+    '<div data-youtube-video=""><iframe src="https://www.youtube-nocookie.com/embed/abc123" allowfullscreen="true"></iframe></div>' +
+    '<iframe src="https://evil.example/x"></iframe>' +
+    '<table><thead><tr><th>Host</th><th>Disk</th></tr></thead><tbody><tr><td>main</td><td>44%</td></tr></tbody></table>';
+  r = await post('/notes', { title: 'Bridge test: rich', content: rich, slug: 'bridge-test-rich', status: 'publish' });
+  assert.equal(r.status, 201, logs);
+  const richRaw = await readFile(path.join(notes, 'bridge-test-rich.mdx'), 'utf8');
+  assert.match(richRaw, /import Figure from '\.\.\/\.\.\/components\/Figure\.astro';/);
+  assert.match(richRaw, /<Figure caption="Two boxes, &quot;one&quot; line">\n<svg[^>]*viewBox="0 0 100 40"/);
+  assert.doesNotMatch(richRaw, /onload|<script|style="color|evil\.example/);
+  assert.match(richRaw, /<text x="5" y="20">&#123;a&#125; b<\/text>/, 'braces in SVG text escaped for MDX');
+  assert.match(richRaw, /<rect[^>]*\/>/, 'SVG elements self-closed');
+  assert.match(richRaw, /<iframe src="https:\/\/www\.youtube-nocookie\.com\/embed\/abc123"/);
+  assert.match(richRaw, /1\. first\n2\. second/);
+  assert.match(richRaw, /\*fleet\*/);
+  assert.match(richRaw, /\| Host \| Disk \|\n\| --- \| --- \|\n\| main \| 44% \|/);
+  const richPage = await (await fetch(base + '/notes/bridge-test-rich/')).text();
+  assert.match(richPage, /<svg[^>]*viewBox="0 0 100 40"/, 'the figure renders on the real page');
+  assert.match(richPage, /Two boxes, &quot;one&quot; line|Two boxes, "one" line/);
+  assert.match(richPage, /youtube-nocookie\.com\/embed\/abc123/);
+  assert.match(richPage, /<table>/);
+
+  // PLN-25: the site preview renders a draft with the real page and writes nothing
+  const before = (await readdir(path.join(root, 'drafts'))).length;
+  r = await post('/preview', { title: 'Preview: a bell', content: rich });
+  assert.equal(r.status, 200, logs);
+  const { url } = await r.json();
+  assert.match(url, /\/bridge-preview\/[\w-]{20,}$/);
+  const previewUrl = base + new URL(url).pathname;
+  const pv = await fetch(previewUrl);
+  assert.equal(pv.status, 200);
+  assert.equal(pv.headers.get('x-robots-tag'), 'noindex, nofollow');
+  const pvHtml = await pv.text();
+  assert.match(pvHtml, /Preview: a bell/);
+  assert.match(pvHtml, /<svg[^>]*viewBox="0 0 100 40"/);
+  assert.equal((await readdir(path.join(root, 'drafts'))).length, before, 'preview writes nothing');
+  assert.equal((await fetch(base + '/bridge-preview/not-a-real-token-at-all-xx')).status, 404);
+  assert.equal((await fetch(base + '/wp-json/wp/v2/preview', { method: 'POST', headers: { 'content-type': 'application/json' }, body: '{}' })).status, 401);
+  assert.equal((await post('/preview', { title: 'x', content: '<p>x</p>' })).status, 400, 'same validation as creating');
+
   // refusals
   assert.equal((await post('/posts', { title: 'Nope', content: '<p>x</p>' })).status, 404);
   assert.equal((await post('/notes', { title: 'x', content: '<p>x</p>' })).status, 400);

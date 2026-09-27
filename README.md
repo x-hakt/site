@@ -65,6 +65,17 @@ the first paragraph becomes the summary, the date is today in Sydney, categories
 `tracks` (default `infrastructure`), tags become `tech`, the featured image becomes `hero`.
 Writes go through the same save queue and Git sync as /admin.
 
+Rich content (PLN-25): a `<figure>` with an inline SVG becomes `<Figure caption="...">` with
+the SVG inside (styles, event attributes and foreign content dropped, braces escaped, elements
+self-closed, the import added); images, YouTube embeds (youtube / youtube-nocookie only),
+numbered lists, emphasis, code and tables carry over. Anything else is dropped.
+
+**Site preview:** `POST /wp-json/wp/v2/preview` (same credentials) builds the note exactly as
+creating it would, checks it renders, stores it in memory for 30 minutes and returns
+`{ url }`, an unguessable `/bridge-preview/<token>` link that shows it with the real note page
+(noindex, no-store). The planner's WordPress editor shows that page in its Site preview panel.
+Nothing is written to disk.
+
 Create-only: no edit or delete routes, and a slug that's taken gets `-2`, `-3`. The bridge
 is 404 unless `WP_BRIDGE_USER` and `WP_BRIDGE_PASSWORD` are set; it uses HTTP Basic auth
 with those (constant-time compare) and throttles 10 failed logins per address per 15

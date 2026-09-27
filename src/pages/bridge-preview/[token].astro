@@ -1,0 +1,16 @@
+---
+export const prerender = false;
+// PLN-25: a planner draft rendered by the real note page (see /wp-json/wp/v2/preview). The token
+// is the only key; previews live 30 minutes in memory and are never indexed.
+import NotePage from '../../components/NotePage.astro';
+import { parseNote } from '../../lib/notes';
+import { renderNote } from '../../lib/render-note';
+import { readPreview } from '../../lib/wp-bridge';
+Astro.response.headers.set('cache-control', 'private, no-store');
+Astro.response.headers.set('x-robots-tag', 'noindex, nofollow');
+const raw = readPreview(String(Astro.params.token ?? ''));
+if (!raw) return new Response('This preview has expired. Refresh it from the planner.', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } });
+const note = parseNote('preview', raw);
+const html = await renderNote(note);
+---
+<NotePage note={note} html={html} />
