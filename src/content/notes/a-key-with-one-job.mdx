@@ -13,7 +13,7 @@ import Term from '../../components/Term.astro';
 
 ## The fleet was fine. The keyring was the problem.
 
-I keep a small number of machines running. the main server does most of the work, tied
+I keep a small number of machines running. The main server does most of the work, tied
 up here in the harbour where I can see it. Three more sit further out: a
 lighthouse box on a public address, and two production hosts I can only reach
 by rowing through a <Term k="jump-host">jump box</Term> first. Between them they
@@ -62,7 +62,7 @@ the rest of this note is those three things, and how I checked that each of
 them holds when someone leans on it.
 
 <Figure wide caption="Same feature, two keys. The one on the left is what I nearly shipped: if it leaks, it is root on everything. The one on the right can only ever ask for one report.">
-  <svg viewBox="0 0 344 190" role="img" aria-label="Left: a leaked full SSH key gives root on lighthouse, client-app, podusa and main. Right: a leaked scoped key can only run one read-only report.">
+  <svg viewBox="0 0 344 190" role="img" aria-label="Left: a leaked full SSH key gives root on the lighthouse, both production hosts and the main server. Right: a leaked scoped key can only run one read-only report.">
     <text x="85" y="16" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#87898d">my key, if it leaks</text>
     <text x="256" y="16" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="9" fill="#87898d">the scoped key, if it leaks</text>
 
@@ -76,8 +76,8 @@ them holds when someone leans on it.
     </g>
     <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#e5484d">
       <text x="142" y="37">root @ lighthouse</text>
-      <text x="142" y="73">root @ client-app</text>
-      <text x="142" y="109">root @ podusa</text>
+      <text x="142" y="73">root @ prod-1</text>
+      <text x="142" y="109">root @ prod-2</text>
       <text x="142" y="145">root @ main</text>
     </g>
 
@@ -162,7 +162,7 @@ restrict,command="...",permitopen="10.0.2.15:22" ssh-ed25519 AAAA... discovery
 ```
 
 <Figure caption="Forwarding is on for one hop only. Every other destination comes back 'administratively prohibited'.">
-  <svg viewBox="0 0 336 160" role="img" aria-label="bosun-x forwards through a jump host to client-app, the one permitted destination. Attempts to forward anywhere else are refused.">
+  <svg viewBox="0 0 336 160" role="img" aria-label="bosun-x forwards through a jump host to prod-1, the one permitted destination. Attempts to forward anywhere else are refused.">
     <rect x="10" y="20" width="80" height="26" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" />
     <text x="50" y="37" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#eaebec">bosun-x</text>
 
@@ -174,7 +174,7 @@ restrict,command="...",permitopen="10.0.2.15:22" ssh-ed25519 AAAA... discovery
 
     <path d="M192 33 H 244" stroke="#26cb96" stroke-width="1.5" fill="none" />
     <rect x="244" y="20" width="66" height="26" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
-    <text x="277" y="37" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">client-app</text>
+    <text x="277" y="37" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">prod-1</text>
 
     <g stroke="#5c5e62" stroke-width="1.1" stroke-dasharray="2 4" fill="none">
       <path d="M50 46 V 100 H 116" />

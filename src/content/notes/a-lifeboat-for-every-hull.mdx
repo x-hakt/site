@@ -95,7 +95,7 @@ Going through the six that matter:
   archives.
 - **playtopia** has two Postgres databases and two data volumes the game
   services treat as their own store. Four.
-- **client-app** has one Postgres database with real customer records in it. One
+- **the client app** has one Postgres database with real customer records in it. One
   store, and the only one that gets encrypted.
 - **bosun-x's own data** is a directory of <Term k="markdown">Markdown</Term> and <Term k="yaml">YAML</Term>. That one I
   handled differently: I made it a git repository with a private remote, so it
@@ -145,11 +145,11 @@ expects is sitting there. If either is missing it stops and says so. It is the
 same instinct as checking the lifeboat is tied to the davit before you lower
 anyone into it.
 
-<Figure wide caption="the main server's agent writes to the mounted NAS folder. The two remote projects are pulled the same way. The guard runs first, every time.">
+<Figure wide caption="The main server's agent writes to the mounted NAS folder. The two remote projects are pulled the same way. The guard runs first, every time.">
   <svg viewBox="0 0 360 168" role="img" aria-label="The agent on the main server checks the mount guard, then writes archives to the NAS Backups folder. Two remote hosts are dumped over SSH and their output written to the same folder.">
     <rect x="10" y="66" width="78" height="30" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
     <text x="49" y="79" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">agent</text>
-    <text x="49" y="89" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">on the main server</text>
+    <text x="49" y="89" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">on main server</text>
 
     <path d="M88 81 H 132" stroke="#26cb96" stroke-width="1.4" fill="none" />
     <path d="M132 66 L 158 81 L 132 96 L 106 81 Z" fill="#131417" stroke="#dca63c" stroke-opacity="0.6" />
@@ -188,22 +188,22 @@ out through the engine.
 - **Files and volumes:** `tar` piped through <Term k="zstd">`zstd`</Term>. One
   stream, so it is internally consistent, and `zstd` because it is fast with
   good ratios.
-- Then, for client-app only, the archive goes through <Term k="age">`age`</Term>
+- Then, for the client app only, the archive goes through <Term k="age">`age`</Term>
   before it lands.
 
-The encryption is worth a paragraph. client-app holds the only customer data in
+The encryption is worth a paragraph. The client app holds the only customer data in
 the fleet, and "private network" is not a security model. So its dump is
 encrypted with an [`age`](https://age-encryption.org/) keypair, and the point
 is the split. The agent only ever holds the public key, which can encrypt and
-cannot decrypt. The private key, the one that can actually read a client-app
+cannot decrypt. The private key, the one that can actually read a client app
 backup, is the restore key. It lives in bosun-x's data, kept out of the
 git repository, and I have a copy in a password manager. If the agent's machine
 is compromised, the attacker can write new backups. They cannot read the old
 ones. It works like a postbox: the slot takes letters from anyone, only the key
 opens it.
 
-<Figure caption="One pipeline. The age step is there for client-app only, and the agent never holds the key that reverses it.">
-  <svg viewBox="0 0 360 150" role="img" aria-label="Postgres goes pg_dump to zstd; files go tar to zstd; for client-app an age encrypt step follows, using a public key the agent holds while the private restore key is kept apart.">
+<Figure caption="One pipeline. The age step is there for the client app only, and the agent never holds the key that reverses it.">
+  <svg viewBox="0 0 360 150" role="img" aria-label="Postgres goes pg_dump to zstd; files go tar to zstd; for the client app an age encrypt step follows, using a public key the agent holds while the private restore key is kept apart.">
     <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#c9cacd">
       <rect x="8" y="20" width="60" height="20" rx="4" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="38" y="33" text-anchor="middle">database</text>
       <rect x="8" y="70" width="60" height="20" rx="4" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="38" y="83" text-anchor="middle">files / vol</text>
@@ -221,7 +221,7 @@ opens it.
 
     <path d="M240 55 H 268" stroke="#5c5e62" stroke-width="1.2" stroke-dasharray="3 3" fill="none" />
     <rect x="268" y="45" width="40" height="20" rx="4" fill="#101216" stroke="#dca63c" stroke-opacity="0.5" /><text x="288" y="58" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#dca63c">age</text>
-    <text x="288" y="40" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">client-app only</text>
+    <text x="288" y="40" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#87898d">client app only</text>
     <path d="M308 55 H 332" stroke="#26cb96" stroke-width="1.3" fill="none" />
     <text x="330" y="52" text-anchor="end" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#26cb96">NAS</text>
 
@@ -234,7 +234,7 @@ opens it.
 ## The two machines I could not reach
 
 **Why it is here.** Four of the six projects run on the main server, where the agent
-runs, so it dumps them directly. Two run elsewhere: client-app on one production
+runs, so it dumps them directly. Two run elsewhere: the client app on one production
 box, sportsball-coach on another. Those had to be dumped across the network.
 
 **How it works.** The plan was a locked-down SSH key on each remote box that
@@ -326,7 +326,7 @@ from one place, the throttle is held in another.
     <rect x="202" y="22" width="148" height="52" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
     <text x="276" y="38" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#26cb96">the agent</text>
     <text x="276" y="50" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">reads config · holds creds</text>
-    <text x="276" y="62" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">on a timer, on the main server</text>
+    <text x="276" y="62" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">on a timer, main server</text>
 
     <path d="M162 42 H 200" stroke="#dca63c" stroke-width="1.3" fill="none" />
     <text x="181" y="37" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6" fill="#dca63c">run now →</text>
@@ -393,7 +393,7 @@ standards board, next to the ones that are missing a spec.
 
 **Verified.** All six projects back up. The two remote databases dump over the
 restricted key, and I have restored both into a throwaway container to prove
-the dumps are real: client-app decrypts and lists a hundred tables,
+the dumps are real: the client app decrypts and lists a hundred tables,
 sportsball-coach lists forty-six. A full run of the fleet saves eight stores
 with no failures in about twenty seconds. The "run backup now" button writes a
 request and the agent picks it up inside two minutes. Unmounting the NAS makes

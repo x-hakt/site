@@ -48,7 +48,7 @@ export const glossary: Record<string, GlossaryEntry> = {
   ssh: {
     term: 'SSH',
     short:
-      'The standard way to log into another machine over the network and run commands on it as if you were sitting there. "ssh main" opens a shell on the machine called main.',
+      'The standard way to log into another machine over the network and run commands on it as if you were sitting there. "ssh web-1" opens a shell on the machine called web-1.',
   },
   'ssh-key': {
     term: 'SSH key',

@@ -169,8 +169,8 @@ live one; it just answers fewer questions.
   </svg>
 </Figure>
 
-<Figure wide plain caption="One vessel's page. Playtopia: the lifecycle stage, the containers read live off the Docker socket, the standards column, and the newest handoff with a staleness clock. Nothing on this page is stored; it is all read at the moment I open it.">
-  <img src="/shots/cr-project.webp" alt="The bosun-x detail page for the playtopia project, showing its status, running containers, standards results and latest handoff." loading="lazy" />
+<Figure wide plain caption="One vessel's page, shown here on the demo data: the lifecycle stage, the task board, the standards column, and the newest handoff with a staleness clock. Nothing on this page is stored; it is all read at the moment I open it.">
+  <img src="/shots/cr-project.webp" alt="The bosun-x detail page for a demo project, showing its tasks, status, standards results and latest handoff." loading="lazy" />
 </Figure>
 
 ## Standards: seaworthiness, checked not claimed
@@ -246,7 +246,7 @@ should not require me to <Term k="ssh">SSH</Term> around five machines and run
 
 **How it works.** There are two cases.
 
-**the main server**, the machine that does most of the work, is where bosun-x itself
+**The main server**, the machine that does most of the work, is where bosun-x itself
 runs. It reads that host directly: the Docker socket for every container, and a
 fixed read-only script for disk, memory, load and `docker stats`. Live, every
 few seconds.
@@ -260,12 +260,12 @@ snapshot from the last time the page asked, not a live feed, and the page says
 so rather than pretending otherwise.
 
 <Figure caption="The host bosun-x lives on is read directly. The far hosts are read through one key that can only run one script.">
-  <svg viewBox="0 0 356 150" role="img" aria-label="bosun-x reads the main server directly through the Docker socket. It reads lighthouse, prod-1 and prod-2 through a single locked-down SSH key.">
+  <svg viewBox="0 0 356 150" role="img" aria-label="bosun-x reads the main server directly through the Docker socket. It reads the lighthouse and the two production hosts through a single locked-down SSH key.">
     <rect x="120" y="58" width="84" height="30" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" />
     <text x="162" y="77" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8.5" fill="#26cb96">bosun-x</text>
 
     <path d="M120 66 H 70 V 40 H 40" stroke="#26cb96" stroke-width="1.5" fill="none" />
-    <text x="34" y="43" text-anchor="end" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">the main server</text>
+    <text x="34" y="43" text-anchor="end" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="8" fill="#eaebec">main</text>
     <text x="66" y="34" text-anchor="middle" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7" fill="#87898d">socket, live</text>
 
     <path d="M204 73 H 232" stroke="#5cb3e6" stroke-width="1.4" fill="none" />
@@ -279,15 +279,15 @@ so rather than pretending otherwise.
     <g fill="#5cb3e6"><circle cx="288" cy="30" r="2.4" /><circle cx="288" cy="73" r="2.4" /><circle cx="288" cy="116" r="2.4" /></g>
     <g font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="7.5" fill="#c9cacd">
       <text x="296" y="33">lighthouse</text>
-      <text x="296" y="76">client-app</text>
-      <text x="296" y="119">podusa</text>
+      <text x="296" y="76">prod-1</text>
+      <text x="296" y="119">prod-2</text>
     </g>
     <text x="290" y="135" font-family="'IBM Plex Mono', ui-monospace, monospace" font-size="6.5" fill="#87898d">point-in-time</text>
   </svg>
 </Figure>
 
-<Figure wide plain caption="the main server's page: the host itself at the top (disk, memory, load, all off the fixed read-only script), then every container on it, grouped by the project it belongs to. The far anchorages get the same layout, marked point-in-time.">
-  <img src="/shots/cr-servers.webp" alt="The bosun-x server page for the main server: host resource stats followed by its containers grouped by project." loading="lazy" />
+<Figure wide plain caption="The servers page, shown here on the demo data: each machine's memory, CPU and disk drawn as bars the size of the whole box, cut up by the projects on it. Each host also gets its own page, the host itself at the top and every container under it, grouped by project; the far anchorages are marked point-in-time.">
+  <img src="/shots/bosun-capacity.webp" alt="Capacity cards for two demo servers, each with memory, CPU and disk bars split into coloured project segments." loading="lazy" />
 </Figure>
 
 ## Handoff: the log the last watch left
