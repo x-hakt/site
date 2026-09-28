@@ -10,11 +10,11 @@ import { createHmac, timingSafeEqual, randomBytes } from 'node:crypto';
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID ?? '';
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET ?? '';
 const SESSION_SECRET = process.env.ADMIN_SESSION_SECRET ?? '';
-const ALLOWED_EMAIL = (process.env.ADMIN_ALLOWED_EMAIL ?? 'you@example.com').toLowerCase();
+const ALLOWED_EMAIL = (process.env.ADMIN_ALLOWED_EMAIL ?? '').trim().toLowerCase();
 const SITE_URL = (process.env.SITE_URL ?? 'https://x-hakt.com').replace(/\/$/, '');
-/** the editor is live only when Google OAuth and the session secret are set */
+/** the editor is live only when Google OAuth, the session secret and the allowed email are set */
 export function adminEnabled(): boolean {
-  return CLIENT_ID.length > 0 && CLIENT_SECRET.length > 0 && SESSION_SECRET.length > 0;
+  return CLIENT_ID.length > 0 && CLIENT_SECRET.length > 0 && SESSION_SECRET.length > 0 && ALLOWED_EMAIL.length > 0;
 }
 
 export const COOKIE = 'xh_admin';

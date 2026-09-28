@@ -29,8 +29,8 @@ services:
       - CONTENT_DIR=/app/src/content/notes
       - ADMIN_STATE_DIR=/app/.admin-state
       - SITE_URL=https://x-hakt.com
-      - ADMIN_ALLOWED_EMAIL=you@example.com
-      # /admin is 404 until all three are set (see x-hakt-site/README.md).
+      - ADMIN_ALLOWED_EMAIL=${ADMIN_ALLOWED_EMAIL:-}
+      # /admin is 404 until these four are set (see x-hakt-site/README.md).
       # GOOGLE_OAUTH_* is one Google client shared with Control Room.
       - GOOGLE_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID:-}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_OAUTH_CLIENT_SECRET:-}
