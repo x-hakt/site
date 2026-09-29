@@ -27,8 +27,11 @@ const plainText = (s: string) => s.replace(/<[^>]+>/g, ' ')
     return named[e.toLowerCase()] ?? m;
   })
   .replace(/\s+/g, ' ').trim().toLowerCase();
-const firstParagraph = plainText(/<p[\s>][\s\S]*?<\/p>/i.exec(html)?.[0] ?? '');
-const summaryText = plainText(note.data.summary ?? '').replace(/\u2026$|\.\.\.$/, '').trim();
+// Compared on letters and digits only: a link renders with a stray space before the next comma, and the
+// summary may be clipped to 300 characters with an ellipsis.
+const bare = (t: string) => t.replace(/[^\p{L}\p{N}]+/gu, '');
+const firstParagraph = bare(plainText(/<p[\s>][\s\S]*?<\/p>/i.exec(html)?.[0] ?? ''));
+const summaryText = bare(plainText(note.data.summary ?? ''));
 const showSummary = Boolean(summaryText) && !firstParagraph.startsWith(summaryText);
 
 const blogPosting = {
