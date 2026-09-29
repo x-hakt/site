@@ -17,6 +17,20 @@ const published = note.data.date.toISOString();
 const modified = (note.data.updated ?? note.data.date).toISOString();
 const keywords = [...note.data.tracks, ...note.data.tech];
 
+// Notes posted through the planner bridge get their summary from their own first paragraph (Postiz sends
+// no excerpt), so showing it as the standfirst printed that paragraph twice. It stays the page's
+// description; the header only shows a summary that says something the body doesn't open with.
+const plainText = (s: string) => s.replace(/<[^>]+>/g, ' ')
+  .replace(/&(#x?[0-9a-f]+|amp|lt|gt|quot|apos|nbsp|rsquo|lsquo|rdquo|ldquo|hellip|mdash|ndash);/gi, (m, e) => {
+    const named: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', rsquo: '\u2019', lsquo: '\u2018', rdquo: '\u201d', ldquo: '\u201c', hellip: '\u2026', mdash: '\u2014', ndash: '\u2013' };
+    if (e[0] === '#') return String.fromCodePoint(e[1].toLowerCase() === 'x' ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10));
+    return named[e.toLowerCase()] ?? m;
+  })
+  .replace(/\s+/g, ' ').trim().toLowerCase();
+const firstParagraph = plainText(/<p[\s>][\s\S]*?<\/p>/i.exec(html)?.[0] ?? '');
+const summaryText = plainText(note.data.summary ?? '').replace(/\u2026$|\.\.\.$/, '').trim();
+const showSummary = Boolean(summaryText) && !firstParagraph.startsWith(summaryText);
+
 const blogPosting = {
   '@type': 'BlogPosting',
   '@id': `${url}#article`,
@@ -60,7 +74,7 @@ const breadcrumb = {
   <article>
     <header class="note-head">
       <h1>{note.data.title}</h1>
-      <p class="note-head__summary">{note.data.summary}</p>
+      {showSummary && <p class="note-head__summary">{note.data.summary}</p>}
       <p class="note-head__meta">
         <time datetime={note.data.date.toISOString()}>{dateFmt.format(note.data.date)}</time>
         {note.data.tracks.map((track) => (
