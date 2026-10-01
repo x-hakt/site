@@ -30,7 +30,11 @@ const plainText = (s: string) => s.replace(/<[^>]+>/g, ' ')
 // Compared on letters and digits only: a link renders with a stray space before the next comma, and the
 // summary may be clipped to 300 characters with an ellipsis.
 const bare = (t: string) => t.replace(/[^\p{L}\p{N}]+/gu, '');
-const firstParagraph = bare(plainText(/<p[\s>][\s\S]*?<\/p>/i.exec(html)?.[0] ?? ''));
+// A glossary hover keeps its definition in a hidden tooltip inside the paragraph; that isn't part of the
+// sentence the summary was taken from, so drop it before comparing.
+const withoutTooltips = (s: string) =>
+  s.replace(/<span\b[^>]*class="term__pop"[^>]*>(?:<span[^>]*>[\s\S]*?<\/span>)*<\/span>/g, '');
+const firstParagraph = bare(plainText(withoutTooltips(/<p[\s>][\s\S]*?<\/p>/i.exec(html)?.[0] ?? '')));
 const summaryText = bare(plainText(note.data.summary ?? ''));
 const showSummary = Boolean(summaryText) && !firstParagraph.startsWith(summaryText);
 
