@@ -1,0 +1,154 @@
+---
+title: Teaching the harbour master to speak WordPress
+summary: For a while, getting anything out meant three different browser tabs. A note here had its own editor and its own login. The business site's explainers went through a different admin entirely, images uploaded one at a time. The game site's queue was its own CMS, with its own idea of what a category…
+date: 2026-10-07T00:00:00.000Z
+tracks:
+  - infrastructure
+tech:
+  - nextjs
+  - typescript
+  - docker
+draft: false
+---
+
+import Figure from '../../components/Figure.astro';
+import Term from '../../components/Term.astro';
+
+For a while, getting anything out meant three different browser tabs. A note here had its own editor and its own login. The business site's explainers went through a different admin entirely, images uploaded one at a time. The game site's queue was its own CMS, with its own idea of what a category was. None of the three had ever heard of each other, and every one of them wanted roughly the same five things: a title, a body, some tags, a picture and a status. Doing that by hand, several times a week, across three logins that all wanted the same shape of thing in slightly different words, was the sort of chore that eats an evening and teaches you nothing.
+
+The social planner I <Term k="self-hosted">self-host</Term> was supposed to be the fix: one calendar, one place to draft, the harbour master for every hull. It can publish to Instagram, Facebook and about twenty other places, and it can publish to websites as long as the website is <Term k="wp-rest" def="WordPress's own REST API: a fixed set of URLs under /wp-json/wp/v2/ for posts, media, users and so on. Anything that answers the same shape looks like WordPress to software that only knows how to talk to WordPress.">WordPress</Term>. None of mine are. This blog is Astro, my business site is a <Term k="nextjs">Next.js</Term> app with its own CMS, and the game site is a pile of NestJS services behind a gateway. So rather than teach the planner three new languages, I taught three sites a few words of WordPress: each one grew a thin bridge at the door that answers exactly what the planner expects and translates it into whatever that site actually does with a new piece of content.
+
+<Figure caption="The planner only ever speaks one protocol. Each hull answers it at the door and translates behind that.">
+<svg viewBox="0 0 360 180" role="img" aria-label="The planner in the middle, with three lines labelled wp-json wp v2 reaching out to three boxes: x-hakt, the business site and the game site. A note says none of them run WordPress.">
+  <rect x="150" y="70" width="80" height="40" rx="6" fill="#101216" stroke="rgba(255,255,255,0.2)" />
+  <text x="190" y="94" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="9" fill="#eaebec">planner</text>
+
+  <path d="M150 82 C 120 64, 100 46, 76 36" stroke="#26cb96" stroke-opacity="0.6" stroke-width="1.3" fill="none" />
+  <path d="M150 95 L 76 95" stroke="#26cb96" stroke-opacity="0.6" stroke-width="1.3" fill="none" />
+  <path d="M150 103 C 120 124, 100 142, 76 154" stroke="#26cb96" stroke-opacity="0.6" stroke-width="1.3" fill="none" />
+
+  <text x="112" y="50" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">/wp-json/wp/v2</text>
+  <text x="112" y="86" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">/wp-json/wp/v2</text>
+  <text x="112" y="132" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">/wp-json/wp/v2</text>
+
+  <rect x="6" y="18" width="70" height="28" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" />
+  <text x="41" y="36" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#26cb96">x-hakt</text>
+
+  <rect x="6" y="81" width="70" height="28" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" />
+  <text x="41" y="99" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7.5" fill="#26cb96">business site</text>
+
+  <rect x="6" y="144" width="70" height="28" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" />
+  <text x="41" y="162" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7.5" fill="#26cb96">game site</text>
+
+  <text x="296" y="94" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#5c5e62">none of them</text>
+  <text x="296" y="104" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#5c5e62">run WordPress</text>
+</svg>
+</Figure>
+
+## Why a fake WordPress, and not three real integrations
+
+Each site already has a real way of creating content, and none of them are the same. This blog writes an <Term k="mdx" def="Markdown that can also contain components, like the diagrams and hover definitions on this page. Powerful, and fussy about stray curly braces.">MDX</Term> file into its notes collection. The business site calls its own `createBlogPost` or `createLearnArticle`, depending on which tier it is. The game site creates an article through its content service's existing <Term k="api">API</Term>, the same one a human editor's post goes through, so nothing skips the review path the editors already trust. Teaching the planner all three of those shapes would mean carrying three bespoke integrations inside a tool I don't otherwise want to maintain. Building the translation once on each site, into a shape the planner was already fluent in, meant touching the planner exactly once.
+
+## Five words is enough
+
+The planner's WordPress connector doesn't want much. It asks `/wp-json/wp/v2/users/me` whether the login works, asks `/types` what kinds of post exist, fetches `/categories` and `/tags` for its dropdowns, uploads a featured image by posting the raw file to `/media` with the filename in a `Content-Disposition` header, and finally posts the article to `/wp-json/wp/v2/<type>` with a title, some HTML, a status and the ids of whatever it picked. That's the whole conversation. Each site's doorway answers exactly those calls and nothing else.
+
+There are no edit routes and no delete routes. A bridge can create an article and that's it; if the slug is taken it gets `-2` on the end rather than overwriting anything. Each doorway is a 404 until its credentials are set, and those credentials are one set per site, sitting in a locked-down file, never anyone's actual login. It compares the <Term k="basic-auth" def="The simplest HTTP login: a username and password, base64-encoded, sent in a header on every request. Fine over HTTPS, useless without it.">Basic auth</Term> header in constant time and locks an address out after ten bad logins in fifteen minutes. The address it locks out is the last hop in `X-Forwarded-For`, the one Traefik, the <Term k="reverse-proxy">reverse proxy</Term>, appends, because the earlier hops are whatever the client felt like typing.
+
+<Figure caption="The whole conversation. Anything else gets a 404.">
+<svg viewBox="0 0 380 176" role="img" aria-label="The five WordPress calls the planner makes: check the login, list post types, fetch categories and tags, upload the featured image, create the post. Each of the three sites answers exactly those, with no edit or delete routes, a 404 until configured, and a lockout after ten bad logins in fifteen minutes."><rect x="10" y="14" width="70" height="124" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="45" y="72" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#eaebec">planner</text><text x="45" y="84" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">WordPress</text><text x="45" y="94" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">connector</text><text x="90" y="23" text-anchor="start" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#5cb3e6">GET  /users/me</text><text x="90" y="33" text-anchor="start" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">does the login work?</text><path d="M90 38 H 257" stroke="#5c5e62" stroke-width="1.2" fill="none" /><path d="M257 35 L262 38 L257 41 Z" fill="#5c5e62" /><text x="90" y="47" text-anchor="start" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#5cb3e6">GET  /types</text><text x="90" y="57" text-anchor="start" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">what kinds of post?</text><path d="M90 62 H 257" stroke="#5c5e62" stroke-width="1.2" fill="none" /><path d="M257 59 L262 62 L257 65 Z" fill="#5c5e62" /><text x="90" y="71" text-anchor="start" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#5cb3e6">GET  /categories, /tags</text><text x="90" y="81" text-anchor="start" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">fill the dropdowns</text><path d="M90 86 H 257" stroke="#5c5e62" stroke-width="1.2" fill="none" /><path d="M257 83 L262 86 L257 89 Z" fill="#5c5e62" /><text x="90" y="95" text-anchor="start" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#5cb3e6">POST /media</text><text x="90" y="105" text-anchor="start" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">featured image, raw file</text><path d="M90 110 H 257" stroke="#5c5e62" stroke-width="1.2" fill="none" /><path d="M257 107 L262 110 L257 113 Z" fill="#5c5e62" /><text x="90" y="119" text-anchor="start" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#5cb3e6">POST /&#x3C;type></text><text x="90" y="129" text-anchor="start" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">title, HTML, status, ids</text><path d="M90 134 H 257" stroke="#5c5e62" stroke-width="1.2" fill="none" /><path d="M257 131 L262 134 L257 137 Z" fill="#5c5e62" /><rect x="266" y="14" width="104" height="124" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" /><text x="318" y="30" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#26cb96">doorway</text><text x="318" y="50" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#eaebec">x-hakt.com</text><text x="318" y="62" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#eaebec">business site</text><text x="318" y="74" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#eaebec">game site</text><text x="318" y="98" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">no edit, no delete</text><text x="318" y="108" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">404 until configured</text><text x="318" y="118" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">10 bad logins / 15 min</text><text x="318" y="128" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">= locked out</text><text x="190" y="158" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">slug taken? it gets -2, nothing is ever overwritten</text></svg>
+</Figure>
+
+## Three accents
+
+This blog's doorway turns the planner's HTML into markdown, starting headings at level two because the title is the page's h1, and escaping every curly brace and angle bracket in the prose, since MDX reads those as code and will cheerfully fail to render a sentence about `{x}`. The first paragraph becomes the summary. A draft goes where drafts go, a publish goes through the same render check the editor runs, and both are committed and pushed by the same save queue, so a note from the planner leaves the same trail in <Term k="git">git</Term> as one I typed.
+
+The business site already stores articles as HTML, so that doorway mostly gets out of the way. It maps the planner's categories to the Learn section's topics and its tags to levels, and strips anything active out of the HTML first, because those articles are rendered raw.
+
+<Figure caption="Same five words in, three different ways of writing them down.">
+<svg viewBox="0 0 380 150" role="img" aria-label="Three accents. This blog converts the HTML to MDX, starts headings at h2, escapes braces, runs the render check and commits and pushes. The business site strips active HTML, maps categories to topics and tags to levels, and stores HTML. The game site calls the same service methods as its CMS editor, as the author&#x27;s account, with permissions and an audit log entry."><rect x="10" y="14" width="112" height="36" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" /><text x="66" y="29" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#26cb96">x-hakt.com</text><text x="66" y="41" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">Astro, MDX files</text><path d="M66 50 V 60" stroke="#5c5e62" stroke-width="1.2" /><rect x="10" y="60" width="112" height="80" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="66" y="76" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">HTML to MDX</text><text x="66" y="90" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">headings from h2</text><text x="66" y="104" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">braces escaped</text><text x="66" y="118" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">render check</text><text x="66" y="132" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#eaebec">commit + push</text><rect x="134" y="14" width="112" height="36" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" /><text x="190" y="29" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#26cb96">business site</text><text x="190" y="41" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">Next.js, HTML store</text><path d="M190 50 V 60" stroke="#5c5e62" stroke-width="1.2" /><rect x="134" y="60" width="112" height="80" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="190" y="76" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">active bits stripped</text><text x="190" y="90" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">categories to topics</text><text x="190" y="104" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">tags to levels</text><text x="190" y="118" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#eaebec">saved as HTML</text><rect x="258" y="14" width="112" height="36" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" /><text x="314" y="29" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#26cb96">game site</text><text x="314" y="41" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">NestJS services</text><path d="M314 50 V 60" stroke="#5c5e62" stroke-width="1.2" /><rect x="258" y="60" width="112" height="80" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="314" y="76" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">same service calls</text><text x="314" y="90" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">the CMS editor uses</text><text x="314" y="104" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">created as me</text><text x="314" y="118" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">permissions apply</text><text x="314" y="132" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#eaebec">audit log entry</text></svg>
+</Figure>
+
+The game site was the careful one, because it has users. Its doorway lives inside the content service and creates each article as my account by calling the same service methods the CMS editor calls, so every permission check and workflow step applies as if I'd written it by hand. Draft stays a draft, pending goes into review, publish publishes. Every creation lands in the audit log. Before it went anywhere near production I built the new image, restored the previous night's database backup into a throwaway <Term k="postgres">Postgres</Term> on an internal <Term k="docker">Docker</Term> network with no route out, ran the bridge against that, checked the three articles came out with the right statuses and author, and threw the lot away.
+
+<Figure caption="A dress rehearsal on last night's data. Production only saw it after this came back clean.">
+<svg viewBox="0 0 380 120" role="img" aria-label="The game site test before production: build the new image, restore the previous night&#x27;s backup into a throwaway Postgres on an internal Docker network with no route out, run the bridge, check the three articles&#x27; statuses and author, then throw it all away."><rect x="136" y="12" width="238" height="100" rx="8" fill="none" stroke="#e5484d" stroke-opacity="0.55" stroke-dasharray="4 3" /><text x="366" y="23" text-anchor="end" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#e5484d">no route out</text><rect x="14" y="30" width="104" height="34" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="66" y="44" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7.5" fill="#eaebec">new image</text><text x="66" y="56" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">built, not deployed</text><rect x="138" y="30" width="104" height="34" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="190" y="44" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7.5" fill="#eaebec">last night's backup</text><text x="190" y="56" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">restored</text><rect x="262" y="30" width="104" height="34" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="314" y="44" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7.5" fill="#eaebec">throwaway Postgres</text><text x="314" y="56" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">internal network</text><rect x="262" y="76" width="104" height="34" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="314" y="90" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7.5" fill="#eaebec">bridge run</text><text x="314" y="102" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">3 articles in</text><rect x="138" y="76" width="104" height="34" rx="6" fill="#101216" stroke="rgba(255,255,255,0.16)" /><text x="190" y="90" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7.5" fill="#eaebec">checked</text><text x="190" y="102" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">statuses + author</text><rect x="14" y="76" width="104" height="34" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.55" /><text x="66" y="90" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7.5" fill="#26cb96">thrown away</text><text x="66" y="102" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">all of it</text><path d="M112 47 H 133" stroke="#5c5e62" stroke-width="1.2" fill="none" /><path d="M133 44 L138 47 L133 50 Z" fill="#5c5e62" /><path d="M236 47 H 257" stroke="#5c5e62" stroke-width="1.2" fill="none" /><path d="M257 44 L262 47 L257 50 Z" fill="#5c5e62" /><path d="M314 64 V 76" stroke="#5c5e62" stroke-width="1.2" /><path d="M262 93 H 241" stroke="#5c5e62" stroke-width="1.2" fill="none" /><path d="M241 90 L236 93 L241 96 Z" fill="#5c5e62" /><path d="M138 93 H 117" stroke="#5c5e62" stroke-width="1.2" fill="none" /><path d="M117 90 L112 93 L117 96 Z" fill="#5c5e62" /></svg>
+</Figure>
+
+## The domain with a path in it
+
+One small gift from the connector: it builds URLs by gluing the "domain" you give it to `/wp-json/...`, and its validation happily accepts a domain with a path on the end. So the game site's channel is `https://api.playtopia.com.au/api/v1/wp-bridge`, the gateway forwards anything under `wp-bridge` to the content service, and nobody had to invent a new hostname. The code is more what you'd call guidelines than actual rules, and for once that worked in my favour.
+
+## What grew on top of create-only
+
+The first version of each bridge was barely more than a doorway: accept a title and a body, write the thing, done. It was enough to post a note, and not enough to post a *good* one. The planner's own editor turned out to be the bigger problem. Its plain mode kept paragraphs, headings, bold, links and little else; everything that made a note worth reading, code blocks, blockquotes, figures, tables, inline SVGs, got stripped on the way out, and whatever survived had its angle brackets unescaped afterwards, a landmine for anything that still had a stray `<` in it. So that got fixed first: a second editor mode, used only for these three channels, that keeps a sanitised allowlist wide enough for a real article, running on a forked build of the planner pushed to <Term k="ghcr">GHCR</Term> and pinned like anything else in the fleet.
+
+Everything after that landed the same way: once on the editor, then once on each bridge, in order. A preview route, so a draft could be checked as the actual page before it went anywhere. Image uploads through the same media route the editor already called. Glossary hovers, the dotted underlines under this very paragraph, which needed the editor itself to learn to protect a `<span data-term>` through an edit, not just hope the markup made it through unscathed.
+
+<Figure caption="Nothing here is x-hakt-specific. Every capability the editor learned, all three bridges picked up.">
+<svg viewBox="0 0 360 150" role="img" aria-label="A timeline of five stages the bridge grew through: notes create-only, rich editor mode, site preview, image uploads, glossary hovers.">
+  <line x1="20" y1="75" x2="340" y2="75" stroke="rgba(255,255,255,0.2)" stroke-width="1.2" />
+
+  <circle cx="30" cy="75" r="4" fill="#5c5e62" />
+  <text x="30" y="58" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#c9cacd">notes,</text>
+  <text x="30" y="68" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#c9cacd">create-only</text>
+
+  <circle cx="108" cy="75" r="4" fill="#5c5e62" />
+  <text x="108" y="58" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#c9cacd">rich editor</text>
+  <text x="108" y="68" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#c9cacd">mode</text>
+
+  <circle cx="186" cy="75" r="4" fill="#26cb96" />
+  <text x="186" y="58" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#c9cacd">site</text>
+  <text x="186" y="68" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#c9cacd">preview</text>
+
+  <circle cx="264" cy="75" r="4" fill="#5c5e62" />
+  <text x="264" y="58" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#c9cacd">image</text>
+  <text x="264" y="68" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#c9cacd">uploads</text>
+
+  <circle cx="330" cy="75" r="4" fill="#26cb96" />
+  <text x="330" y="58" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#c9cacd">glossary</text>
+  <text x="330" y="68" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#c9cacd">hovers</text>
+
+  <text x="30" y="92" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6" fill="#5c5e62">three bridges</text>
+  <text x="186" y="92" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6" fill="#5c5e62">three bridges</text>
+  <text x="330" y="92" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6" fill="#5c5e62">three bridges</text>
+
+  <text x="180" y="130" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">each stage landed on all three, not just one</text>
+</svg>
+</Figure>
+
+## Proving the preview isn't lying
+
+The preview route is the one I trust the least by instinct and the most in practice, because it doesn't render a guess at the page, it renders the actual page. A draft posts to `POST .../wp-json/wp/v2/preview`; the bridge stores it behind a token that expires in half an hour and hands back a URL. On this blog that URL is served by the same note template a published page uses. On the business site it's the same article template. On the game site it's literally the same component that renders `/news/[slug]`, just fed a draft instead of a published row. What shows up in the planner's preview panel is not a simulation of what the site will do with the draft. It is what the site did with the draft, a minute ago, on a URL nobody else can reach.
+
+<Figure caption="The loop this note itself went through before you read it: drafted, posted to the preview route, rendered by the real template, checked, then scheduled.">
+<svg viewBox="0 0 360 170" role="img" aria-label="A loop: a draft with figures and glossary spans is saved through the rich editor mode, posted to the bridge&#x27;s preview route, rendered by the real site template behind a short-lived token, and shown back inside the planner before anything is scheduled.">
+  <rect x="10" y="20" width="90" height="36" rx="6" fill="#101216" stroke="rgba(255,255,255,0.2)" />
+  <text x="55" y="36" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7.5" fill="#eaebec">draft html</text>
+  <text x="55" y="48" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">figures + terms</text>
+
+  <path d="M100 38 H 150" stroke="#26cb96" stroke-opacity="0.6" stroke-width="1.3" fill="none" />
+  <text x="125" y="32" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">rich mode</text>
+
+  <rect x="150" y="20" width="110" height="36" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.5" />
+  <text x="205" y="36" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7.5" fill="#26cb96">POST .../preview</text>
+  <text x="205" y="48" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">bridge route</text>
+
+  <path d="M205 56 V 90" stroke="#26cb96" stroke-opacity="0.6" stroke-width="1.3" fill="none" />
+  <text x="235" y="76" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">30-min token</text>
+
+  <rect x="150" y="90" width="110" height="36" rx="6" fill="#101216" stroke="rgba(255,255,255,0.2)" />
+  <text x="205" y="106" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7.5" fill="#eaebec">the real page</text>
+  <text x="205" y="118" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">same template as live</text>
+
+  <path d="M150 108 H 100 V 56" stroke="#26cb96" stroke-opacity="0.6" stroke-width="1.3" fill="none" />
+
+  <rect x="10" y="90" width="90" height="36" rx="6" fill="#101216" stroke="rgba(255,255,255,0.2)" />
+  <text x="55" y="106" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7.5" fill="#eaebec">planner preview</text>
+  <text x="55" y="118" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">panel</text>
+
+  <text x="180" y="152" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">what you see is what the site will actually render</text>
+</svg>
+</Figure>
+
+All three bridges answer the same route shape today, each one tested against its own site, and this note went through that loop before it was scheduled. What nothing has tested yet is the reason the shape was built this way: that a fourth hull, if one ever joins the fleet, costs one more bridge and not a fourth integration. Three sites, one planner, and not a line of PHP anywhere near the harbour. Fair winds.
