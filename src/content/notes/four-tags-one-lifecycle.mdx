@@ -1,0 +1,166 @@
+---
+title: Four tags, one lifecycle
+summary: Every run of the planner's scheduled draft happens with nobody watching. Claude works through the queue for all three sites on a cron job before the operator is awake, and there's no one in the room to ask "should I write this one" while it runs. Whatever review the work needed had to happen…
+date: 2026-10-12T00:00:00.000Z
+tracks:
+  - control
+tech:
+  - yaml
+  - git
+draft: false
+---
+
+import Figure from '../../components/Figure.astro';
+import Term from '../../components/Term.astro';
+
+Every run of the planner's scheduled draft happens with nobody watching. Claude works through the queue for all three sites on a <Term k="cron">cron</Term> job before the operator is awake, and there's no one in the room to ask "should I write this one" while it runs. Whatever review the work needed had to happen without anyone present at the moment it mattered, which meant it couldn't live in a conversation. It had to live somewhere the operator could leave instructions ahead of time and Claude could read them back later, on its own schedule, days apart if need be.
+
+The planner runs as its own hull in the fleet, a self-hosted <Term k="postiz" def="A self-hosted tool for scheduling posts to many sites and social accounts from one shared calendar.">Postiz</Term> instance I've written about [before](/notes/the-key-to-the-lifeboat-was-on-the-ship) for a different reason. What matters here is one thing it already had before I touched it: every post, scheduled or not, can carry tags. Building a review screen from nothing, with its own states and buttons and a table to track them, felt like laying a new keel just to answer a yes-or-no question. So I didn't. I hung the whole review process off tags that were already sitting there.
+
+## Four flags, and nothing else
+
+A suggested idea lands on the calendar as a short draft, a working headline and a rough angle, tagged `Topic`. It isn't a post anyone will ever see; it's a placeholder for a decision, sitting at the slot where Claude thinks the finished piece belongs. From there the operator has exactly three moves: leave it alone, tag it `Skip` (or just delete it, if `Skip` feels like ceremony for something that was never going to happen), or tag it `Write`.
+
+`Write` is the only flag that turns a suggestion into work. When Claude next picks up the queue, it reads whatever text is currently sitting on the card over the same <Term k="mcp">MCP</Term> connection it drafts through, not the text it originally suggested, so a headline or angle the operator rewrote by hand steers the piece instead of getting overwritten. It drafts the whole thing and writes the finished html into that same draft: same slot, same channel. The tag it adds on the way out is `Ready`. Four flags, `Topic`, `Write`, `Skip`, `Ready`, and every card's life was one of two short paths: Topic to Write to Ready, or Topic to Skip.
+
+None of that governs how many cards get written in one run, or how far ahead a site's calendar has to stay covered. Those limits live in one <Term k="yaml">YAML</Term> config file, read once at the start of a run; the flags only ever decide what happens to a single card. And none of it ever touches a post once it's live: only drafts carry these flags in the first place, so there's no path from a tag to something going out that wasn't meant to.
+
+<Figure caption="Four flags plotted a straight line: Topic to Write to Ready, with Skip as the only exit from either of the first two. Revise came later, as a loop back onto Ready.">
+<svg viewBox="0 0 380 190" role="img" aria-label="Topic moves to Write when the operator tags it, then to Ready when Claude expands it. Either Topic or Write can move to Skip. Ready loops through Revise and back to Ready when the operator leaves comments and Claude reworks it.">
+  <rect x="8" y="88" width="68" height="30" rx="6" fill="#101216" stroke="#dca63c" stroke-width="1.2" />
+  <text x="42" y="107" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="9" fill="#eaebec">Topic</text>
+
+  <path d="M76 103 H 154" stroke="#5cb3e6" stroke-width="1.3" fill="none" marker-end="url(#arrow-blue)" />
+  <text x="115" y="93" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">tags Write</text>
+
+  <rect x="154" y="88" width="68" height="30" rx="6" fill="#101216" stroke="#5cb3e6" stroke-width="1.2" />
+  <text x="188" y="107" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="9" fill="#eaebec">Write</text>
+
+  <path d="M222 103 H 300" stroke="#26cb96" stroke-width="1.3" fill="none" marker-end="url(#arrow-green)" />
+  <text x="261" y="93" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">expands it</text>
+
+  <rect x="300" y="88" width="68" height="30" rx="6" fill="#0d1512" stroke="#26cb96" stroke-width="1.2" />
+  <text x="334" y="107" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="9" fill="#26cb96">Ready</text>
+
+  <rect x="154" y="150" width="68" height="28" rx="6" fill="#101216" stroke="#e5484d" stroke-width="1.2" />
+  <text x="188" y="168" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="9" fill="#eaebec">Skip</text>
+
+  <path d="M42 118 C 60 138, 110 148, 156 154" stroke="#e5484d" stroke-width="1.1" fill="none" stroke-dasharray="3 3" marker-end="url(#arrow-red)" />
+  <path d="M188 118 V 150" stroke="#e5484d" stroke-width="1.1" fill="none" stroke-dasharray="3 3" marker-end="url(#arrow-red)" />
+  <text x="95" y="140" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#e5484d">or Skip, from either</text>
+
+  <rect x="300" y="18" width="68" height="28" rx="6" fill="#101216" stroke="#dca63c" stroke-width="1.2" />
+  <text x="334" y="36" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="9" fill="#dca63c">Revise</text>
+
+  <path d="M312 88 V 46" stroke="#dca63c" stroke-width="1.1" fill="none" marker-end="url(#arrow-amber)" />
+  <path d="M356 46 V 88" stroke="#26cb96" stroke-width="1.1" fill="none" marker-end="url(#arrow-green)" />
+  <text x="295" y="58" text-anchor="end" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">comments</text>
+  <text x="295" y="78" text-anchor="end" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">reworked</text>
+
+  <defs>
+    <marker id="arrow-blue" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 z" fill="#5cb3e6" /></marker>
+    <marker id="arrow-green" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 z" fill="#26cb96" /></marker>
+    <marker id="arrow-red" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 z" fill="#e5484d" /></marker>
+    <marker id="arrow-amber" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 z" fill="#dca63c" /></marker>
+  </defs>
+</svg>
+</Figure>
+
+## One flag doesn't take another one down
+
+The part that isn't obvious from the names alone is what happens to a flag once a card moves past it. It doesn't come down. Turning a Write card into a Ready one adds Ready and only removes Topic; Write stays exactly where it was, still flying, doing nothing more useful now than recording that this card once needed drafting. Open today's board and the finished cards carry both Write and Ready at once, every one of them. It isn't a leftover somebody forgot to clean up. It's the design: a card's tags are a small, mostly-append history of what's been asked of it, not one box that gets wiped and refilled.
+
+<Figure caption="Tags never get replaced, only added or dropped one at a time. Topic and Revise are the only two that ever come back down; Write and Ready stay flying once they go up.">
+<svg viewBox="0 0 380 165" role="img" aria-label="A card starts flying only a Topic flag. Once the operator tags it Write, both Topic and Write fly together. When Claude expands it, Topic drops but Write stays, and Ready is added alongside it.">
+  <rect x="10" y="26" width="92" height="94" rx="6" fill="none" stroke="rgba(255,255,255,0.18)" />
+  <rect x="24" y="42" width="64" height="20" rx="4" fill="#101216" stroke="#dca63c" />
+  <text x="56" y="56" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#dca63c">Topic</text>
+  <text x="56" y="134" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">created</text>
+
+  <path d="M102 73 H 138" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" fill="none" marker-end="url(#arrow-g2)" />
+
+  <rect x="138" y="26" width="92" height="94" rx="6" fill="none" stroke="rgba(255,255,255,0.18)" />
+  <rect x="152" y="40" width="64" height="20" rx="4" fill="#101216" stroke="#dca63c" />
+  <text x="184" y="54" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#dca63c">Topic</text>
+  <rect x="152" y="66" width="64" height="20" rx="4" fill="#101216" stroke="#5cb3e6" />
+  <text x="184" y="80" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#5cb3e6">Write</text>
+  <text x="184" y="134" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">operator tags Write</text>
+
+  <path d="M230 73 H 266" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" fill="none" marker-end="url(#arrow-g2)" />
+
+  <rect x="266" y="26" width="92" height="94" rx="6" fill="none" stroke="rgba(255,255,255,0.18)" />
+  <rect x="280" y="40" width="64" height="20" rx="4" fill="#101216" stroke="#5cb3e6" />
+  <text x="312" y="54" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#5cb3e6">Write</text>
+  <rect x="280" y="66" width="64" height="20" rx="4" fill="#0d1512" stroke="#26cb96" />
+  <text x="312" y="80" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#26cb96">Ready</text>
+  <text x="312" y="134" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">expanded, Topic drops</text>
+
+  <text x="190" y="155" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">Write and Ready, once raised, stay up</text>
+
+  <defs>
+    <marker id="arrow-g2" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 z" fill="rgba(255,255,255,0.4)" /></marker>
+  </defs>
+</svg>
+</Figure>
+
+That only works if something is willing to look at a card wearing three flags at once and say which one actually counts.
+
+## Which flag wins
+
+The rule is fixed, and it runs in the same order every single time: skip beats everything, then revise, then ready, then write, and a card with none of those left standing is still just a topic.
+
+```
+skip > revise > ready > write > topic
+```
+
+Whichever of those is the highest one still flying, that's the card's status, no matter what else is stuck to it further down. A card goes wherever its top flag says it goes. That's what a ship is, you know. The rest of the system never has to work out which order the flags went up in, only which one's on top right now.
+
+<Figure caption="This card is flying Write, Ready and Revise all at once. The checks run in a fixed order and stop at the first match, so Revise wins even though Ready is also still up there.">
+<svg viewBox="0 0 380 210" role="img" aria-label="A card flying Write, Ready and Revise flags at once is checked in a fixed order: Skip first, then Revise, then Ready, then Write, then Topic. The checks stop at the first match, so Revise wins here even though Ready is also still flying.">
+  <text x="190" y="16" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#87898d">one card, three flags still flying</text>
+  <rect x="70" y="24" width="60" height="20" rx="4" fill="#101216" stroke="#5cb3e6" /><text x="100" y="38" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#5cb3e6">Write</text>
+  <rect x="160" y="24" width="60" height="20" rx="4" fill="#0d1512" stroke="#26cb96" /><text x="190" y="38" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#26cb96">Ready</text>
+  <rect x="250" y="24" width="60" height="20" rx="4" fill="#101216" stroke="#dca63c" /><text x="280" y="38" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#dca63c">Revise</text>
+
+  <path d="M190 44 V 58" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" fill="none" />
+
+  <rect x="40" y="58" width="140" height="24" rx="5" fill="#101216" stroke="rgba(255,255,255,0.18)" />
+  <text x="110" y="74" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#c9cacd">Skip flying?</text>
+  <text x="270" y="74" text-anchor="start" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#87898d">no</text>
+
+  <path d="M110 82 V 96" stroke="rgba(255,255,255,0.3)" stroke-width="1.2" fill="none" />
+
+  <rect x="40" y="96" width="140" height="24" rx="5" fill="#0d1512" stroke="#dca63c" stroke-width="1.4" />
+  <text x="110" y="112" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#dca63c">Revise flying?</text>
+  <text x="270" y="112" text-anchor="start" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#dca63c">yes, stop here</text>
+
+  <path d="M180 108 H 250" stroke="#dca63c" stroke-width="1.3" fill="none" marker-end="url(#arrow-a3)" />
+  <rect x="250" y="96" width="100" height="24" rx="5" fill="#0d1512" stroke="#dca63c" stroke-width="1.4" />
+  <text x="300" y="112" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#dca63c">status: revise</text>
+
+  <rect x="40" y="134" width="140" height="22" rx="5" fill="#101216" stroke="rgba(255,255,255,0.12)" opacity="0.5" />
+  <text x="110" y="149" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7.5" fill="#87898d">Ready flying? (not reached)</text>
+
+  <rect x="40" y="164" width="140" height="22" rx="5" fill="#101216" stroke="rgba(255,255,255,0.12)" opacity="0.5" />
+  <text x="110" y="179" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7.5" fill="#87898d">Write flying? (not reached)</text>
+
+  <rect x="40" y="194" width="140" height="14" rx="4" fill="#101216" stroke="rgba(255,255,255,0.12)" opacity="0.5" />
+  <text x="110" y="204" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">else: topic (not reached)</text>
+
+  <defs>
+    <marker id="arrow-a3" markerWidth="6" markerHeight="6" refX="4" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 z" fill="#dca63c" /></marker>
+  </defs>
+</svg>
+</Figure>
+
+## The fifth flag
+
+Four was the whole plan for a while, and it held for the first stretch of the project. It stopped being enough the first time a Ready draft came back almost right: one clumsy paragraph, a fact that needed a source, a joke that landed wrong. Rewriting the entire piece from a blank Write card felt like scrapping a hull over a chipped rail. What the operator needed was a way to leave a note on a finished draft and have only that note acted on. That became `Revise`: tag a Ready draft Revise, leave comments on it saying what to fix, and Claude reads only the comments marked new since the last pass, so a second or third round doesn't redo feedback that already landed. It reworks the html, keeps whatever the operator already changed by hand, and drops the Revise tag back to Ready when it's done. Ready doesn't mean finished forever. It means finished for now, and free to go round again.
+
+## The comment that didn't get the memo
+
+Revise went in cleanly everywhere except one place: a code comment sitting right above the precedence rule, still reading through skip, ready, write and topic the way it did when there were four flags to name, with revise missing from the sentence entirely even though the function underneath it has checked for Revise, in the right slot, since the day it was added. A look back through the project's own history shows why: Revise was filed and shipped as its own small piece of work, weeks after the first four flags, and the comment above the precedence check simply wasn't part of that patch.
+
+Nothing about the behaviour is broken. Skip still wins, Revise still comes right after it, and everything downstream of that has been correct since the day it shipped. The comment above it is the only thing that's out of date, and it still says four.
+
+Five flags now, doing the work four used to. The name stuck anyway. Fair winds.
