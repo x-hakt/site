@@ -1,0 +1,112 @@
+---
+title: Steering by comment
+summary: 'A draft comes back from the overnight run and it''s close: right shape, right length, the voice landing where it should, and one thing in it that''s just wrong. A date pulled from the wrong field. A sentence that reads like it''s selling something instead of describing it. A note that should have…'
+date: 2026-10-16T00:00:00.000Z
+tracks:
+  - control
+tech:
+  - yaml
+  - git
+draft: false
+---
+
+import Figure from '../../components/Figure.astro';
+import Term from '../../components/Term.astro';
+
+A draft comes back from the overnight run and it's close: right shape, right length, the voice landing where it should, and one thing in it that's just wrong. A date pulled from the wrong field. A sentence that reads like it's selling something instead of describing it. A note that should have linked the piece it follows on from and didn't. Small, and exactly the kind of thing a second pair of eyes catches that an agent alone won't, because it never knew to look for it.
+
+Before there was a proper way to send that back, fixing it meant one of two things. Either I went into Postiz myself and hand-edited the HTML, which works for a typo and badly for anything bigger, or I waited, opened a session myself, pasted the brief back in and described what was wrong, and hoped whatever came out landed in the same slot on the same channel as the thing it was replacing. Neither of those is a loop. They're both just redoing the work by hand.
+
+So now there's an actual loop. I leave a comment on the draft, in Postiz, the same place I'd leave a note on anything else there, and tag the card Revise. The next scheduled run reads it, reworks the draft in place, and hands it straight back to being an ordinary approved post. Same slot, same channel, nothing re-created.
+
+## A comment that only ever means the newest thing
+
+**Why it is here.** A card can go round this loop more than once. If a run re-applied every comment ever left on it, the second pass would try to redo the first fix too, on html that's already been fixed, and likely break it. The agent needs to know which comments are instructions it hasn't acted on yet, and which it already has.
+
+**How it works.** Every time a card is successfully reworked, its id gets written to a small file, `revisions.json`, sitting in the project's plain-text state next to the ledger, a flat id-to-timestamp map. Everything else the project keeps is <Term k="yaml">YAML</Term>; this one's plain JSON, because there's nothing in it that nests. When the next run asks for a card's comments, it reads Postiz's own comment thread on that post and checks each comment's timestamp against whatever's stored for that id. Nothing stored yet, every comment counts as new. Something stored, only what landed after it does. It's the same idea as marking a ship's log at the end of a watch: everything written after the mark is new to whoever reads it next, everything before it they've already had. A <Term k="git">git</Term> log read since the last commit works the same way.
+
+<Figure caption="Every comment's timestamp is checked against the one stored for that card. Nothing before the mark gets re-read.">
+<svg viewBox="0 0 380 150" role="img" aria-label="A timeline of comments on a card. A dashed line marks when the card was last revised. Comments before the line are greyed out as already read; comments after it are highlighted green as new.">
+  <line x1="20" y1="90" x2="360" y2="90" stroke="#5c5e62" stroke-width="1.2" />
+  <line x1="190" y1="30" x2="190" y2="130" stroke="#5cb3e6" stroke-width="1.2" stroke-dasharray="4 3" />
+  <text x="190" y="22" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7.5" fill="#5cb3e6">revisedAt</text>
+
+  <circle cx="60" cy="90" r="5" fill="#101216" stroke="#87898d" stroke-width="1.2" />
+  <text x="60" y="112" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">already read</text>
+  <circle cx="120" cy="90" r="5" fill="#101216" stroke="#87898d" stroke-width="1.2" />
+
+  <circle cx="260" cy="90" r="5" fill="#0d1512" stroke="#26cb96" stroke-width="1.4" />
+  <text x="260" y="112" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#26cb96">new: true</text>
+  <circle cx="320" cy="90" r="5" fill="#0d1512" stroke="#26cb96" stroke-width="1.4" />
+
+  <text x="20" y="140" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">oldest</text>
+  <text x="345" y="140" text-anchor="end" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">newest</text>
+</svg>
+</Figure>
+
+## Signal flags, and which one wins
+
+**Why it is here.** Postiz already has a comment thread and a tag field on every post. Building a separate review tool on top of that would mean a second place to check, and the whole point was to stop the review step living somewhere else.
+
+**How it works.** Each card carries one of five tags, Topic, Write, Skip, Ready or Revise, and its actual status is whichever of those outranks the rest: Skip beats Revise beats Ready beats Write beats a plain Topic with nothing decided yet. Tagging a Ready draft Revise doesn't clear anything else off it, it just outranks Ready while it's sitting there, so the moment I notice something's off I can pull a draft straight out of the approved pile without deleting the approval underneath it. The rework step only accepts a card whose status comes out Write or Revise; hand it anything still Topic, anything Ready with nothing above it, or anything Skip, and it refuses outright rather than guess at what I meant.
+
+<Figure caption="A card's status is whichever tag outranks the rest. Skip and Revise can pull a draft out of any pile; only Write or Revise lets a run touch it.">
+<svg viewBox="0 0 380 190" role="img" aria-label="Five tags ranked by priority: Skip, Revise, Ready, Write, Topic. Skip and Ready and Topic are refused. Revise and Write are rework allowed.">
+  <rect x="140" y="8" width="100" height="26" rx="5" fill="#140808" stroke="#e5484d" stroke-opacity="0.6" />
+  <text x="190" y="25" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#e5484d">Skip</text>
+
+  <rect x="140" y="44" width="100" height="26" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.7" />
+  <text x="190" y="61" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#26cb96">Revise</text>
+
+  <rect x="140" y="80" width="100" height="26" rx="5" fill="#101216" stroke="rgba(255,255,255,0.18)" />
+  <text x="190" y="97" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#c9cacd">Ready</text>
+
+  <rect x="140" y="116" width="100" height="26" rx="5" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.7" />
+  <text x="190" y="133" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#26cb96">Write</text>
+
+  <rect x="140" y="152" width="100" height="26" rx="5" fill="#101216" stroke="rgba(255,255,255,0.18)" />
+  <text x="190" y="169" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="8" fill="#c9cacd">Topic</text>
+
+  <text x="254" y="61" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#26cb96">rework allowed</text>
+  <text x="254" y="133" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#26cb96">rework allowed</text>
+  <text x="254" y="25" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#e5484d">refused</text>
+  <text x="254" y="97" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">refused</text>
+  <text x="254" y="169" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">refused</text>
+
+  <text x="60" y="14" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">outranks</text>
+  <path d="M60 20 V 170" stroke="#5c5e62" stroke-width="1" stroke-dasharray="2 3" />
+  <path d="M60 170 L 56 162 M60 170 L 64 162" stroke="#5c5e62" stroke-width="1" />
+</svg>
+</Figure>
+
+## Same post, every time
+
+**Why it is here.** A fix that quietly created a second post, or moved the original to a new slot, would be worse than no fix at all. Whoever's watching the calendar needs Tuesday's post to still be Tuesday's post.
+
+**How it works.** Reworking a card never creates anything. It's the same Postiz post id going back into the same update call that first wrote it: new html, new tags, same date, same channel. The only two things that change are the body and the tag list, Revise comes off, Ready goes back on, and the revisions file gets today's timestamp so the next round of comments has a fresh line to measure against. What a man can do and what a man can't do: this part can edit a card's words, and it can never touch its slot.
+
+<Figure caption="No new post, ever. The same id goes back into the same update call it first came from.">
+<svg viewBox="0 0 380 140" role="img" aria-label="A card with the same post id goes through the rework call and comes out with new html and tags, but the same id, date and channel.">
+  <rect x="10" y="40" width="140" height="60" rx="6" fill="#101216" stroke="rgba(255,255,255,0.18)" />
+  <text x="80" y="58" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7.5" fill="#eaebec">post abc123</text>
+  <text x="80" y="70" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">html v1 · tag Revise</text>
+  <text x="80" y="82" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">Tue 10:00 · x-hakt</text>
+
+  <path d="M150 70 H 210" stroke="#26cb96" stroke-width="1.4" fill="none" />
+  <text x="180" y="62" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#26cb96">rework</text>
+
+  <rect x="210" y="30" width="160" height="80" rx="6" fill="#0d1512" stroke="#26cb96" stroke-opacity="0.6" />
+  <text x="290" y="50" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7.5" fill="#26cb96">post abc123</text>
+  <text x="290" y="62" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#c9cacd">html v2 · tag Ready</text>
+  <text x="290" y="74" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">Tue 10:00 · x-hakt</text>
+  <text x="290" y="90" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="6.5" fill="#87898d">same id, same slot</text>
+
+  <text x="190" y="128" text-anchor="middle" font-family="&#x27;IBM Plex Mono&#x27;, ui-monospace, monospace" font-size="7" fill="#87898d">the id never changes, only the body and the tags do</text>
+</svg>
+</Figure>
+
+## Verified vs assumed
+
+Verified: a draft tagged Revise with a fresh comment gets reworked and returns to Ready, in place, and a second round of comments on the same card only surfaces what was said after the first rework. Assumed: that a comment is always specific enough to act on. Postiz strips nothing from what I type, so a vague one, "not quite right," goes through as readable text, and whatever happens next depends on reading between the lines the way anyone would with a vague note. The timestamp doesn't know whether the comment was useful. That part's still on me.
+
+Fair winds.
